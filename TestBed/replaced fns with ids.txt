@@ -1,0 +1,12 @@
+This message generated at: {0}
+
+A file contact has occured for the integration: {1}, {2}
+
+Date & Time of Contact:
+{3}
+
+{4} Files:
+{5}
+
+Patterns Used:
+{6}: {7}

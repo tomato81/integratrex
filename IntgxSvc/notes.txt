@@ -1,0 +1,27 @@
+﻿run integration
+
+-connect to source
+-get file listing
+-match against patterns
+	-apply transformations
+-copy files to working area
+	-apply any transformations
+-remove files from source (y/n)
+-run response
+	-apply transformations
+
+
+
+
+
+MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+try {
+    SvcLog.TraceEvent(TraceEventType.Verbose, 0, Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                       
+}
+catch (Exception ex) {
+    SvcLog.TraceEvent(TraceEventType.Critical, 0, Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+    throw ex;
+}
+finally {
+    SvcLog.TraceEvent(TraceEventType.Verbose, 0, Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+} 

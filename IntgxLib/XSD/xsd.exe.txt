@@ -1,0 +1,18 @@
+﻿// create business calendar classes
+"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\xsd.exe" "C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxWeb\Schema\BusinessCalendar.xsd" /classes /namespace:C2InfoSys.FileIntegratrex.Lib /o:"C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxLib\XSD"
+
+// create integrations classes
+"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\xsd.exe" "C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxWeb\Schema\Service.Config.xsd" /classes /namespace:C2InfoSys.FileIntegratrex.Lib /o:"C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxLib\XSD"
+
+
+"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\xsd.exe" "C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxWeb\Schema\Service.Config.xsd" /classes /namespace:C2InfoSys.FileIntegratrex.Lib /o:"C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxLib\XSD"
+
+
+"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\xsd.exe" /language:JS "C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxWeb\Schema\Service.Config.xsd" /o:"H:\Users\bedey\XSD"
+
+
+
+PS H:\> "C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\xsd.exe" "H:\Users\Brad\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxWeb\Schema\Service.Config.xsd" /classes /language:JS /o:"H:\Users\Brad\XSD"
+
+
+C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\

@@ -1,0 +1,280 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet type="text/xsl" href="../Schemas/Service.Config.xslt" ?>
+
+<Integrations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="c2infosys.com/Integratrex/Service.Config.xsd" >
+ 
+  <Integration Desc="Send Trade Report" Enable="Y">
+    
+    <Schedule>
+      <Continuous Interval="30" />
+      <Calendar Occurs="Week" Offset="3" TimeOfDay="5:04 PM" />
+    </Schedule>
+
+    <Source Desc="Network Drive">
+      <Network Folder="\\someserver\reportshare" />
+    </Source>
+
+    <Patterns>
+      <Pattern Desc="Trade Report" Type="ExactIgnoreCase">TradeReport.xlsx</Pattern>      
+    </Patterns>
+
+    <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="N" >
+      <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f yyyyMMddhhmmss)</Rename>
+    </OnContact>
+
+    <Responses>
+      <Response Desc="Send to Bank" Enable="Y">
+        <Rename>?{File.WorkingName}_?(Date -f yyyyMMddhhmmss)</Rename>
+        <Target>
+          <FTP Action="Upload" Overwrite="Y" Port="21" URI="ftp.somedomain.com" Folder="reports" />          
+        </Target>        
+      </Response>
+      <Response Desc="Email Confirm" Enable="Y">
+        <Target>
+          <Email Action="Notify" To="reports@somedomain.com" Subject="Trade Report - Sent to Bank" />
+        </Target>
+      </Response>      
+    </Responses>
+
+    <Log Level="Information" Enable="Y">      
+      <Email To="errors@somedomain.com" Subject="Integratrex - Send Trade Report Log" />            
+    </Log>
+    
+  </Integration>
+
+  <!--
+  
+  <Integration Desc="Ship Log Files" Enable="Y">
+
+    <Schedule>
+      <Continuous Interval="40" />
+      <Calendar Occurs="Day" BusinessDay="Y" TimeOfDay="9:00 PM" BusinessCalendar="CA" />      
+    </Schedule>
+
+    <Source Desc="ERP App">
+      <Network Folder="\\someserver\someshare" />      
+    </Source>
+
+    <Patterns>
+      <Pattern Desc="Log Files" Type="Simple">*.log</Pattern>
+    </Patterns>
+
+    <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="Y" />    
+
+    <Responses>
+      <Response Desc="Move to File Storage" Enable="Y">
+        <Target>
+          <Network Folder="\\filestorage\logs\ERP" Action="Copy" Overwrite="N" />
+        </Target>        
+      </Response>      
+    </Responses> 
+    
+  </Integration>  
+  
+  <Integration Desc="Check for Price Files" Enable="Y" >
+
+   
+    
+    <Schedule>
+
+
+      <Calendar Occurs="Day" TimeOfDay="5:00 PM" BusinessDay="Y" BusinessCalendar="CA-ON" />
+      
+      <Calendar Occurs="Week" Offset="3" TimeOfDay="5:01 PM"  BusinessDay="N" BusinessCalendar="CA-ON" />
+      <Calendar Occurs="Week" Offset="3" TimeOfDay="5:02 PM" BusinessDay="N" BusinessCalendar="CA-ON" />
+
+      
+    </Schedule>
+    
+    <Source Desc="Data Provider SFTP Site">
+      <SFTP URI="sftp.someserver.com" Port="22" Folder="Extracts" >
+        <Credentials User="theusername" Password="theencryptedpassword" Encrypted="Y" />
+      </SFTP>
+    </Source>
+
+    <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="Y" CalculateMD5="Y" CalculateSHA1="Y" />    
+
+    <Patterns>
+      <Pattern Desc="Equity Price File" Type="RegEx">[Dd]atestampedfile_[0-9]{4}[0-9]{2}[0-9]{2}\.[zZ][iI][pP]</Pattern>
+      <Pattern Desc="All files" Type="Simple">*.*</Pattern>
+      <Pattern Desc="Exact Match File" Type="Exact">mydocument.docx</Pattern>
+    </Patterns>
+
+    <Responses>
+      
+      <Response Desc="Run Pre-Process Script" Enable="Y">
+        <Target>
+          <PowerShell Action="Run" Script="C:\some_script.ps1" Args="-p0 {0} -p1 {1} -p2 {2}" >          
+            <Parameters>
+              <Parameter Name="0">param0 value</Parameter>
+              <Parameter Name="1">param1 value</Parameter>
+              <Parameter Name="2">param2 value</Parameter>
+            </Parameters>                     
+          </PowerShell>
+        </Target>            
+      </Response>
+      
+      <Response Desc="Run Embedded Script" Enable="Y">
+        <Target>
+          <PowerShell Action="Run" Directory="C:\" >
+$some_var = ?{File.Name}     
+Copy-Item $some_var D:\some_folder
+          </PowerShell>
+        </Target>            
+      </Response>
+
+      <Response Desc="Copy to Archive Folder" Enable="Y" >
+        <Target Desc="Archive Folder">
+          <Network Action="Copy" Folder="\\SomeServer\Share\Archive\?(Date -f yyyyMMdd)" Overwrite="Y" />
+        </Target>
+      </Response>
+
+      <Response Desc="Store Local" Enable="Y">        
+  
+        <Transform>
+          <TextFile OriginalEncoding="ASCII" TargetEncoding="UTF-8" LineBreaks="crlf" />
+        </Transform>
+        <Target Desc="Archive Folder">
+          <Local Action="Copy" Folder="C:\SomeFolder\SubFolder" Overwrite="N" />
+        </Target>
+      </Response>
+
+      <Response Desc="Upload to SFTP" Enable="Y">     
+        
+        <SupressDuplicates Enable="Y">
+          <MatchBy FileName="Y" LastModifiedDate="N" FileSize="N" MD5="Y" SHA1="Y" />
+        </SupressDuplicates>           
+            
+        <Target Desc="Archive Folder">
+          <SFTP URI="sftp.someserver.com" Action="Upload" Port="22" Folder="Extracts" Overwrite="Y" >
+            <Credentials User="theusername" Password="thepassword" />
+          </SFTP>
+        </Target>
+      </Response>
+      
+      <Response Desc="Email_Notification" Enable="Y">        
+         
+        <Target Desc="IT Distribution List">
+          <Email Action="Attach" Subject="the subject" To="user1@domain.com" CC="user2@domain.com" BCC="user3@domain.com" >
+This message generated at: ?(Date -f "MM/dd/YYYY hh:mm:ss")
+
+A file contact has occured for the integration: ?{Integration.Name}, ?Integration.Desc
+
+Date and Time of Contact:
+?(Format ?Integration.ContactDate -f yyyy-MM-dd)
+
+?Files.Count Files:
+?Files.All
+
+Patterns Used:
+?{Pattern.Type}: ?Pattern.Name
+          </Email>
+        </Target>
+      </Response>
+    </Responses>
+
+    <Log Level="Information" Enable="Y">
+      <Email To="errors@somedomain.com" Subject="Integratrex - Send Trade Report Log" />
+    </Log>
+    
+  </Integration>
+
+  <Integration Desc="Do another thing" Enable="Y" >
+
+    <Schedule>
+      <Continuous Interval="50" DailyResponseLimit="1" />
+    </Schedule>
+
+    <Source Desc="Data Provider FTP Site">
+      <FTP URI="ftp.someserver.com" Port="21" Folder="Extracts" >
+        <Credentials User="theusername" Password="thepassword" />
+      </FTP>
+    </Source>
+
+    <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="N" />
+
+    <Patterns>
+      <Pattern Desc="Equity Price File" Type="RegEx">[Dd]atestampedfile_[0-9]{4}[0-9]{2}[0-9]{2}\.[zZ][iI][pP]</Pattern>
+    </Patterns>
+
+    <Responses>
+
+      <Response Desc="Run Program" Enable="Y">
+        <Target>
+          <Program Action="Execute" Path="C:\bin\someprogram.exe" Args="-param {0}" >
+            <Parameters>
+              <Parameter Name="0">param0 value</Parameter>
+              <Parameter Name="1">param1 value</Parameter>
+              <Parameter Name="2">param2 value</Parameter>
+            </Parameters>
+          </Program>
+        </Target>
+      </Response>
+
+      <Response Desc="Execute Procedure" Enable="Y">
+        <Target>
+          <Database DBMS="SQLServer" Action="StoredProcedure" Server="theservername" Db="thedatabase" Query="procTheProcedure" >
+            <Credentials User="theusername" Password="thepassword" Encrypted="Y" />
+            <Parameters>
+              <Parameter Name="@param1">param1 value</Parameter>
+              <Parameter Name="@param2">param2 value</Parameter>
+              <Parameter Name="@param3">param3 value</Parameter>
+            </Parameters>
+          </Database>
+        </Target>
+      </Response>
+
+      <Response Desc="Copy to Archive Folder" Enable="Y">
+        <Target>
+          <Network Action="Copy" Folder="\\SomeServer\Share\Archive\?(Date -f yyyyMMdd)" Overwrite="Y" />
+        </Target>
+      </Response>
+
+      <Response Desc="Store Local" Enable="Y">
+        <Transform>
+          <TextFile OriginalEncoding="ASCII" TargetEncoding="UTF-8" LineBreaks="crlf" />
+          <Compression>            
+            <Decompress Type="ZIP" CompressionLevel="Optimal" />
+          </Compression>          
+        </Transform>
+        <Target>
+          <Local Action="Copy" Folder="C:\SomeFolder\SubFolder" Overwrite="N" />
+        </Target>
+      </Response>
+
+      <Response Desc="Upload to SFTP" Enable="Y">
+        <Target>
+          <SFTP URI="sftp.someserver.com" Action="Upload" Port="22" Folder="Extracts" Overwrite="Y" >
+            <Credentials User="theusername" Password="thepassword" />
+          </SFTP>
+        </Target>
+      </Response>
+
+      <Response Desc="Email_Notification" Enable="Y">
+        <Target>
+          <Email Action="Attach" Subject="the subject" To="user1@domain.com" CC="user2@domain.com" BCC="user3@domain.com" >
+This message generated at: ?(Date -f "MM/dd/YYYY hh:mm:ss")
+
+A file contact has occured for the integration: ?{Integration.Name}, ?Integration.Desc
+
+Date and Time of Contact:
+?(Format ?Integration.ContactDate -f yyyy-MM-dd)
+
+?Files.Count Files:
+?Files.All
+
+Patterns Used:
+?{Pattern.Type}: ?Pattern.Name
+          </Email>
+        </Target>
+      </Response>
+    </Responses>
+
+    <Log Level="Information" Enable="Y">
+      <Email To="errors@somedomain.com" Subject="Integratrex - Send Trade Report Log" />
+    </Log>
+    
+  </Integration>
+  -->
+
+</Integrations>

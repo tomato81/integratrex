@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<BusinessCalendar Code="CA" Desc="Canada"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="c2infosys.com/Common/BusinessCalendar.xsd">
+    
+  <Year No="2014" LeapYear="N">
+
+
+    <Month No="1" Name="January" Abrev="Jan">
+      <Day YearDay="1" MonthDay="1" WeekDay="3" BusinessDay="N" Name="Wednesday" Abrev="Wed" QuarterStart="Q1"></Day>
+      <Day YearDay="2" MonthDay="2" WeekDay="4" BusinessDay="Y" Name="Thursday" Abrev="Thu"></Day>
+      <Day YearDay="3" MonthDay="3" WeekDay="5" BusinessDay="Y" Name="Friday" Abrev="Fri"></Day>
+      <Day YearDay="4" MonthDay="4" WeekDay="6" BusinessDay="N" Name="Saturday" Abrev="Sat"></Day>
+      <Day YearDay="5" MonthDay="5" WeekDay="7" BusinessDay="N" Name="Sunday" Abrev="Sun"></Day>
+      <Day YearDay="6" MonthDay="6" WeekDay="1" BusinessDay="Y" Name="Monday" Abrev="Mon"></Day>
+      <Day YearDay="7" MonthDay="6" WeekDay="2" BusinessDay="Y" Name="Tuesday" Abrev="Tue"></Day>
+      <Day YearDay="8" MonthDay="7" WeekDay="3" BusinessDay="Y" Name="Wednesday" Abrev="Wed"></Day>
+      <Day YearDay="9" MonthDay="8" WeekDay="4" BusinessDay="Y" Name="Thursday" Abrev="Thu"></Day>
+      <Day YearDay="10" MonthDay="9" WeekDay="5" BusinessDay="Y" Name="Friday" Abrev="Fri"></Day>
+      <Day YearDay="11" MonthDay="10" WeekDay="6" BusinessDay="N" Name="Saturday" Abrev="Sat"></Day>
+      <Day YearDay="12" MonthDay="11" WeekDay="7" BusinessDay="N" Name="Sunday" Abrev="Sun"></Day>
+      <Day YearDay="13" MonthDay="13" WeekDay="1" BusinessDay="Y" Name="Monday" Abrev="Mon"></Day>
+      <Day YearDay="14" MonthDay="14" WeekDay="2" BusinessDay="Y" Name="Tuesday" Abrev="Tue"></Day>
+      <Day YearDay="15" MonthDay="15" WeekDay="3" BusinessDay="Y" Name="Wednesday" Abrev="Wed"></Day>
+      <Day YearDay="16" MonthDay="16" WeekDay="4" BusinessDay="Y" Name="Thursday" Abrev="Thu"></Day>
+      <Day YearDay="17" MonthDay="17" WeekDay="5" BusinessDay="Y" Name="Friday" Abrev="Fri"></Day>
+      <Day YearDay="18" MonthDay="18" WeekDay="6" BusinessDay="N" Name="Saturday" Abrev="Sat"></Day>
+      <Day YearDay="19" MonthDay="19" WeekDay="7" BusinessDay="N" Name="Sunday" Abrev="Sun"></Day>
+      <Day YearDay="20" MonthDay="20" WeekDay="1" BusinessDay="Y" Name="Monday" Abrev="Mon"></Day>
+      <Day YearDay="21" MonthDay="21" WeekDay="2" BusinessDay="Y" Name="Tuesday" Abrev="Tue"></Day>
+      <Day YearDay="22" MonthDay="22" WeekDay="3" BusinessDay="Y" Name="Wednesday" Abrev="Wed"></Day>
+      <Day YearDay="23" MonthDay="23" WeekDay="4" BusinessDay="Y" Name="Thursday" Abrev="Thu"></Day>
+      <Day YearDay="24" MonthDay="24" WeekDay="5" BusinessDay="Y" Name="Friday" Abrev="Mon"></Day>
+      <Day YearDay="25" MonthDay="25" WeekDay="6" BusinessDay="N" Name="Saturday" Abrev="Sat"></Day>
+      <Day YearDay="26" MonthDay="26" WeekDay="7" BusinessDay="N" Name="Sunday" Abrev="Sun"></Day>
+      <Day YearDay="27" MonthDay="27" WeekDay="1" BusinessDay="Y" Name="Monday" Abrev="Mon"></Day>
+      <Day YearDay="28" MonthDay="28" WeekDay="2" BusinessDay="Y" Name="Tuesday" Abrev="Tue"></Day>
+      <Day YearDay="29" MonthDay="29" WeekDay="3" BusinessDay="Y" Name="Wednesday" Abrev="Wed"></Day>
+      <Day YearDay="30" MonthDay="30" WeekDay="4" BusinessDay="Y" Name="Thursday" Abrev="Thu"></Day>
+      <Day YearDay="31" MonthDay="31" WeekDay="5" BusinessDay="Y" Name="Friday" Abrev="Fri"></Day>
+    </Month>
+
+    <Month No="12" Name="December" Abrev="Dec">
+      <Day YearDay="361" MonthDay="27" WeekDay="6" BusinessDay="N" Name="Saturday" Abrev="Sat"></Day>
+      <Day YearDay="362" MonthDay="28" WeekDay="7" BusinessDay="N" Name="Sunday" Abrev="Sun"></Day>
+      <Day YearDay="363" MonthDay="29" WeekDay="1" BusinessDay="Y" Name="Monday" Abrev="Mon"></Day>
+      <Day YearDay="364" MonthDay="30" WeekDay="2" BusinessDay="Y" Name="Tuesday" Abrev="Tue"></Day>
+      <Day YearDay="365" MonthDay="31" WeekDay="3" BusinessDay="Y" Name="Wednesday" Abrev="Wed" YearEnd="Y" QuarterEnd="Q4"></Day>        
+    </Month>
+      
+  </Year>
+    
+    
+    
+  <Year No="2015">
+    <Month No="1" Name="January" Abrev="Jan">
+      <Day YearDay="1" MonthDay="1" WeekDay="4" BusinessDay="N" Name="Thursday" Abrev="Thu"></Day>
+      <Day YearDay="2" MonthDay="2" WeekDay="5" BusinessDay="Y" Name="Friday" Abrev="Fri"></Day>
+      <Day YearDay="3" MonthDay="3" WeekDay="6" BusinessDay="N" Name="Saturday" Abrev="Sat"></Day>
+      <Day YearDay="4" MonthDay="4" WeekDay="7" BusinessDay="N" Name="Sunday" Abrev="Sun"></Day>
+      <Day YearDay="5" MonthDay="5" WeekDay="1" BusinessDay="Y" Name="Monday" Abrev="Mon"></Day>
+    </Month>
+    <Month No="2" Name="February" Abrev="Feb">
+      <Day YearDay="32" MonthDay="1" BusinessDay="N" Name="Sunday" Abrev="Sun"></Day>
+      <Day YearDay="33" MonthDay="2" BusinessDay="Y" Name="Monday" Abrev="Mon"></Day>
+      <Day YearDay="34" MonthDay="3" BusinessDay="Y" Name="Tuesday" Abrev="Tue"></Day>
+      <Day YearDay="35" MonthDay="4" BusinessDay="Y" Name="Wednesday" Abrev="Wed"></Day>
+    </Month>
+  </Year>
+</BusinessCalendar>
+
+
+  
+

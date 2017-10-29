@@ -1,0 +1,12 @@
+﻿Integrated at:
+?Response.Name
+?(Format      -v=        ?(Date -r "monthend")                 -f "yyyy-MM-dd")
+?(Date -f "dd/MM/yyyy")
+?{Integration.Type}
+?{Integration.Name}
+?Integration.Desc
+End Message
+?Integration.Desc
+?{Response.Name}
+?(Date -f "MM/dd/yyyy")
+

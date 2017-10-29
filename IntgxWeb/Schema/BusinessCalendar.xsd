@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Calendar"
+    targetNamespace="c2infosys.com/Common/BusinessCalendar.xsd"
+    elementFormDefault="qualified"
+    xmlns="c2infosys.com/Common/BusinessCalendar.xsd"
+    xmlns:mstns="c2infosys.com/Common/BusinessCalendar.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="BusinessCalendar" type="BusinessCalendar" />      
+  
+  <xs:complexType name="BusinessCalendar">
+    <xs:sequence>
+      <xs:element name="Year" type="Year" maxOccurs="99" minOccurs="1" />      
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="Code" use="required"/>
+    <xs:attribute type="xs:string" name="Desc" use="required"/>
+  </xs:complexType>
+    
+  <xs:complexType name="Year">
+    <xs:sequence>
+      <xs:element name="Month" type="Month" maxOccurs="12" minOccurs="1" />       
+    </xs:sequence>
+    <xs:attribute type="xs:int" name="No" use="required"/>
+    <xs:attribute name="LeapYear" use="required" >
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Y" />
+          <xs:enumeration value="N" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>  
+  
+  <xs:complexType name="Month">
+    <xs:sequence>
+      <xs:element name="Day" type="Day" maxOccurs="31" minOccurs="28" />       
+    </xs:sequence>
+    
+    <xs:attribute name="No" use="required" >
+      <xs:simpleType>
+        <xs:restriction base="xs:int">
+          <xs:minInclusive value="1"/>
+          <xs:maxInclusive value="12"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>        
+    
+    <xs:attribute name="Name" use="required" >
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="January" />
+          <xs:enumeration value="February" />
+          <xs:enumeration value="March" />
+          <xs:enumeration value="April" />
+          <xs:enumeration value="May" />
+          <xs:enumeration value="June" />
+          <xs:enumeration value="July" />
+          <xs:enumeration value="August" />
+          <xs:enumeration value="September" />
+          <xs:enumeration value="October" />
+          <xs:enumeration value="November" />
+          <xs:enumeration value="December" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    
+    <xs:attribute name="Abrev" use="required" >
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Jan" />
+          <xs:enumeration value="Feb" />
+          <xs:enumeration value="Mar" />
+          <xs:enumeration value="Apr" />
+          <xs:enumeration value="May" />
+          <xs:enumeration value="Jun" />
+          <xs:enumeration value="Jul" />
+          <xs:enumeration value="Aug" />
+          <xs:enumeration value="Sep" />
+          <xs:enumeration value="Oct" />
+          <xs:enumeration value="Nov" />
+          <xs:enumeration value="Dec" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>    
+    
+  </xs:complexType>                 
+  
+  <xs:complexType name="Day" mixed="true">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        
+        <xs:attribute name="YearDay" use="required" >
+          <xs:simpleType>
+            <xs:restriction base="xs:int">
+              <xs:minInclusive value="1"/>
+              <xs:maxInclusive value="366"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>  
+        
+        <xs:attribute name="MonthDay" use="required" >
+          <xs:simpleType>
+            <xs:restriction base="xs:int">
+              <xs:minInclusive value="1"/>
+              <xs:maxInclusive value="31"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>  
+        
+        <xs:attribute name="WeekDay" use="required" >
+          <xs:simpleType>
+            <xs:restriction base="xs:int">
+              <xs:minInclusive value="1"/>
+              <xs:maxInclusive value="7"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        
+        <xs:attribute name="BusinessDay" use="required" >
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        
+        <xs:attribute name="Name" use="required" >
+          <xs:simpleType>
+            <xs:restriction base="xs:string">              
+              <xs:enumeration value="Monday" />
+              <xs:enumeration value="Tuesday" />
+              <xs:enumeration value="Wednesday" />
+              <xs:enumeration value="Thursday" />
+              <xs:enumeration value="Friday" />
+              <xs:enumeration value="Saturday" />                            
+              <xs:enumeration value="Sunday" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+    
+        <xs:attribute name="Abrev" use="required" >
+          <xs:simpleType>
+            <xs:restriction base="xs:string">              
+              <xs:enumeration value="Mon" />
+              <xs:enumeration value="Tue" />
+              <xs:enumeration value="Wed" />
+              <xs:enumeration value="Thu" />
+              <xs:enumeration value="Fri" />
+              <xs:enumeration value="Sat" />
+              <xs:enumeration value="Sun" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute> 
+        
+        <xs:attribute name="QuarterStart" use="optional" >
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Q1" />
+              <xs:enumeration value="Q2" />
+              <xs:enumeration value="Q3" />
+              <xs:enumeration value="Q4" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        
+        <xs:attribute name="QuarterEnd" use="optional" >
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Q1" />
+              <xs:enumeration value="Q2" />
+              <xs:enumeration value="Q3" />
+              <xs:enumeration value="Q4" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        
+        <xs:attribute name="YearEnd" use="optional" >
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+</xs:schema>

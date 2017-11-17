@@ -13,7 +13,6 @@ using System.Xml.Serialization;
 // Other
 using log4net;
 
-
 // C2
 using C2InfoSys.Schedule;
 using C2InfoSys.FileIntegratrex.Lib;
@@ -68,7 +67,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // initialize integrations
                 foreach (XIntegration Integration in m_Integrations.Integration) {                                    
                     // check the integration has a unique name
-                    if (m_ManagerDict.ContainsKey(Integration.Desc)) {                      
+                    if (m_ManagerDict.ContainsKey(Integration.Desc)) {     
                         SvcLog.WarnFormat(Global.ErrMessage.ERR1001, Integration.Desc);
                         continue;
                     }

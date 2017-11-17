@@ -11,7 +11,7 @@
     </Schedule>
 
     <Source Desc="Network Drive">
-      <Network Folder="\\someserver\reportshare" />
+      <Network Folder="\\someserver\reportshare\?(Date -f yyyyMMdd)" />
     </Source>
 
     <Patterns>

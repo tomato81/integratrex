@@ -70,6 +70,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public ILog DebugLog;
         public ILog IntLog;
 
+                
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -103,6 +105,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public NetworkSrc(XSource p_XSource) :
             base(p_XSource.Desc) {
+
+
+            // so i need to compile the dynamic text here
+            // and store it ... somehow ... for it to be accessed during the integration function (scan, etc.) so it can be called
+
             m_XSource = p_XSource;
             m_XNetworkSrc = (XNetworkSrc)p_XSource.Item;                       
         }               
@@ -119,7 +126,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
                 IntLog.InfoFormat("Scanning {0}", m_XSource.Desc);
 
-                // TODO: ADD DYNAMIC TEXT LOGIC
+                // TODO: ADD DYNAMIC TEXT LOGIC 
+                // .Folder needs to be processed!! 
+
+
+
+
                 DirectoryInfo Di = new DirectoryInfo(m_XNetworkSrc.Folder);
                 FileInfo[] Files = Di.GetFiles();
                 HashSet<MatchedFile> Matches = new HashSet<MatchedFile>();

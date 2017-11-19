@@ -108,7 +108,7 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
                 // http://parsingintro.sourceforge.net/
 
 
-                FileInfo Fi = new FileInfo(@"..\..\FnSample.txt");
+                FileInfo Fi = new FileInfo(@"..\..\FnSample3.txt");
                 StreamReader Fin = new StreamReader(Fi.OpenRead());
 
                 string incoming = Fin.ReadToEnd();
@@ -140,6 +140,29 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
                 Console.WriteLine();
                 Console.WriteLine(C.Tree.ToString());
 
+
+                // build an attribtute dictionary -- need to switch this to string - object ... 
+                Dictionary<string, object> Attrs = new Dictionary<string, object>();
+
+                Attrs.Add("Integration.Name", "INT4556660");
+                Attrs.Add("Integration.Desc", "Trades to Bank");
+                Attrs.Add("Integration.ContactDate", DateTime.Now);
+
+                Attrs.Add("Files.Count", 3);
+                Attrs.Add("Files.All", "test1.txt, test2.txt, test3.txt");
+
+                Attrs.Add("Pattern.Type", "Simple");
+                Attrs.Add("Pattern.Name", "*.txt");
+
+                DynamicTextParser RT = new DynamicTextParser(incoming);
+
+                RT.Compile();
+
+                string result = RT.Run(Attrs);
+
+
+                Console.WriteLine();
+                Console.WriteLine(result);
 
 
                 //Expression constString = Expression.Constant("hi there", typeof(string));

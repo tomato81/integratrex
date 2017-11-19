@@ -63,22 +63,22 @@ namespace C2InfoSys.FileIntegratrex.Lib {
                 Stack<MyTree<Token>> ParamStack = new Stack<MyTree<Token>>();            
                                                                         
                 // go thru tokens and build execution tree
-                foreach (Token T in m_Tokens) {
-                    switch (T.TokenType) {
+                foreach (Token Tok in m_Tokens) {
+                    switch (Tok.TokenType) {
                         case TokenType.TEXT:
-                            MyTree<Token> TextNode = new MyTree<Token>(T);
+                            MyTree<Token> TextNode = new MyTree<Token>(Tok);
                             m_Root.Add(TextNode);
                             break;
                         case TokenType.VARIABLE:                            
                             if (ParamStack.Count == 0) {
-                                m_Root.Add(new MyTree<Token>(T));
+                                m_Root.Add(new MyTree<Token>(Tok));
                             }
                             else {
-                                ParamStack.Pop().Add(new MyTree<Token>(T));                      
+                                ParamStack.Pop().Add(new MyTree<Token>(Tok));                      
                             }                         
                             break;
                         case TokenType.FUNCTION:
-                            MyTree<Token> FnNode = new MyTree<Token>(T);
+                            MyTree<Token> FnNode = new MyTree<Token>(Tok);
                             FnStack.Push(FnNode);
                             if (ParamStack.Count == 0) {
                                 m_Root.Add(FnNode);                                
@@ -92,17 +92,17 @@ namespace C2InfoSys.FileIntegratrex.Lib {
                             break;
                         case TokenType.CONSTANT:
                             if (ParamStack.Count == 0) {
-                                LogParseError("Hit constant token in improper context", T);
+                                LogParseError("Hit constant token in improper context", Tok);
                             }
-                            ParamStack.Pop().Add(new MyTree<Token>(T));
+                            ParamStack.Pop().Add(new MyTree<Token>(Tok));
                             break;
                         case TokenType.SYMBOL:
                             break;
                         case TokenType.PARAM:
                             if (FnStack.Count == 0) {
-                                LogParseError("Hit param token outside of function context", T);
+                                LogParseError("Hit param token outside of function context", Tok);
                             }
-                            MyTree<Token> ParamToken = new MyTree<Token>(T);
+                            MyTree<Token> ParamToken = new MyTree<Token>(Tok);
                             ParamStack.Push(ParamToken);
                             FnStack.Peek().Add(ParamToken);
                             break;

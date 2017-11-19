@@ -63,7 +63,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         private string m_verboseCargo;
 
         /// <summary>
-        /// Token Name
+        /// Token Content
         /// </summary>
         public string Cargo {
             get {
@@ -72,6 +72,22 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         }
         // member
         private string m_cargo;
+
+        /// <summary>
+        /// Set the Depth of this Token
+        /// </summary>
+        /// <param name="p_depth">the depth</param>
+        public void SetDepth(int p_depth) {
+            m_depth = p_depth;
+        }
+        // member 
+        private int m_depth;
+        // prop
+        public int Depth {
+            get {
+                return m_depth;
+            }
+        }
 
         /// <summary>
         /// Token Type
@@ -88,7 +104,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
             }
         }
         // member
-        private TokenType m_TokenType;
+        private TokenType m_TokenType;  
 
         /// <summary>
         /// To String!
@@ -97,8 +113,6 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         public override string ToString() {            
             return string.Format("type:{0} token:{1}", m_TokenType, m_verboseCargo);
         }
-
-
 
     }   // Token
 

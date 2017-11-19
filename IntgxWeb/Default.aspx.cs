@@ -10,7 +10,7 @@ using System.Security;
 using System.Security.Cryptography;
 
 // integratrex
-using C2InfoSys.FileIntegratrex.IntgxLib;
+using C2InfoSys.FileIntegratrex.Lib;
 
 /// <summary>
 /// Default

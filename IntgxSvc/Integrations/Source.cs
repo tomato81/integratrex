@@ -61,6 +61,20 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     }   // SourceLocationFactory
 
     /// <summary>
+    /// Base class for all integration objects
+    /// </summary>
+    public class IntegrationObject {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public IntegrationObject() {
+        }
+       
+        
+    }   // IntegrationObject
+
+    /// <summary>
     /// Integration Source Base
     /// </summary>
     public class IntegrationSource {
@@ -105,13 +119,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public NetworkSrc(XSource p_XSource) :
             base(p_XSource.Desc) {
-
+            
 
             // so i need to compile the dynamic text here
             // and store it ... somehow ... for it to be accessed during the integration function (scan, etc.) so it can be called
 
             m_XSource = p_XSource;
             m_XNetworkSrc = (XNetworkSrc)p_XSource.Item;                       
+
+            // need to use reflection to identify the string properties of each object and parse them out
         }               
 
         /// <summary>

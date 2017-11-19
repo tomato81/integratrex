@@ -1,0 +1,16 @@
+﻿Vars: ?{Integration.Name}, ?Integration.Desc
+This message generated at: ?(Format -v ?(Date) -f "dd-MMM-yyyy hh:mm:ss")
+
+A file contact has occured for the integration: ?{Integration.Name}, ?Integration.Desc
+
+Date & Time of Contact:
+?(Format -v ?Integration.ContactDate -f "yyyy-MM-dd")
+?(Date -f "MM/dd/yyyy")
+
+?Files.Count Files:
+?Files.All
+
+Patterns Used:
+?{Pattern.Type}: ?Pattern.Name
+
+

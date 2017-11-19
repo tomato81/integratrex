@@ -31,7 +31,11 @@
       </Response>
       <Response Desc="Email Confirm" Enable="Y">
         <Target>
-          <Email Action="Notify" To="reports@somedomain.com" Subject="Trade Report - Sent to Bank" />
+          <Email Action="Notify" To="reports@somedomain.com" Subject="Trade Report - Sent to Bank">
+
+
+
+          </Email>
         </Target>
       </Response>      
     </Responses>

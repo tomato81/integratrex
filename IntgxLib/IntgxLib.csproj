@@ -43,6 +43,8 @@
     <Compile Include="ConfigReader.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Dynamics\Parser\Compiler.cs" />
+    <Compile Include="Dynamics\Parser\DynamicFunctions.cs" />
+    <Compile Include="Dynamics\Parser\DynamicTextParser.cs" />
     <Compile Include="Dynamics\Parser\Lexxer.cs" />
     <Compile Include="Dynamics\Parser\Scanner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

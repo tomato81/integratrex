@@ -68,8 +68,37 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Constructor
         /// </summary>
-        public IntegrationObject() {
+        protected IntegrationObject(object p_IntegrationObj) {
+            ExtractObjAttrs(p_IntegrationObj);
         }
+
+
+        /// <summary>
+        /// Find all attributes of the integration object
+        /// </summary>
+        protected void ExtractObjAttrs(object p_IntegrationObj) {
+
+            try {
+
+                Type T = p_IntegrationObj.GetType();
+
+                m_ObjectProps = T.GetProperties();
+
+                
+                
+            }
+            catch(Exception ex) {
+                throw ex;
+            }
+        }
+
+        protected PropertyInfo[] ObjectProps {
+            get {
+                return m_ObjectProps;
+            }
+        }
+        // member
+        private PropertyInfo[] m_ObjectProps;
        
         
     }   // IntegrationObject
@@ -77,28 +106,32 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// Integration Source Base
     /// </summary>
-    public class IntegrationSource {
+    public class IntegrationSource : IntegrationObject {
 
         // log        
         public ILog SvcLog;
         public ILog DebugLog;
         public ILog IntLog;
 
-                
+        // maybe move this logging stuff to IntegrationObject               
 
         /// <summary>
         /// Constructor
         /// </summary>
-        protected IntegrationSource() {
+        protected IntegrationSource(XSource p_Source) 
+            : base(p_Source.Item) {
+            // log refs
             SvcLog = LogManager.GetLogger(Global.ServiceLogName);
             DebugLog = LogManager.GetLogger(Global.DebugLogName);
-        }
+            // log of this integration
+            IntLog = CreateLogger(p_Source.Desc);
+        }        
 
-        protected IntegrationSource(string p_traceSourceName) :
-            this() {
-            IntLog = CreateLogger(p_traceSourceName);
-        }
-
+        /// <summary>
+        /// Create Logger
+        /// </summary>
+        /// <param name="p_name"></param>
+        /// <returns></returns>
         private ILog CreateLogger(string p_name) {
             return LogManager.GetLogger(p_name);
         }        
@@ -118,11 +151,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Constructor
         /// </summary>
         public NetworkSrc(XSource p_XSource) :
-            base(p_XSource.Desc) {
+            base(p_XSource) {
             
 
             // so i need to compile the dynamic text here
             // and store it ... somehow ... for it to be accessed during the integration function (scan, etc.) so it can be called
+            // i think i will need a separate object to manage the dynamic text of the integration objects
+            // some object to read and organize all of the integration attributes and make them available to the parser
 
             m_XSource = p_XSource;
             m_XNetworkSrc = (XNetworkSrc)p_XSource.Item;                       

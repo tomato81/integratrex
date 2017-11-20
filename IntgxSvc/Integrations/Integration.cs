@@ -51,11 +51,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// </summary>
     public class IntegrationManager {
 
-        // log
-        private ILog SvcLog;
-        private ILog IntLog;        
-        private ILog DebugLog;
-        private ILog IntInstLog;
+        // logs
+        private ILog SvcLog;    // service log
+        private ILog IntLog;    // log of ALL integrations          
+        private ILog DebugLog;  // debug log
+        private ILog IntInstLog;    // log of THIS integration
 
         // integration log listener
         //private TraceListener IntegrationInstLog;   // this is for THIS integration
@@ -72,6 +72,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private ISourceLocation m_Source;
         private DirectoryInfo m_IntegrationDi;  // this folder stores any support files necessrary for this integration to run (e.g. psftp scripts)
         private DirectoryInfo m_WorkingDi;  // root folder for this integration's timestamped integration instance folders        
+
+        MyTree<object> m_Attrs = new MyTree<object>();
 
         /// <summary>
         /// Integration Function
@@ -112,6 +114,24 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // setup timer
             m_RunAction = new Action(Run);
             m_Timer = new ScheduleTimer();
+        }
+
+        /// <summary>
+        /// Read the attributes of the integration into a tree
+        /// </summary>
+        private void ReadStaticAttrs() {
+            try {                
+                if(m_Attrs.Count > 0) {
+                    m_Attrs.Clear();
+                }
+
+
+
+
+            }
+            catch(Exception ex) {
+
+            }
         }
 
         /// <summary>

@@ -25,16 +25,13 @@ namespace C2InfoSys.FileIntegratrex.Lib
             // function stack
             Stack<DyFn> FnStack = new Stack<DyFn>();
             // evaluate the tree
-            List<object> Output = Evaluate(m_Root, p_Attrs, FnStack);
-
-            
-
+            List<object> Output = Evaluate(m_Root, p_Attrs, FnStack);            
+            // build up the processed string 
             StringBuilder Sb = new StringBuilder();
             foreach (object output in Output) {
                 Sb.Append(output.ToString());
             }
             return Sb.ToString();
-
         }
 
         /// <summary>
@@ -48,134 +45,72 @@ namespace C2InfoSys.FileIntegratrex.Lib
                 throw new InvalidOperationException();
             }
 
-
-            //StringBuilder Sb = new StringBuilder();
-
             List<object> Output = new List<object>();
 
+            /*
+            evaluate the dynamic string against the input dictionary
+            when evaluating branches... only the top level branch needs 
+            to return a string ... this will help when evaluating 
+            function params (especially dates... which need to retain 
+            their objectness as params)
+            */
 
-            // evaluate the dynamic string against the input dictionary
-
-            // when evaluating branches... only the top level branch needs to return a string ... this will help when evaluating function params (especially dates... which need to retain their objectness as params)
-
-
-            try {
-                
-                foreach (MyTree<Token> B in p_Branch) {
-                    // does this branch have any depth?
-                    if (B.Count > 0) {
-                        switch (B.Value.TokenType) {
-                            case TokenType.FUNCTION: {
-                                    p_FnStack.Push(ParseFn(B.Value));
-                                    // is the return of this useful??? i dont think so... it should just complete the params of the function on the stack
-                                    if (Evaluate(B, p_Attrs, p_FnStack).Count > 0) {
-                                        throw new Exception("evaluation of function parameters returned a non-zero length result list");
-                                    }    
-                                    DyFn F = p_FnStack.Pop();
-                                    
-                                    if(F.EvalToType() == typeof(string)) {
-                                        Output.Add(F.EvalStr());
-                                    }
-                                    else {
-                                        Output.Add(F.EvalObj());
-                                    }                                  
-
-                                    
-
-                                        break;
+            try {                
+                foreach (MyTree<Token> B in p_Branch) {                   
+                    switch (B.Value.TokenType) {
+                        case TokenType.FUNCTION: {
+                                p_FnStack.Push(GetFn(B.Value));                                
+                                if (Evaluate(B, p_Attrs, p_FnStack).Count > 0) {    //  the return of this isn't useful. it completes the params of the function on the stack
+                                    throw new Exception("evaluation of function parameters returned a non-zero length result list");
+                                }    
+                                DyFn F = p_FnStack.Pop();                                    
+                                if(F.EvalToType() == typeof(string)) {
+                                    Output.Add(F.EvalStr());
                                 }
-                            case TokenType.PARAM: {
-                                    if(p_FnStack.Count < 1) {
-                                        throw new Exception();
-                                    }
-
-                                    
-                                    string param = B.Value.Cargo;   // this is the -?? or whatever
-
-                                    // this should return a list with exactly 1 entry
-                                    List<object> FnParam = Evaluate(B, p_Attrs, p_FnStack);   // the evaluation of the branch below the param is the paramater value
-
-                                    if(FnParam.Count !=  1) {
-                                        throw new Exception("evaluation of parameter value result list length does not equal 1"); 
-                                    }
-
-
-                                    p_FnStack.Peek().AddParam(param, FnParam[0]);
-                                    
-
-                                    
-
-
-                                    break;
+                                else {
+                                    Output.Add(F.EvalObj());
+                                }                                                                     
+                                break;
+                            }
+                        case TokenType.PARAM: {
+                                if(p_FnStack.Count < 1) {
+                                    throw new Exception();
+                                }                                    
+                                string param = B.Value.Cargo;   // this is the -?? or -whatever    
+                                List<object> FnParam = Evaluate(B, p_Attrs, p_FnStack);   // the evaluation of the branch below the param is the paramater value. this should return a list with exactly 1 entry
+                                if (FnParam.Count !=  1) {
+                                    throw new Exception("evaluation of parameter value result list length does not equal 1"); 
                                 }
-                            case TokenType.TEXT:                                
-                            case TokenType.VARIABLE:                              
-                            case TokenType.ENDFUNCTION:                                
-                            case TokenType.CONSTANT:                                
-                            case TokenType.SYMBOL:                                                                      
-                            case TokenType.EOF:                                
-                            case TokenType.NONE:
-                                throw new Exception(string.Format("unexpected token type {0}", B.Value.TokenType));
-                            default:
-                                throw new Exception(string.Format("unhandled token type {0}", B.Value.TokenType));
-                        }
-                    }
-                    else {
-                        switch (B.Value.TokenType) {
-                            case TokenType.FUNCTION: {
-
-                                    DyFn F = ParseFn(B.Value);
-
-                                    if (F.EvalToType() == typeof(string)) {
-                                        Output.Add(F.EvalStr());
-                                    }
-                                    else {
-                                        Output.Add(F.EvalObj());
-                                    }
-                                    break;
-                                }
-                            case TokenType.CONSTANT:
-                            case TokenType.TEXT: {
-                                    //Sb.Append(B.Value.Cargo);
-                                    Output.Add(B.Value.Cargo);
-                                    break;
-                                }
-                            case TokenType.VARIABLE: {
-                                    //Sb.Append(p_Attrs[B.Value.Cargo].ToString());
-                                    Output.Add(p_Attrs[B.Value.Cargo]);
-                                    break;
-                                }
-                            case TokenType.PARAM:
-                            case TokenType.ENDFUNCTION:                            
-                            case TokenType.SYMBOL:
-                            case TokenType.EOF:
-                            case TokenType.NONE:
-                                throw new Exception(string.Format("unexpected token type {0}", B.Value.TokenType));
-                            default:
-                                throw new Exception(string.Format("unhandled token type {0}", B.Value.TokenType));
-                        }
-                    }
+                                p_FnStack.Peek().AddParam(param, FnParam[0]);                                
+                                break;
+                            }
+                        case TokenType.CONSTANT:
+                        case TokenType.TEXT: {                                
+                                Output.Add(B.Value.Cargo);
+                                break;
+                            }
+                        case TokenType.VARIABLE: {                                
+                                Output.Add(p_Attrs[B.Value.Cargo]);
+                                break;
+                            }
+                        case TokenType.ENDFUNCTION:                               
+                        case TokenType.SYMBOL:                                                                      
+                        case TokenType.EOF:                                
+                        case TokenType.NONE:
+                            throw new Exception(string.Format("unexpected token type {0}", B.Value.TokenType));
+                        default:
+                            throw new Exception(string.Format("unhandled token type {0}", B.Value.TokenType));
+                    }                   
                 }
-
+                // done
                 return Output;
-
-                /*
-                StringBuilder Sb = new StringBuilder();
-                foreach(string output in Output) {
-                    Sb.Append(output);
-                }
-                return Sb.ToString();
-                */
             }
             catch (Exception ex) {
                 throw ex;
-            }
-
-            
+            }            
         }
 
-
-        private DyFn ParseFn(Token p_FnToken) {
+        private DyFn GetFn(Token p_FnToken) {
             if(p_FnToken.TokenType != TokenType.FUNCTION) {
                 throw new Exception();
             }          
@@ -231,7 +166,7 @@ namespace C2InfoSys.FileIntegratrex.Lib
                     throw new InvalidOperationException();
                 }
                 if(m_text.Length == 0) {
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException();  // maybe 0 length is fine
                 }                
                 // a character scanner
                 Scanner S = new Scanner(m_text);
@@ -252,11 +187,8 @@ namespace C2InfoSys.FileIntegratrex.Lib
             }
             catch (Exception ex) {
                 throw ex;
-            }
-            
-        }
-       
-
+            }            
+        }    
 
     }   // end of class
 }

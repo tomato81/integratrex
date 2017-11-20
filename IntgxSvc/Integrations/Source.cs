@@ -13,82 +13,153 @@ using C2InfoSys.FileIntegratrex.Lib;
 
 namespace C2InfoSys.FileIntegratrex.Svc {
 
+
     /// <summary>
-    /// Source Location Factory
+    /// Integration Source Factory
     /// </summary>
-    public class SourceLocationFactory {
+    public class IntegrationSourceFactory
+    {
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public SourceLocationFactory() {
+        public IntegrationSourceFactory()
+        {
         }
 
         /// <summary>
-        /// Create a Source Location object
+        /// Create an Integration Source object
         /// </summary>
         /// <param name="p_XSource">XSource</param>
         /// <returns></returns>
-        public ISourceLocation Create(XSource p_XSource) {
+        public IntegrationSource Create(XSource p_XSource)
+        {
+            // interface to a source location
+            ISourceLocation SourceLocation;
+            // what is the source location??
             try {
                 Type T = p_XSource.Item.GetType();
-                switch(T.Name) {
+                switch (T.Name) {
                     case "XLocalSrc": {
-                        throw new NotImplementedException();
-                    }
+                            throw new NotImplementedException();
+                        }
                     case "XNetworkSrc": {
-                        return new NetworkSrc(p_XSource);
-                    }
+                            SourceLocation = new NetworkSrc(p_XSource.Desc, p_XSource.Item);
+                            break;
+                        }
                     case "XWebSrc": {
-                        throw new NotImplementedException();
-                    }
+                            throw new NotImplementedException();
+                        }
                     case "XFTPSrc": {
-                        throw new NotImplementedException();
-                    }
+                            throw new NotImplementedException();
+                        }
                     case "XSFTPSrc": {
-                        throw new NotImplementedException();
-                    }
+                            throw new NotImplementedException();
+                        }
                     default: {
-                        throw new InvalidOperationException();
-                    }
-                }         
+                            throw new InvalidOperationException();
+                        }
+                }
+                // return a new integration source object with the correct source location
+                return new IntegrationSource(p_XSource, SourceLocation);
             }
-            catch(Exception ex) {
+            catch (Exception ex) {
                 throw ex;
             }
         }
 
-    }   // SourceLocationFactory
+    }   // IntegrationSourceFactory
 
     /// <summary>
     /// Base class for all integration objects
     /// </summary>
     public class IntegrationObject {
 
+        // log        
+        public ILog SvcLog;
+        public ILog DebugLog;
+        public ILog IntLog;
+
         /// <summary>
         /// Constructor
         /// </summary>
         protected IntegrationObject(object p_IntegrationObj) {
+
+            // log refs
+            SvcLog = LogManager.GetLogger(Global.ServiceLogName);
+            DebugLog = LogManager.GetLogger(Global.DebugLogName);
+
+
             ExtractObjAttrs(p_IntegrationObj);
         }
 
+        /// <summary>
+        /// Does the referenced property require dynamic text processing?
+        /// </summary>
+        /// <param name="p_Info">the property</param>
+        /// <returns>true false</returns>
+        protected bool IsDynamic(PropertyInfo p_Info) {
+            return m_DynamicText.ContainsKey(p_Info.Name);
+        }
+        protected bool IsDynamic(string p_propertyName) {
+            return m_DynamicText.ContainsKey(p_propertyName);
+        }
+        /// <summary>
+        /// Compiled Dynamic Text
+        /// </summary>
+        protected Dictionary<string, DynamicTextParser> DynamicText {
+            get {
+                return m_DynamicText;
+            }
+        }
+        // member
+        private Dictionary<string, DynamicTextParser> m_DynamicText = new Dictionary<string, DynamicTextParser>();
 
         /// <summary>
-        /// Find all attributes of the integration object
+        /// Find all attributes of the integration object, and compile any dynamic text
         /// </summary>
         protected void ExtractObjAttrs(object p_IntegrationObj) {
-
             try {
-
                 Type T = p_IntegrationObj.GetType();
-
                 m_ObjectProps = T.GetProperties();
-
-                
-                
+                foreach (PropertyInfo P in m_ObjectProps) {
+                    if (P.PropertyType == typeof(string)) {
+                        string text = P.GetValue(p_IntegrationObj).ToString();
+                        DynamicTextParser DyText = new DynamicTextParser(text);
+                        if (DyText.Compile()) {
+                            m_DynamicText.Add(P.Name, DyText);
+                        }
+                    }
+                }
             }
-            catch(Exception ex) {
+            catch (Exception ex) {
                 throw ex;
+            }
+        }
+
+        public void SetIntegrationAttrs(Dictionary<string, object> p_Attrs) {
+            m_Attrs = p_Attrs;
+        }
+        protected Dictionary<string, object> Attrs {
+            get {
+                return m_Attrs;
+            }
+        }
+        private Dictionary<string, object> m_Attrs;
+
+
+        /// <summary>
+        /// Adds a new dynamic element to the collection
+        /// </summary>
+        /// <param name="p_key"></param>
+        /// <param name="p_text"></param>
+        protected void AddDynamicText(string p_key, string p_text) {
+            if(m_DynamicText.ContainsKey(p_key)) {
+                throw new Exception(string.Format("a dynamic text element with the key {0} already exists", p_key));
+            }
+            DynamicTextParser DyText = new DynamicTextParser(p_text);
+            if (DyText.Compile()) {
+                m_DynamicText.Add(p_key, DyText);
             }
         }
 
@@ -99,8 +170,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
         // member
         private PropertyInfo[] m_ObjectProps;
-       
-        
+
+        /// <summary>
+        /// Create Logger
+        /// </summary>
+        /// <param name="p_name"></param>
+        /// <returns></returns>
+        protected ILog CreateLogger(string p_name)
+        {
+            return LogManager.GetLogger(p_name);
+        }
+
     }   // IntegrationObject
 
     /// <summary>
@@ -108,33 +188,39 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// </summary>
     public class IntegrationSource : IntegrationObject {
 
-        // log        
-        public ILog SvcLog;
-        public ILog DebugLog;
-        public ILog IntLog;
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="p_Source"></param>
+        /// <param name="p_SourceLocation"></param>
+        public IntegrationSource(XSource p_Source, ISourceLocation p_SourceLocation) :
+            base(p_Source) {
+            m_Source = p_Source;
+            m_SourceLocation = p_SourceLocation;
+        }
+        
+        /// <summary>
+        /// Source Location
+        /// </summary>
+        public ISourceLocation Location {
+            get {
+                return m_SourceLocation;
+            }
+        }
+        // member
+        private ISourceLocation m_SourceLocation;
 
-        // maybe move this logging stuff to IntegrationObject               
+        private XSource m_Source;
+        
 
         /// <summary>
         /// Constructor
         /// </summary>
         protected IntegrationSource(XSource p_Source) 
-            : base(p_Source.Item) {
-            // log refs
-            SvcLog = LogManager.GetLogger(Global.ServiceLogName);
-            DebugLog = LogManager.GetLogger(Global.DebugLogName);
+            : base(p_Source) {
             // log of this integration
             IntLog = CreateLogger(p_Source.Desc);
-        }        
-
-        /// <summary>
-        /// Create Logger
-        /// </summary>
-        /// <param name="p_name"></param>
-        /// <returns></returns>
-        private ILog CreateLogger(string p_name) {
-            return LogManager.GetLogger(p_name);
-        }        
+        }                   
 
     }   // IntegrationSource
 
@@ -142,28 +228,42 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// Network Source
     /// </summary>
-    public class NetworkSrc: IntegrationSource, ISourceLocation {
-
-        private XSource m_XSource;        
-        private XNetworkSrc m_XNetworkSrc;
+    public class NetworkSrc: IntegrationObject, ISourceLocation
+    {
+                
+        // XNetworkSrc object        
+        private XNetworkSrc m_XNetworkSrc;        
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public NetworkSrc(XSource p_XSource) :
-            base(p_XSource) {
-            
+        public NetworkSrc(string p_sourceDesc, XSourceLocation p_XSourceLocation) :
+            base(p_XSourceLocation) {
 
             // so i need to compile the dynamic text here
             // and store it ... somehow ... for it to be accessed during the integration function (scan, etc.) so it can be called
             // i think i will need a separate object to manage the dynamic text of the integration objects
             // some object to read and organize all of the integration attributes and make them available to the parser
 
-            m_XSource = p_XSource;
-            m_XNetworkSrc = (XNetworkSrc)p_XSource.Item;                       
+            m_description = p_sourceDesc;
+            m_XNetworkSrc = (XNetworkSrc)p_XSourceLocation;
 
-            // need to use reflection to identify the string properties of each object and parse them out
-        }               
+            //Attrs.Add("Source.Desc", m_description);
+            
+
+
+        }
+
+        /// <summary>
+        /// Source Description
+        /// </summary>
+        public string Description {
+            get {
+                return m_description;
+            }
+        }
+        // member
+        private string m_description;
 
         /// <summary>
         /// Scan the source location
@@ -175,15 +275,23 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
-                IntLog.InfoFormat("Scanning {0}", m_XSource.Desc);
+                IntLog.InfoFormat("Scanning {0}", Description);
 
                 // TODO: ADD DYNAMIC TEXT LOGIC 
                 // .Folder needs to be processed!! 
 
 
+                string folder = IsDynamic("Folder") ? DynamicText["Folder"].Run(Attrs) : m_XNetworkSrc.Folder;
+
+                
 
 
-                DirectoryInfo Di = new DirectoryInfo(m_XNetworkSrc.Folder);
+
+
+
+
+
+                DirectoryInfo Di = new DirectoryInfo(folder);
                 FileInfo[] Files = Di.GetFiles();
                 HashSet<MatchedFile> Matches = new HashSet<MatchedFile>();
                 // go thru each pattern

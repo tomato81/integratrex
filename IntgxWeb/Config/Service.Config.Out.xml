@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Integrations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="c2infosys.com/Integratrex/Service.Config.xsd">
+  <Integration Desc="Send Trade Report" Enable="Y">
+    <Schedule>
+      <Continuous Interval="30" />
+      <Calendar Occurs="Week" Offset="3" TimeOfDay="5:04 PM" />
+    </Schedule>
+    <Source Desc="Network Drive">
+      <Network Folder="\\someserver\reportshare\?(Date -f yyyyMMdd)" />
+    </Source>
+    <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="N">
+      <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f yyyyMMddhhmmss)</Rename>
+    </OnContact>
+    <Patterns>
+      <Pattern Desc="Trade Report" Type="ExactIgnoreCase">TradeReport.xlsx
+        2
+        3
+        4
+        5
+        6
+        </Pattern>
+    </Patterns>
+    <Responses>
+      <Response Desc="Send to Bank" Enable="Y">
+        <Rename>?{File.WorkingName}_?(Date -f yyyyMMddhhmmss)</Rename>
+        <Target>
+          <FTP Action="Upload" Overwrite="Y" URI="ftp.somedomain.com" Port="21" Folder="reports" />
+        </Target>
+      </Response>
+      <Response Desc="Email Confirm" Enable="Y">
+        <Target>
+          <Email Subject="Trade Report - Sent to Bank" To="reports@somedomain.com" Action="Notify" />
+        </Target>
+      </Response>
+    </Responses>
+    <Log Level="Information" Enable="Y">
+      <Email Subject="Integratrex - Send Trade Report Log" To="errors@somedomain.com" />
+    </Log>
+  </Integration>
+</Integrations>

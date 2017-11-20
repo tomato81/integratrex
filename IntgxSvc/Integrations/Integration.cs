@@ -58,8 +58,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private ILog IntInstLog;    // log of THIS integration
 
         // integration log listener
-        //private TraceListener IntegrationInstLog;   // this is for THIS integration
-        
+        //private TraceListener IntegrationInstLog;   // this is for THIS integration        
 
         // thread safety
         private object m_Padlock = new object();
@@ -69,11 +68,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         // members
         private XIntegration m_Integration;
         private ScheduleTimer m_Timer;
-        private ISourceLocation m_Source;
+        private IntegrationSource m_Source;
+        private IPattern[] m_Patterns;
         private DirectoryInfo m_IntegrationDi;  // this folder stores any support files necessrary for this integration to run (e.g. psftp scripts)
         private DirectoryInfo m_WorkingDi;  // root folder for this integration's timestamped integration instance folders        
 
-        MyTree<object> m_Attrs = new MyTree<object>();
+        private Dictionary<string, object> m_Attrs = new Dictionary<string, object>();
 
         /// <summary>
         /// Integration Function
@@ -110,28 +110,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             m_IntegrationInterruptEvent = p_IntegrationInterruptEvent;
             m_Integration = p_Integration;
             // intialize sub-systems
+            InitializeMgr();
             InitializeLog();
+            InitializePatterns();
+            InitializeSource();
             // setup timer
             m_RunAction = new Action(Run);
-            m_Timer = new ScheduleTimer();
+            m_Timer = new ScheduleTimer();            
         }
 
-        /// <summary>
-        /// Read the attributes of the integration into a tree
-        /// </summary>
-        private void ReadStaticAttrs() {
-            try {                
-                if(m_Attrs.Count > 0) {
-                    m_Attrs.Clear();
-                }
-
-
-
-
-            }
-            catch(Exception ex) {
-
-            }
+        private void InitializeMgr() {
+            AppendAttrs(m_Integration);
         }
 
         /// <summary>
@@ -159,7 +148,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
             Global.AddAppender(m_Integration.Desc, I);
 
-            IntInstLog.Info("hello");
+            IntInstLog.Info("integration instance log intialized");
             
                    
             // setup trace sources
@@ -171,7 +160,79 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     
         }
 
+        /// <summary>
+        /// Extract Attributes from an XObject
+        /// </summary>
+        /// <param name="p_Obj">the XObject</param>
+        /// <returns>property dictionary</returns>
+        public Dictionary<string, object> ExtractAttrs(XObject p_XObj) {
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                // empty dictionary
+                Dictionary<string, object> Attrs = new Dictionary<string, object>();
+                // reflect
+                Type T = p_XObj.GetType();
+                PropertyInfo[] Props = T.GetProperties();
+                // get 'em
+                foreach(PropertyInfo P in Props) {
+                    if (P.GetType().Equals(typeof(string))) {
+                        if (!P.GetType().IsValueType) {
+                            continue;
+                        }
+                    }
+                    string key = string.Format("{0}.{1}", T.Name, P.Name);
+                    object Val = P.GetValue(p_XObj);
+                    Attrs.Add(key, Val);
+                }
+                // return the completed attribute dictionary
+                return Attrs;
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+        }
 
+        public void AppendAttrs(XObject p_XObj) {
+
+            Dictionary<string, object> Attrs = ExtractAttrs(p_XObj);
+
+
+            foreach(string key in Attrs.Keys) {
+
+                if(m_Attrs.ContainsKey(key)) {
+                    m_Attrs.Remove(key);
+                }
+
+                m_Attrs.Add(key, Attrs[key]);
+
+            }
+
+        }
+
+        /// <summary>
+        /// Initialize Patterns
+        /// </summary>
+        private void InitializePatterns() {
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                // create the array
+                m_Patterns = new IPattern[m_Integration.Patterns.Pattern.Count()];
+                // source!
+                PatternFactory F = new PatternFactory();
+                // go thru the patterns
+                for(int i = 0; i < m_Patterns.Count(); i++) {
+                    m_Patterns[i] = F.Create(m_Integration.Patterns.Pattern[i]);
+                }                
+                // log
+                IntLog.InfoFormat("File matching patterns intialized:{0}", m_Patterns.Count());
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+        }
+    
 
         /// <summary>
         /// Setup the Source Object
@@ -180,8 +241,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
                 // source!
-                SourceLocationFactory F = new SourceLocationFactory();
-                ISourceLocation Source = F.Create(m_Integration.Source);
+                IntegrationSourceFactory F = new IntegrationSourceFactory();
+                m_Source = F.Create(m_Integration.Source);
+                m_Source.SetIntegrationAttrs(m_Attrs);
                 //Source.TraceSource.Listeners.Add(IntegrationInstLog);
                 // log
                 IntLog.InfoFormat("Integration source intialized:{0}", m_Integration.Source.Desc);
@@ -319,7 +381,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // matched files
                 MatchedFile[] MatchedFiles;
 
-                // steps
+                // steps               
+
                 ScanSource(T);
                 GetFiles(T);
                 WorkingTransform(T);
@@ -345,6 +408,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                
+                //m_Integration.Patterns.Pattern[0].Text[0];
+
+                MatchedFile[] MatchedFiles = m_Source.Location.Scan(m_Patterns);
+
+                
+
                 // method logic
                 IntLog.InfoFormat("Scan Source:{0}", m_Integration.Desc);
             }

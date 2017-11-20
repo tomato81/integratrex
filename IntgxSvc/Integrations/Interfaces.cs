@@ -20,7 +20,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// Integration Source Location
     /// </summary>
-    public interface ISourceLocation {                
+    public interface ISourceLocation {
+        string Description { get; }        
         MatchedFile[] Scan(IPattern[] p_Pattern);
         void Get(MatchedFile[] p_Mf);
         void Delete(MatchedFile[] p_Mf);        

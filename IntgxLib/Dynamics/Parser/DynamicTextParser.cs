@@ -160,7 +160,8 @@ namespace C2InfoSys.FileIntegratrex.Lib
         /// <summary>
         /// Compile
         /// </summary>
-        public void Compile() {
+        /// <returns>false if there are no dynamic elements in the source string</returns>
+        public bool Compile() {
             try {
                 if(m_compiled) {
                     throw new InvalidOperationException();
@@ -176,14 +177,16 @@ namespace C2InfoSys.FileIntegratrex.Lib
                 List<Token> Tokens = new List<Token>();
                 while (L.Read()) {
                     Tokens.Add(L.Token);
-                }
+                }              
                 // a compiler
                 Compiler C = new Compiler(Tokens);
                 C.BuildTree();
                 // assign local tree
-                m_Root = C.Tree;
+                m_Root = C.Tree;              
                 // compiled
                 m_compiled = true;
+                // returns false if there is nothing dynamic about this text
+                return (Tokens.Count == 1 && Tokens[0].TokenType == TokenType.TEXT);                
             }
             catch (Exception ex) {
                 throw ex;

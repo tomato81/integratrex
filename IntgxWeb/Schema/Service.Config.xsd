@@ -1,12 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<xs:schema id="Service.Config"
-    targetNamespace="c2infosys.com/Integratrex/Service.Config.xsd"
-    elementFormDefault="qualified"
-    xmlns="c2infosys.com/Integratrex/Service.Config.xsd"
-    xmlns:mstns="c2infosys.com/Integratrex/Service.Config.xsd"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema id="Service.Config" targetNamespace="c2infosys.com/Integratrex/Service.Config.xsd" elementFormDefault="qualified"
+  xmlns="c2infosys.com/Integratrex/Service.Config.xsd" xmlns:mstns="c2infosys.com/Integratrex/Service.Config.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <xs:element name="Integrations" type="XIntegrations" />
+
+  <xs:complexType name="XObject" />
 
   <xs:complexType name="XIntegrations">
     <xs:sequence>
@@ -15,125 +13,153 @@
   </xs:complexType>
 
   <xs:complexType name="XIntegration">
-    <xs:all>
-      <xs:element name="Schedule" type="XSchedule" />
-      <xs:element name="Source" type="XSource" />
-      <xs:element name="OnContact" type="XOnContact" />
-      <xs:element name="Patterns" type="XPatterns" />
-      <xs:element name="Responses" type="XResponses" />
-      <xs:element name="Log" type="XLog" minOccurs="0" />
-    </xs:all>
-    <xs:attribute name="Desc" type="xs:string" use="required" />
-    <xs:attribute name="Enable" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:all>
+          <xs:element name="Schedule" type="XSchedule" />
+          <xs:element name="Source" type="XSource" />
+          <xs:element name="OnContact" type="XOnContact" />
+          <xs:element name="Patterns" type="XPatterns" />
+          <xs:element name="Responses" type="XResponses" />
+          <xs:element name="Log" type="XLog" minOccurs="0" />
+        </xs:all>
+        <xs:attribute name="Desc" type="xs:string" use="required" />
+        <xs:attribute name="Enable" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="XSchedule">
-    <xs:sequence>
-      <xs:element name="Continuous" type="XContinuous" minOccurs="0" maxOccurs="1" />
-      <xs:element name="Calendar" type="XCalendar" minOccurs="0" maxOccurs="99" />
-    </xs:sequence> 
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:sequence>
+          <xs:element name="Continuous" type="XContinuous" minOccurs="0" maxOccurs="1" />
+          <xs:element name="Calendar" type="XCalendar" minOccurs="0" maxOccurs="99" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="XCalendar">
-    <xs:attribute name="Occurs" use="required">
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Second" />
-          <xs:enumeration value="Minute" />
-          <xs:enumeration value="Hour" />
-          <xs:enumeration value="Day" />          
-          <xs:enumeration value="Week" />
-          <xs:enumeration value="Month" />          
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="BusinessDay" use="optional" default="N">
-      <xs:simpleType>
-        <xs:restriction base="xs:string">          
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />          
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="BusinessCalendar" type="xs:string" />    
-    <xs:attribute name="Offset" type="xs:string" />
-    <xs:attribute name="TimeOfDay" type="xs:string" use="required" />       
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:attribute name="Occurs" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Second" />
+              <xs:enumeration value="Minute" />
+              <xs:enumeration value="Hour" />
+              <xs:enumeration value="Day" />
+              <xs:enumeration value="Week" />
+              <xs:enumeration value="Month" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="BusinessDay" use="optional" default="N">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="BusinessCalendar" type="xs:string" />
+        <xs:attribute name="Offset" type="xs:string" />
+        <xs:attribute name="TimeOfDay" type="xs:string" use="required" />
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="XContinuous">
-    <xs:attribute name="Interval" use="required" type="xs:integer" />
-    <xs:attribute name="DailyResponseLimit" type="xs:integer" />
-    <xs:attribute name="BusinessCalendar" type="xs:string" />
-    <xs:attribute name="BusinessDay" use="optional" default="N">
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="N/A" />
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-          <xs:enumeration value="Prior" />
-          <xs:enumeration value="Next" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:attribute name="Interval" use="required" type="xs:integer" />
+        <xs:attribute name="DailyResponseLimit" type="xs:integer" />
+        <xs:attribute name="BusinessCalendar" type="xs:string" />
+        <xs:attribute name="BusinessDay" use="optional" default="N">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="N/A" />
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+              <xs:enumeration value="Prior" />
+              <xs:enumeration value="Next" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
-  
+
   <xs:complexType name="XSource">
-    <xs:choice>
-      <xs:element name="Local" type="XLocalSrc" />
-      <xs:element name="Network" type="XNetworkSrc" />
-      <xs:element name="Web" type="XWebSrc" />
-      <xs:element name="FTP" type="XFTPSrc" />
-      <xs:element name="SFTP" type="XSFTPSrc" />
-    </xs:choice>
-    <xs:attribute name="Desc" type="xs:string" use="required" />
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:choice>
+          <xs:element name="Local" type="XLocalSrc" />
+          <xs:element name="Network" type="XNetworkSrc" />
+          <xs:element name="Web" type="XWebSrc" />
+          <xs:element name="FTP" type="XFTPSrc" />
+          <xs:element name="SFTP" type="XSFTPSrc" />
+        </xs:choice>
+        <xs:attribute name="Desc" type="xs:string" use="required" />
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
-  
-  <xs:complexType name="XSourceLocation">   
+
+  <xs:complexType name="XSourceLocation">
+    <xs:complexContent>
+      <xs:extension base="XObject">
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="XLocalSrc">
     <xs:complexContent>
       <xs:extension base="XSourceLocation">
-        <xs:attribute name="Folder" type="xs:string" use="required" />      
+        <xs:attribute name="Folder" type="xs:string" use="required" />
       </xs:extension>
-    </xs:complexContent>    
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="XNetworkSrc">
     <xs:complexContent>
       <xs:extension base="XSourceLocation">
-        <xs:attribute name="Folder" type="xs:string" use="required" />      
+        <xs:attribute name="Folder" type="xs:string" use="required" />
       </xs:extension>
-    </xs:complexContent>    
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="XWebSrc">    
+  <xs:complexType name="XWebSrc">
     <xs:complexContent>
       <xs:extension base="XSourceLocation">
         <xs:attribute name="URI" type="xs:string" use="required" />
-        <xs:attribute name="Port" type="xs:integer" />     
+        <xs:attribute name="Port" type="xs:integer" />
       </xs:extension>
-    </xs:complexContent>    
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="XFTPSrc">   
+  <xs:complexType name="XFTPSrc">
     <xs:complexContent>
       <xs:extension base="XSourceLocation">
         <xs:all>
           <xs:element name="Credentials" type="XCredentials" minOccurs="0" maxOccurs="1" />
-        </xs:all>    
+        </xs:all>
         <xs:attribute name="URI" type="xs:string" use="required" />
         <xs:attribute name="Port" type="xs:integer" />
-        <xs:attribute name="Folder" type="xs:string" />     
+        <xs:attribute name="Folder" type="xs:string" />
       </xs:extension>
-    </xs:complexContent> 
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="XSFTPSrc">
@@ -141,96 +167,115 @@
       <xs:extension base="XSourceLocation">
         <xs:all>
           <xs:element name="Credentials" type="XCredentials" minOccurs="0" maxOccurs="1" />
-        </xs:all>    
+        </xs:all>
         <xs:attribute name="URI" type="xs:string" use="required" />
         <xs:attribute name="Port" type="xs:integer" />
-        <xs:attribute name="Folder" type="xs:string" />     
+        <xs:attribute name="Folder" type="xs:string" />
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="XCredentials">
-    <xs:attribute name="User" type="xs:string" use="required" />
-    <xs:attribute name="Password" type="xs:string" />
-    <xs:attribute name="Encrypted" use="optional" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">          
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:attribute name="User" type="xs:string" use="required" />
+        <xs:attribute name="Password" type="xs:string" />
+        <xs:attribute name="Encrypted" use="optional">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="XParameters">
-    <xs:sequence>
-      <xs:element name="Parameter" type="XParameter" minOccurs="1" maxOccurs="255" />
-    </xs:sequence>
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:sequence>
+          <xs:element name="Parameter" type="XParameter" minOccurs="1" maxOccurs="255" />
+        </xs:sequence>
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="XParameter">
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
+  <xs:complexType name="XParameter" mixed="true">
+    <xs:complexContent>
+      <xs:extension base="XObject">
         <xs:attribute name="Name" type="xs:string" use="required" />
       </xs:extension>
-    </xs:simpleContent>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="XOnContact">
-    <xs:all>
-      <xs:element name="Rename" type="XRenameOnContact" minOccurs="0" />
-    </xs:all>
-    <xs:attribute name="MoveToWorkingArea" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="DeleteFromSource" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="StoreFileInfo" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="CalculateMD5" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="CalculateSHA1" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:all>
+          <xs:element name="Rename" type="XRenameOnContact" minOccurs="0" />
+        </xs:all>
+        <xs:attribute name="MoveToWorkingArea" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="DeleteFromSource" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="StoreFileInfo" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="CalculateMD5" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="CalculateSHA1" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="XPatterns" >
-    <xs:sequence>
-      <xs:element name="Pattern" type="XPattern"  minOccurs="1" maxOccurs="255"/>
-    </xs:sequence>
+  <xs:complexType name="XPatterns">
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:sequence>
+          <xs:element name="Pattern" type="XPattern" minOccurs="1" maxOccurs="255" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="XPattern">
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
+  <xs:complexType name="XPattern" mixed="true">
+    <xs:complexContent>
+      <xs:extension base="XObject">
         <xs:attribute name="Desc" use="required" type="xs:string" />
         <xs:attribute name="Type" use="required">
           <xs:simpleType>
@@ -243,175 +288,33 @@
           </xs:simpleType>
         </xs:attribute>
       </xs:extension>
-    </xs:simpleContent>
+    </xs:complexContent>
+
   </xs:complexType>
 
-  <xs:complexType name="XResponses" >
-    <xs:sequence>
-      <xs:element name="Response" type="XResponse"  minOccurs="0" maxOccurs="255"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="XResponse" >
-    <xs:all>
-      <xs:element name="SupressDuplicates" type="XSupressDuplicates" minOccurs="0" />
-      <xs:element name="Rename" type="XRenameResponse" minOccurs="0" />
-      <xs:element name="Transform" type="XTransform" minOccurs="0" />
-      <xs:element name="Target" type="XTarget" />      
-    </xs:all>
-    <xs:attribute name="Desc" type="xs:string" use="required" />
-    <xs:attribute name="Enable" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-  </xs:complexType>
-
-  <xs:complexType name="XTransform" >
-    <xs:all>
-      <xs:element name="TextFile" type="XTextFile" minOccurs="0" />      
-      <xs:element name="Compression" type="XCompression" minOccurs="0" />
-    </xs:all>
-  </xs:complexType>
-
-  <xs:complexType name="XTextFile" >
-    <xs:attribute name="OriginalEncoding" use="optional" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="ASCII" />
-          <xs:enumeration value="UTF-7" />
-          <xs:enumeration value="UTF-8" />
-          <xs:enumeration value="Unicode" />
-          <xs:enumeration value="UTF-32" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="TargetEncoding" use="optional" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="ASCII" />
-          <xs:enumeration value="UTF-7" />
-          <xs:enumeration value="UTF-8" />
-          <xs:enumeration value="Unicode" />
-          <xs:enumeration value="UTF-32" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="LineBreaks" use="optional" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="crlf" />
-          <xs:enumeration value="cr" />
-          <xs:enumeration value="lf" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-  </xs:complexType>
-
-  <xs:complexType name="XCompression">
-    <xs:choice>
-      <xs:element name="Compress" type="XCompress" />    
-      <xs:element name="Decompress" type="XDecompress" />    
-    </xs:choice>  
-  </xs:complexType> 
-  
-  <xs:complexType name="XCompress">
-    <xs:attribute name="Type" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="ZIP" />          
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="CompressionLevel" use="optional" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Fastest" />          
-          <xs:enumeration value="NoCompression" />          
-          <xs:enumeration value="Optimal" />          
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>    
-  </xs:complexType>
-  
-  <xs:complexType name="XDecompress">
-    <xs:attribute name="Type" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="ZIP" />          
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="CompressionLevel" use="optional" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Fastest" />          
-          <xs:enumeration value="NoCompression" />          
-          <xs:enumeration value="Optimal" />          
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>    
-  </xs:complexType>  
-
-  <xs:complexType name="XTarget">
-    <xs:choice>
-      <xs:element name="Local" type="XLocalTgt" />
-      <xs:element name="Network" type="XNetworkTgt" />
-      <xs:element name="Email" type="XEmailTgt" />
-      <xs:element name="FTP" type="XFTPTgt" />
-      <xs:element name="SFTP" type="XSFTPTgt" />
-      <xs:element name="Program" type="XProgramTgt" />
-      <xs:element name="Database" type="XDatabaseTgt" />
-      <xs:element name="PowerShell" type="XPowerShellTgt" />
-    </xs:choice>
-    <xs:attribute name="Desc" type="xs:string" use="optional" />
-  </xs:complexType>
-  
-  <xs:complexType name="XTargetLocation">   
-  </xs:complexType>
-
-  <xs:complexType name="XLocalTgt">    
+  <xs:complexType name="XResponses">
     <xs:complexContent>
-      <xs:extension base="XTargetLocation">
-        <xs:attribute name="Folder" type="xs:string" use="required" />
-        <xs:attribute name="Action" use="required" >
-          <xs:simpleType>
-            <xs:restriction base="xs:string">          
-              <xs:enumeration value="None" />
-              <xs:enumeration value="Copy" />
-            </xs:restriction>
-          </xs:simpleType>
-        </xs:attribute>
-        <xs:attribute name="Overwrite" use="required" >
-          <xs:simpleType>
-            <xs:restriction base="xs:string">          
-              <xs:enumeration value="Y" />
-              <xs:enumeration value="N" />
-            </xs:restriction>
-          </xs:simpleType>
-        </xs:attribute>
+      <xs:extension base="XObject">
+        <xs:sequence>
+          <xs:element name="Response" type="XResponse" minOccurs="0" maxOccurs="255" />
+        </xs:sequence>
       </xs:extension>
-    </xs:complexContent>   
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="XNetworkTgt">   
+  <xs:complexType name="XResponse">
     <xs:complexContent>
-      <xs:extension base="XTargetLocation">
-        <xs:attribute name="Folder" type="xs:string" use="required" />
-        <xs:attribute name="Action" use="required" >
+      <xs:extension base="XObject">
+        <xs:all>
+          <xs:element name="SupressDuplicates" type="XSupressDuplicates" minOccurs="0" />
+          <xs:element name="Rename" type="XRenameResponse" minOccurs="0" />
+          <xs:element name="Transform" type="XTransform" minOccurs="0" />
+          <xs:element name="Target" type="XTarget" />
+        </xs:all>
+        <xs:attribute name="Desc" type="xs:string" use="required" />
+        <xs:attribute name="Enable" use="required">
           <xs:simpleType>
-            <xs:restriction base="xs:string">          
-              <xs:enumeration value="None" />
-              <xs:enumeration value="Copy" />
-            </xs:restriction>
-          </xs:simpleType>
-        </xs:attribute>
-        <xs:attribute name="Overwrite" use="required" >
-          <xs:simpleType>
-            <xs:restriction base="xs:string">          
+            <xs:restriction base="xs:string">
               <xs:enumeration value="Y" />
               <xs:enumeration value="N" />
             </xs:restriction>
@@ -421,7 +324,186 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="XWebTgt">    
+  <xs:complexType name="XTransform">
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:all>
+          <xs:element name="TextFile" type="XTextFile" minOccurs="0" />
+          <xs:element name="Compression" type="XCompression" minOccurs="0" />
+        </xs:all>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="XTextFile">
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:attribute name="OriginalEncoding" use="optional">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="ASCII" />
+              <xs:enumeration value="UTF-7" />
+              <xs:enumeration value="UTF-8" />
+              <xs:enumeration value="Unicode" />
+              <xs:enumeration value="UTF-32" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="TargetEncoding" use="optional">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="ASCII" />
+              <xs:enumeration value="UTF-7" />
+              <xs:enumeration value="UTF-8" />
+              <xs:enumeration value="Unicode" />
+              <xs:enumeration value="UTF-32" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="LineBreaks" use="optional">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="crlf" />
+              <xs:enumeration value="cr" />
+              <xs:enumeration value="lf" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="XCompression">
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:choice>
+          <xs:element name="Compress" type="XCompress" />
+          <xs:element name="Decompress" type="XDecompress" />
+        </xs:choice>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="XCompress">
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:attribute name="Type" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="ZIP" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="CompressionLevel" use="optional">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Fastest" />
+              <xs:enumeration value="NoCompression" />
+              <xs:enumeration value="Optimal" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="XDecompress">
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:attribute name="Type" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="ZIP" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="CompressionLevel" use="optional">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Fastest" />
+              <xs:enumeration value="NoCompression" />
+              <xs:enumeration value="Optimal" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="XTarget">
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:choice>
+          <xs:element name="Local" type="XLocalTgt" />
+          <xs:element name="Network" type="XNetworkTgt" />
+          <xs:element name="Email" type="XEmailTgt" />
+          <xs:element name="FTP" type="XFTPTgt" />
+          <xs:element name="SFTP" type="XSFTPTgt" />
+          <xs:element name="Program" type="XProgramTgt" />
+          <xs:element name="Database" type="XDatabaseTgt" />
+          <xs:element name="PowerShell" type="XPowerShellTgt" />
+        </xs:choice>
+        <xs:attribute name="Desc" type="xs:string" use="optional" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="XTargetLocation">
+    <xs:complexContent>
+      <xs:extension base="XObject">
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="XLocalTgt">
+    <xs:complexContent>
+      <xs:extension base="XTargetLocation">
+        <xs:attribute name="Folder" type="xs:string" use="required" />
+        <xs:attribute name="Action" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="None" />
+              <xs:enumeration value="Copy" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="Overwrite" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="XNetworkTgt">
+    <xs:complexContent>
+      <xs:extension base="XTargetLocation">
+        <xs:attribute name="Folder" type="xs:string" use="required" />
+        <xs:attribute name="Action" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="None" />
+              <xs:enumeration value="Copy" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="Overwrite" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="XWebTgt">
     <xs:complexContent>
       <xs:extension base="XTargetLocation">
         <xs:attribute name="URI" type="xs:string" use="required" />
@@ -436,17 +518,17 @@
         <xs:all>
           <xs:element name="Credentials" type="XCredentials" minOccurs="0" maxOccurs="1" />
         </xs:all>
-        <xs:attribute name="Action" use="required" >
+        <xs:attribute name="Action" use="required">
           <xs:simpleType>
-            <xs:restriction base="xs:string">          
+            <xs:restriction base="xs:string">
               <xs:enumeration value="None" />
               <xs:enumeration value="Upload" />
             </xs:restriction>
           </xs:simpleType>
         </xs:attribute>
-        <xs:attribute name="Overwrite" use="required" >
+        <xs:attribute name="Overwrite" use="required">
           <xs:simpleType>
-            <xs:restriction base="xs:string">          
+            <xs:restriction base="xs:string">
               <xs:enumeration value="Y" />
               <xs:enumeration value="N" />
             </xs:restriction>
@@ -465,17 +547,17 @@
         <xs:all>
           <xs:element name="Credentials" type="XCredentials" minOccurs="0" maxOccurs="1" />
         </xs:all>
-        <xs:attribute name="Action" use="required" >
+        <xs:attribute name="Action" use="required">
           <xs:simpleType>
-            <xs:restriction base="xs:string">          
+            <xs:restriction base="xs:string">
               <xs:enumeration value="None" />
               <xs:enumeration value="Upload" />
             </xs:restriction>
           </xs:simpleType>
         </xs:attribute>
-        <xs:attribute name="Overwrite" use="required" >
+        <xs:attribute name="Overwrite" use="required">
           <xs:simpleType>
-            <xs:restriction base="xs:string">          
+            <xs:restriction base="xs:string">
               <xs:enumeration value="Y" />
               <xs:enumeration value="N" />
             </xs:restriction>
@@ -496,7 +578,7 @@
         <xs:attribute name="To" type="xs:string" use="optional" />
         <xs:attribute name="CC" type="xs:string" use="optional" />
         <xs:attribute name="BCC" type="xs:string" use="optional" />
-        <xs:attribute name="Action" use="required" >
+        <xs:attribute name="Action" use="required">
           <xs:simpleType>
             <xs:restriction base="xs:string">
               <xs:enumeration value="None" />
@@ -517,7 +599,7 @@
         </xs:all>
         <xs:attribute name="Path" type="xs:string" use="required" />
         <xs:attribute name="Args" type="xs:string" use="optional" />
-        <xs:attribute name="Action" use="required" >
+        <xs:attribute name="Action" use="required">
           <xs:simpleType>
             <xs:restriction base="xs:string">
               <xs:enumeration value="None" />
@@ -527,8 +609,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>  
-  
+  </xs:complexType>
+
   <xs:complexType name="XPowerShellTgt" mixed="true">
     <xs:complexContent>
       <xs:extension base="XTargetLocation">
@@ -539,7 +621,7 @@
         <xs:attribute name="Path" type="xs:string" use="optional" />
         <xs:attribute name="Script" type="xs:string" use="optional" />
         <xs:attribute name="Args" type="xs:string" use="optional" />
-        <xs:attribute name="Action" use="required" >
+        <xs:attribute name="Action" use="required">
           <xs:simpleType>
             <xs:restriction base="xs:string">
               <xs:enumeration value="None" />
@@ -548,17 +630,17 @@
           </xs:simpleType>
         </xs:attribute>
       </xs:extension>
-    </xs:complexContent>    
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="XDatabaseTgt">    
+  <xs:complexType name="XDatabaseTgt">
     <xs:complexContent>
       <xs:extension base="XTargetLocation">
         <xs:all>
           <xs:element name="Credentials" type="XCredentials" minOccurs="0" maxOccurs="1" />
           <xs:element name="Parameters" type="XParameters" minOccurs="0" maxOccurs="1" />
         </xs:all>
-        <xs:attribute name="DBMS" use="required" >
+        <xs:attribute name="DBMS" use="required">
           <xs:simpleType>
             <xs:restriction base="xs:string">
               <xs:enumeration value="SQLServer" />
@@ -570,7 +652,7 @@
         <xs:attribute name="Server" type="xs:string" use="required" />
         <xs:attribute name="Db" type="xs:string" use="optional" />
         <xs:attribute name="Query" type="xs:string" use="required" />
-        <xs:attribute name="Action" use="required" >
+        <xs:attribute name="Action" use="required">
           <xs:simpleType>
             <xs:restriction base="xs:string">
               <xs:enumeration value="None" />
@@ -582,120 +664,151 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  
+
   <xs:complexType name="XLog">
-    <xs:all>
-      <xs:element name="Email" type="XEmailLog" minOccurs="0" />            
-    </xs:all>
-    <xs:attribute name="Level" use="optional" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Critical" />          
-          <xs:enumeration value="Error" />          
-          <xs:enumeration value="Warning" />
-          <xs:enumeration value="Information" />
-          <xs:enumeration value="Verbose" />
-          <xs:enumeration value="Start" />
-          <xs:enumeration value="Stop" />
-          <xs:enumeration value="Suspend" />
-          <xs:enumeration value="Resume" />
-          <xs:enumeration value="Transfer" />                                  
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="Enable" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:all>
+          <xs:element name="Email" type="XEmailLog" minOccurs="0" />
+        </xs:all>
+        <xs:attribute name="Level" use="optional">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Critical" />
+              <xs:enumeration value="Error" />
+              <xs:enumeration value="Warning" />
+              <xs:enumeration value="Information" />
+              <xs:enumeration value="Verbose" />
+              <xs:enumeration value="Start" />
+              <xs:enumeration value="Stop" />
+              <xs:enumeration value="Suspend" />
+              <xs:enumeration value="Resume" />
+              <xs:enumeration value="Transfer" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="Enable" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="XEmailLog" mixed="false">
-    <xs:attribute name="Subject" type="xs:string" use="required" />
-    <xs:attribute name="To" type="xs:string" use="optional" />
-    <xs:attribute name="CC" type="xs:string" use="optional" />
-    <xs:attribute name="BCC" type="xs:string" use="optional" />
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:attribute name="Subject" type="xs:string" use="required" />
+        <xs:attribute name="To" type="xs:string" use="optional" />
+        <xs:attribute name="CC" type="xs:string" use="optional" />
+        <xs:attribute name="BCC" type="xs:string" use="optional" />
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
-  
+
   <xs:complexType name="XSupressDuplicates">
-    <xs:all>
-      <xs:element name="MatchBy" type="XMatchBy" minOccurs="1" />            
-    </xs:all>
-    <xs:attribute name="Enable" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:all>
+          <xs:element name="MatchBy" type="XMatchBy" minOccurs="1" />
+        </xs:all>
+        <xs:attribute name="Enable" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
-  
+
   <xs:complexType name="XMatchBy">
-    <xs:attribute name="FileName" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="FileSize" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="LastModifiedDate" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="MD5" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="SHA1" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:attribute name="FileName" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="FileSize" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="LastModifiedDate" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="MD5" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="SHA1" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
-  
+
   <xs:complexType name="XRenameOnContact" mixed="true">
-    <xs:attribute name="Original" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="WorkingCopy" use="required" >
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="Y" />
-          <xs:enumeration value="N" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="XObject">
+        <xs:attribute name="Original" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="WorkingCopy" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Y" />
+              <xs:enumeration value="N" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
- 
-  <xs:complexType name="XRenameResponse" mixed="true" /> 
+
+  <xs:complexType name="XRenameResponse" mixed="true">
+    <xs:complexContent>
+      <xs:extension base="XObject">
+
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
 
 </xs:schema>

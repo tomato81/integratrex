@@ -105,6 +105,7 @@
     <Content Include="FnSample3.txt" />
     <Content Include="FnSample2.txt" />
     <Content Include="FnSample.txt" />
+    <Content Include="NoDyText.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

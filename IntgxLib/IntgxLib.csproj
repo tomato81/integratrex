@@ -48,9 +48,9 @@
     <Compile Include="Dynamics\Parser\Lexxer.cs" />
     <Compile Include="Dynamics\Parser\Scanner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="XSD\Service_Config.cs" />
+    <Compile Include="XSD\Service_Config.cs" />
     <None Include="XSD\Backups\XIntegrations.cs" />
-    <Compile Include="XSD\XIntegrations.cs" />
+    <None Include="XSD\XIntegrations.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="XSD\xsd.exe.txt" />

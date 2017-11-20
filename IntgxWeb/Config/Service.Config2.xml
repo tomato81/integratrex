@@ -1,39 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet type="text/xsl" href="../Schemas/Service.Config.xslt" ?>
 
-<Integrations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="c2infosys.com/Integratrex/Service.Config.xsd" >
- 
-  <Integration Desc="Send Trade Report" Enable="Y" >
-    
-    <Schedule>
-      <Continuous Interval="30" BusinessCalendar="CA-ON" BusinessDay="Y" DailyResponseLimit="1" />
-      <Calendar Occurs="Day" TimeOfDay="4:02 PM" />
-    </Schedule>
+  <Integrations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="c2infosys.com/Integratrex/Service.Config.xsd">
 
-    <Source Desc="Network Drive">
+    <Integration Desc="Send Trade Report" Enable="Y">
+
+      <Schedule>
+        <Continuous Interval="30" BusinessCalendar="CA-ON" BusinessDay="Y" DailyResponseLimit="1" />
+        <Calendar Occurs="Day" TimeOfDay="4:02 PM" />
+      </Schedule>
+
+      <Source Desc="Network Drive">
       <Network Folder="\\na1bfbim02d\bedey_shared\?(Date -f yyyyMMdd)" />
-    </Source>
+      </Source>
 
-    <Patterns>
-      <Pattern Desc="Trade Report" Type="Exact">TradeReport.xlsx</Pattern>
-    </Patterns>
+      <Patterns>
+        <Pattern Desc="Trade Report" Type="Exact">TradeReport.xlsx</Pattern>
+      </Patterns>
 
-    <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="N" >
-      <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f yyyyMMddhhmmss)</Rename>
-    </OnContact>
-    
-    <Responses>
-      <Response Desc="Email Confirm" Enable="Y">
-        <Target>
-          <Email Action="Notify" To="brad.edey@brookfield.com" Subject="Trade Report - Sent to Bank" />
-        </Target>
-      </Response>      
-    </Responses>
+      <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="N">
+        <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f yyyyMMddhhmmss)</Rename>
+      </OnContact>
 
-    <Log Level="Information" Enable="Y">      
-      <Email To="brad.edey@brookfield.com" Subject="Integratrex - Send Trade Report Log" />            
-    </Log>
-    
-  </Integration>    
+      <Responses>
+        <Response Desc="Email Confirm" Enable="Y">
+          <Target>
+            <Email Action="Notify" To="brad.edey@brookfield.com" Subject="Trade Report - Sent to Bank" />
+          </Target>
+        </Response>
+      </Responses>
 
-</Integrations>
+      <Log Level="Information" Enable="Y">
+        <Email To="brad.edey@brookfield.com" Subject="Integratrex - Send Trade Report Log" />
+      </Log>
+
+    </Integration>
+
+  </Integrations>

@@ -67,12 +67,12 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
 
                 //TestBCReader();
 
-                //TestIntegrationsXml();
+                TestIntegrationsXml();
                 //TestBusinessCalendarXml();
                 //TestBusinessCalendarEdits();
                 //TestOptions();
                 //ParseDynamicText();
-                TestDynamicTextParser();
+                //TestDynamicTextParser();
                 //TestScheduleTimer();
 
                 //TestBusinessCalendar();
@@ -108,7 +108,7 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
                 // http://parsingintro.sourceforge.net/
 
 
-                FileInfo Fi = new FileInfo(@"..\..\FnSample3.txt");
+                FileInfo Fi = new FileInfo(@"..\..\NoDyText.txt");
                 StreamReader Fin = new StreamReader(Fi.OpenRead());
 
                 string incoming = Fin.ReadToEnd();
@@ -356,8 +356,8 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
         /// </summary>
         private static void TestIntegrationsXml() {
 
-            string xmlConfigPath = @"C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxWeb\Config\Service.Config.xml";
-            string xmlConfigOutPath = @"C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxWeb\Config\Service.Config.Out.xml";
+            string xmlConfigPath = @"C:\source\integratrex\IntgxWeb\Config\Service.Config.xml";
+            string xmlConfigOutPath = @"C:\source\integratrex\IntgxWeb\Config\Service.Config.Out.xml";
             
             StreamReader Fin = new StreamReader(xmlConfigPath);
             XmlSerializer Xin = new XmlSerializer(typeof(XIntegrations), "c2infosys.com/Integratrex/Service.Config.xsd");
@@ -379,7 +379,7 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
 
 
 
-                foreach(XResponse R in I.Responses) {
+                foreach(XResponse R in I.Responses.Response) {
 
                     Console.WriteLine(string.Format("\t{0}", R.Desc));
                 }

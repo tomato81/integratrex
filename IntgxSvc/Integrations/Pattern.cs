@@ -63,7 +63,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_filename">match this filename against the pattern</param>
         /// <returns>boolean</returns>
         public bool IsMatch(string p_filename) {
-            return m_Pattern.Value.Equals(p_filename, m_StringComparison);
+            return m_Pattern.Text[0].Equals(p_filename, m_StringComparison);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_filename">match this filename against the pattern</param>
         /// <returns>boolean</returns>
         public bool IsMatch(string p_filename) {
-            if(Operators.LikeString(p_filename, m_Pattern.Value, CompareMethod.Text)) {
+            if(Operators.LikeString(p_filename, m_Pattern.Text[0], CompareMethod.Text)) {
                 return true;
             }
             return false;
@@ -129,7 +129,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public RegExPattern(XPattern p_P) {
             m_Pattern = p_P;
-            m_RegEx = new Regex(p_P.Value);
+            m_RegEx = new Regex(p_P.Text[0]);
         }
 
         /// <summary>

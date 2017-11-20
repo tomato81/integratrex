@@ -2,7 +2,7 @@
 "C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\xsd.exe" "C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxWeb\Schema\BusinessCalendar.xsd" /classes /namespace:C2InfoSys.FileIntegratrex.Lib /o:"C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxLib\XSD"
 
 // create integrations classes
-"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\xsd.exe" "C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxWeb\Schema\Service.Config.xsd" /classes /namespace:C2InfoSys.FileIntegratrex.Lib /o:"C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxLib\XSD"
+"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools\xsd.exe" "C:\source\integratrex\IntgxWeb\Schema\Service.Config.xsd" /classes /namespace:C2InfoSys.FileIntegratrex.Lib /o:"C:\source\integratrex\IntgxLib\XSD2"
 
 
 "C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\xsd.exe" "C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxWeb\Schema\Service.Config.xsd" /classes /namespace:C2InfoSys.FileIntegratrex.Lib /o:"C:\Users\bedey\Google Drive\C2 Info Systems\File Integratrex\IntegratrexSln\IntgxLib\XSD"
@@ -16,3 +16,6 @@ PS H:\> "C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Too
 
 
 C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\
+
+
+C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools

@@ -73,6 +73,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private DirectoryInfo m_IntegrationDi;  // this folder stores any support files necessrary for this integration to run (e.g. psftp scripts)
         private DirectoryInfo m_WorkingDi;  // root folder for this integration's timestamped integration instance folders        
 
+
+
+        public Dictionary<string, object> Attrs {
+            get {
+                return m_Attrs;
+            }
+        }
         private Dictionary<string, object> m_Attrs = new Dictionary<string, object>();
 
         /// <summary>
@@ -243,7 +250,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // source!
                 IntegrationSourceFactory F = new IntegrationSourceFactory();
                 m_Source = F.Create(m_Integration.Source);
-                m_Source.SetIntegrationAttrs(m_Attrs);
+                
                 //Source.TraceSource.Listeners.Add(IntegrationInstLog);
                 // log
                 IntLog.InfoFormat("Integration source intialized:{0}", m_Integration.Source.Desc);
@@ -410,6 +417,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 
                 //m_Integration.Patterns.Pattern[0].Text[0];
+
+                // i  need to create a proper IntegrationAttributes object to hold all these things - static, etc.
 
                 MatchedFile[] MatchedFiles = m_Source.Location.Scan(m_Patterns);
 

@@ -44,7 +44,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                             throw new NotImplementedException();
                         }
                     case "XNetworkSrc": {
-                            SourceLocation = new NetworkSrc(p_XSource.Desc, p_XSource.Item);
+                            SourceLocation = new NetworkSrc(p_XSource.Desc, p_XSource.Item);                            
                             break;
                         }
                     case "XWebSrc": {
@@ -137,6 +137,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
 
+        /*
         public void SetIntegrationAttrs(Dictionary<string, object> p_Attrs) {
             m_Attrs = p_Attrs;
         }
@@ -146,6 +147,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
         private Dictionary<string, object> m_Attrs;
+        */
 
 
         /// <summary>
@@ -247,10 +249,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
             m_description = p_sourceDesc;
             m_XNetworkSrc = (XNetworkSrc)p_XSourceLocation;
-
-            //Attrs.Add("Source.Desc", m_description);
             
 
+            //Attrs.Add("Source.Desc", m_description);
+
+
+
+            IntLog = CreateLogger(p_sourceDesc);
 
         }
 
@@ -281,6 +286,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // .Folder needs to be processed!! 
 
 
+                // problem is the Attrs we set in the integration manager is on the integrationsource object, this is the attrs from the location xnetworkfolder
+                // really gotta figure out where this lives, probabaly on the manager/tracker
                 string folder = IsDynamic("Folder") ? DynamicText["Folder"].Run(Attrs) : m_XNetworkSrc.Folder;
 
                 

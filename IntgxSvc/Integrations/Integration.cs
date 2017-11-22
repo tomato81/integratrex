@@ -28,17 +28,28 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Constructor
         /// </summary>
-        public IntegrationTracker(XIntegration p_Integration) {
+        public IntegrationTracker(XIntegration p_Integration, IntegrationAttributes p_Attrs) {
             // set locals
+            m_Attrs = p_Attrs;
             m_Integration = p_Integration;       
             // set up working dirs
             string dtStamp = string.Format("{0:s}", DateTime.Now).Replace(" ", "").Replace(":", "").Replace(".", "").Replace("-", "");
             string work = Path.Combine(Global.AppSettings.IntegratrexWorkFolder, m_Integration.Desc, Global.WorkInstDir, dtStamp);            
             // create some objects
             m_WorkingDi = new DirectoryInfo(work);            
-        }       
+        }
+        
+        /// <summary>
+        /// Get at the integration attributes
+        /// </summary>
+        public IntegrationAttributes Attrs {
+            get {
+                return m_Attrs;
+            }
+        }
 
         // members
+        private IntegrationAttributes m_Attrs;
         private XIntegration m_Integration;
         private DateTime m_RunDate;
         private MatchedFile[] m_MatchedFiles;
@@ -66,21 +77,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private ManualResetEvent m_IntegrationInterruptEvent;
 
         // members
+        private IntegrationAttributes m_Attrs;
         private XIntegration m_Integration;
         private ScheduleTimer m_Timer;
         private IntegrationSource m_Source;
         private IPattern[] m_Patterns;
         private DirectoryInfo m_IntegrationDi;  // this folder stores any support files necessrary for this integration to run (e.g. psftp scripts)
         private DirectoryInfo m_WorkingDi;  // root folder for this integration's timestamped integration instance folders        
-
-
-
-        public Dictionary<string, object> Attrs {
-            get {
-                return m_Attrs;
-            }
-        }
-        private Dictionary<string, object> m_Attrs = new Dictionary<string, object>();
 
         /// <summary>
         /// Integration Function
@@ -116,6 +119,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // set locals
             m_IntegrationInterruptEvent = p_IntegrationInterruptEvent;
             m_Integration = p_Integration;
+            m_Attrs = new IntegrationAttributes(p_Integration);
             // intialize sub-systems
             InitializeMgr();
             InitializeLog();
@@ -127,7 +131,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         private void InitializeMgr() {
-            AppendAttrs(m_Integration);
+            
+
+            
         }
 
         /// <summary>
@@ -200,23 +206,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
 
-        public void AppendAttrs(XObject p_XObj) {
-
-            Dictionary<string, object> Attrs = ExtractAttrs(p_XObj);
-
-
-            foreach(string key in Attrs.Keys) {
-
-                if(m_Attrs.ContainsKey(key)) {
-                    m_Attrs.Remove(key);
-                }
-
-                m_Attrs.Add(key, Attrs[key]);
-
-            }
-
-        }
-
         /// <summary>
         /// Initialize Patterns
         /// </summary>
@@ -238,8 +227,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
-        }
-    
+        }    
 
         /// <summary>
         /// Setup the Source Object
@@ -379,8 +367,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     }
                 }
 
+                // reset attributes
+                m_Attrs.Reset();
+
                 // tracker jacker
-                IntegrationTracker T = new IntegrationTracker(m_Integration);
+                IntegrationTracker T = new IntegrationTracker(m_Integration, m_Attrs);
 
                 // method logic
                 SvcLog.InfoFormat("Run Integration:{0}", m_Integration.Desc);                
@@ -389,7 +380,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 MatchedFile[] MatchedFiles;
 
                 // steps               
-
                 ScanSource(T);
                 GetFiles(T);
                 WorkingTransform(T);
@@ -416,12 +406,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 
-                //m_Integration.Patterns.Pattern[0].Text[0];
+                
 
-                // i  need to create a proper IntegrationAttributes object to hold all these things - static, etc.
+                
 
-                MatchedFile[] MatchedFiles = m_Source.Location.Scan(m_Patterns);
-
+                MatchedFile[] MatchedFiles = m_Source.Location.Scan(m_Patterns, p_T);
                 
 
                 // method logic
@@ -514,7 +503,86 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             finally {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             } 
-        }     
+        }
 
-    }   // end of class
+    }   // IntegrationManager
+
+
+    /// <summary>
+    /// Manage the attributes associated with each integration and provide a way to access them
+    /// </summary>
+    public class IntegrationAttributes {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public IntegrationAttributes(XIntegration p_Integration) {
+            Integration(p_Integration);
+        }        
+
+        /// <summary>
+        /// Add an integration to the attribute collection
+        /// </summary>
+        /// <param name="p_Integration"></param>
+        public void Integration(XIntegration p_Integration) {
+            // get attributes
+            Dictionary<string,object> IntegrationAttrs = ExtractAttrs(p_Integration);
+            Dictionary<string,object> SourceAttrs = ExtractAttrs(p_Integration.Source);
+            // merge them and output
+            m_IntegrationAttrs = IntegrationAttrs.Concat(SourceAttrs).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        }
+        private Dictionary<string, object> m_IntegrationAttrs;
+
+
+        /// <summary>
+        /// Reset the object for a new Run
+        /// </summary>
+        public void Reset() {
+            // clear any integration specific attributes
+        }
+
+
+        public void MatchedFiles(MatchedFile[] p_MatchedFiles) {
+
+        }
+
+        /// <summary>
+        /// Get an updated key-val set of integration attributes
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, object> GetAttrs() {
+            return m_IntegrationAttrs;
+        }
+
+        /// <summary>
+        /// Extract Attributes from an XObject
+        /// </summary>
+        /// <param name="p_Obj">the XObject</param>
+        /// <returns>property dictionary</returns>
+        private Dictionary<string, object> ExtractAttrs(XObject p_XObj) {      
+            // empty dictionary
+            Dictionary<string, object> Attrs = new Dictionary<string, object>();
+            // reflect
+            Type T = p_XObj.GetType();
+            PropertyInfo[] Props = T.GetProperties();
+            // get the type name - X
+            string tname = T.Name[0] == 'X' ? T.Name.Substring(1, T.Name.Length - 1) : T.Name;
+            // get 'em
+            foreach (PropertyInfo P in Props) {
+                if (P.GetType().Equals(typeof(string))) {
+                    if (!P.GetType().IsValueType) {
+                        continue;
+                    }
+                }
+                string key = string.Format("{0}.{1}", tname, P.Name);
+                object Val = P.GetValue(p_XObj);
+                Attrs.Add(key, Val);
+            }
+            // return the completed attribute dictionary
+            return Attrs;           
+        }
+
+
+    }   // IntegrationAttributes
+
 }

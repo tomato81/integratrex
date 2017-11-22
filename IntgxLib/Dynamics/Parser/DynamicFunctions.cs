@@ -107,6 +107,9 @@ namespace C2InfoSys.FileIntegratrex.Lib {
             m_format = "{0:MM/dd/yyyy}";
         }
 
+
+        private bool m_evalStr = false;
+
         /// <summary>
         /// Add a parameter to the function
         /// </summary>
@@ -115,6 +118,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         public override void AddParam(string p_name, object p_val) {                       
             switch(p_name) {
                 case "f": {
+                        m_evalStr = true;
                         m_format = "{0:" + p_val.ToString() + "}";
                         break;
                     }
@@ -125,6 +129,9 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         }
 
         public override Type EvalToType() {
+            if(m_evalStr) {
+                return typeof(string);
+            }
             return typeof(DateTime);
         }
 

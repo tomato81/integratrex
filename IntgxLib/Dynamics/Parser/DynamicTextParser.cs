@@ -21,7 +21,7 @@ namespace C2InfoSys.FileIntegratrex.Lib
         /// </summary>
         /// <param name="p_Attrs">attributes</param>
         /// <returns>evaluated dynamic text</returns>
-        public string Run(Dictionary<string, object> p_Attrs) {
+        public string Run(Dictionary<string, object> p_Attrs){
             // function stack
             Stack<DyFn> FnStack = new Stack<DyFn>();
             // evaluate the tree
@@ -186,7 +186,7 @@ namespace C2InfoSys.FileIntegratrex.Lib
                 // compiled
                 m_compiled = true;
                 // returns false if there is nothing dynamic about this text
-                return (Tokens.Count == 1 && Tokens[0].TokenType == TokenType.TEXT);                
+                return !(Tokens.Count == 1 && Tokens[0].TokenType == TokenType.TEXT);                
             }
             catch (Exception ex) {
                 throw ex;

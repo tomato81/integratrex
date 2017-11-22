@@ -62,6 +62,8 @@ namespace C2InfoSys.FileIntegratrex.Lib {
 
                 XIntegrations Integrations = new XIntegrations();
                 Integrations = (XIntegrations)Xin.Deserialize(Fin);
+                
+                
 
                 // log em
                 foreach (XIntegration I in Integrations.Integration) {

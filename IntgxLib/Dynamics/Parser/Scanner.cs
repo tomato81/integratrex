@@ -29,7 +29,11 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         /// </summary>
         public Scanner(string p_source) {
             m_source = p_source;         
+
             m_Ms = new MemoryStream(Encoding.UTF8.GetBytes(p_source));
+
+            
+
             m_Sr = new StreamReader(m_Ms);          
             m_buffer = new char[1];
             m_index = 0;

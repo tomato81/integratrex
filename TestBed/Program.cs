@@ -67,12 +67,13 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
 
                 //TestBCReader();
 
-                TestIntegrationsXml();
+                //TestIntegrationsXml();
                 //TestBusinessCalendarXml();
                 //TestBusinessCalendarEdits();
                 //TestOptions();
                 //ParseDynamicText();
                 //TestDynamicTextParser();
+                TestScanner();
                 //TestScheduleTimer();
 
                 //TestBusinessCalendar();
@@ -100,6 +101,57 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
             // method logic
             CalendarAccess.Instance.LoadCalendars(bcfolder, false, xmlns);
 
+        }
+
+        private static void TestScanner() {
+            try {
+
+
+                ConfigReader R = new ConfigReader();
+
+                XIntegrations I = R.ReadIntegrationsXml(@"C:\source\integratrex\IntgxWeb\Config\Service.Config.xml", "c2infosys.com/Integratrex/Service.Config.xsd");
+
+
+                //"\\\\\\\\\\\\\\\\someserver\\\\\\\\reportshare\\\\\\\\?(Date -f yyyyMMdd)"
+
+                //string incoming = "\\\\\\\\someserver\\\\reportshare\\\\?(Date -f yyyyMMdd)";
+
+                string incoming = ((XNetworkSrc)I.Integration[0].Source.Item).Folder;
+
+                /*
+                Scanner S = new Scanner(incoming);
+
+                while(S.Read()) {
+
+
+                    Console.WriteLine(S.Char.DescribeCargo());
+
+                }
+                */
+
+                Dictionary<string, object> D = new Dictionary<string, object>();
+                D.Add("Desc", "hi");
+
+                DynamicTextParser P = new DynamicTextParser(incoming);
+                P.Compile();
+
+                string text = P.Run(D);
+                Console.WriteLine(text);
+
+
+
+            }
+            catch (Exception ex) {
+
+                Console.WriteLine(ex.Message);
+
+            }
+            finally {
+
+
+
+                Console.ReadKey();
+            }
         }
 
         private static void TestDynamicTextParser() {

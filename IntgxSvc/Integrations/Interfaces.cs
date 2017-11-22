@@ -22,7 +22,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// </summary>
     public interface ISourceLocation {
         string Description { get; }        
-        MatchedFile[] Scan(IPattern[] p_Pattern);
+        MatchedFile[] Scan(IPattern[] p_Pattern, IntegrationTracker p_T);
         void Get(MatchedFile[] p_Mf);
         void Delete(MatchedFile[] p_Mf);        
         void Rename(MatchedFile[] p_Mf, string[] p_rename);

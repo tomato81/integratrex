@@ -135,6 +135,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         private const char CLOSE_BRAC = ')';
         private const char PARAM = '-';
         private const char DB_QUOTE = '"';
+        private const char QUOTE = '\'';
 
         // whitespace
         private const char SPACE = ' ';
@@ -146,7 +147,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         private const char ESCAPE = '\\';        
 
         // define the language        
-        private readonly char[] SYMBOLS = { ASSIGNMENT, BEGIN_DYNAMIC, OPEN_SQUIG, CLOSE_SQUIG, OPEN_BRAC, CLOSE_BRAC, PARAM, DB_QUOTE };
+        private readonly char[] SYMBOLS = { ASSIGNMENT, BEGIN_DYNAMIC, OPEN_SQUIG, CLOSE_SQUIG, OPEN_BRAC, CLOSE_BRAC, PARAM, DB_QUOTE, QUOTE };
         private readonly char[] WHITESPACE = { SPACE, CR, NEWLINE, TAB };
         private readonly char[] LETTERS = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
                                    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
@@ -268,7 +269,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
                                 if (C == PARAM) {  // it is a ?(function -parameter)
                                     TheToken.TokenType = TokenType.PARAM;                                    
                                 }
-                                else if (C == DB_QUOTE) {   // it is a ?(function -parameter "constant value")
+                                else if (C == DB_QUOTE || C == QUOTE) {   // it is a ?(function -parameter "constant value")
                                     constOpenQuote = true;
                                     TheToken.TokenType = TokenType.CONSTANT;                                    
                                 }
@@ -406,7 +407,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
                             }
                         }
                         else {
-                            if (C == DB_QUOTE) {    // end of constant value token
+                            if (C == DB_QUOTE || C == QUOTE) {    // end of constant value token
                                 tokenStatus = true;
                             }
                             else {

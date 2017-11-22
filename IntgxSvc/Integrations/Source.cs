@@ -135,20 +135,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             catch (Exception ex) {
                 throw ex;
             }
-        }
-
-        /*
-        public void SetIntegrationAttrs(Dictionary<string, object> p_Attrs) {
-            m_Attrs = p_Attrs;
-        }
-        protected Dictionary<string, object> Attrs {
-            get {
-                return m_Attrs;
-            }
-        }
-        private Dictionary<string, object> m_Attrs;
-        */
-
+        }  
 
         /// <summary>
         /// Adds a new dynamic element to the collection
@@ -241,22 +228,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public NetworkSrc(string p_sourceDesc, XSourceLocation p_XSourceLocation) :
             base(p_XSourceLocation) {
-
-            // so i need to compile the dynamic text here
-            // and store it ... somehow ... for it to be accessed during the integration function (scan, etc.) so it can be called
-            // i think i will need a separate object to manage the dynamic text of the integration objects
-            // some object to read and organize all of the integration attributes and make them available to the parser
-
-            m_description = p_sourceDesc;
-            m_XNetworkSrc = (XNetworkSrc)p_XSourceLocation;
-            
-
-            //Attrs.Add("Source.Desc", m_description);
-
-
-
+            // integration log
             IntLog = CreateLogger(p_sourceDesc);
 
+            m_description = p_sourceDesc;
+            m_XNetworkSrc = (XNetworkSrc)p_XSourceLocation;                 
         }
 
         /// <summary>
@@ -275,32 +251,23 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_Pattern">the file matching patterns</param>
         /// <returns>a list of matched files</returns>
-        public MatchedFile[] Scan(IPattern[] p_Pattern) {                                            
+        public MatchedFile[] Scan(IPattern[] p_Pattern, IntegrationTracker p_T) {                                            
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+
+            HashSet<MatchedFile> Matches = new HashSet<MatchedFile>();
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
                 IntLog.InfoFormat("Scanning {0}", Description);
 
-                // TODO: ADD DYNAMIC TEXT LOGIC 
-                // .Folder needs to be processed!! 
-
-
-                // problem is the Attrs we set in the integration manager is on the integrationsource object, this is the attrs from the location xnetworkfolder
-                // really gotta figure out where this lives, probabaly on the manager/tracker
-                string folder = IsDynamic("Folder") ? DynamicText["Folder"].Run(Attrs) : m_XNetworkSrc.Folder;
+                string folder = IsDynamic("Folder") ? DynamicText["Folder"].Run(p_T.Attrs.GetAttrs()) : m_XNetworkSrc.Folder;
 
                 
 
 
-
-
-
-
-
                 DirectoryInfo Di = new DirectoryInfo(folder);
                 FileInfo[] Files = Di.GetFiles();
-                HashSet<MatchedFile> Matches = new HashSet<MatchedFile>();
+                
                 // go thru each pattern
                 foreach(IPattern P in p_Pattern) {                                                       
                     foreach(FileInfo Fi in Files) {
@@ -309,16 +276,26 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                         }
                     }
                 }
-                // out
-                return Matches.ToArray<MatchedFile>();
+                
+            }
+            catch(DirectoryNotFoundException ex) {
+                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);                
+            }
+            catch(DriveNotFoundException ex) {
+                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+            }
+            catch(IOException ex) {
+                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }
             catch(Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
+            // out
+            return Matches.ToArray<MatchedFile>();
         }
 
         /// <summary>

@@ -6,22 +6,18 @@
     <Integration Desc="Send Trade Report" Enable="Y">
 
       <Schedule>
-        <Continuous Interval="10" />
+        <Continuous Interval="20" />
+        <!--
         <Calendar Occurs="Week" Offset="3" TimeOfDay="5:04 PM" />
+        -->
       </Schedule>
 
       <Source Desc="Network Drive">
-        <Network Folder="\\someserver\reportshare\?(Date -f yyyyMMdd)" />
+        <Network Folder="\\\\someserver\\reportshare\\?(Date -f 'yyyyMMdd')" />
       </Source>
 
       <Patterns>
-        <Pattern Desc="Trade Report" Type="ExactIgnoreCase">TradeReport.xlsx
-        2
-        3
-        4
-        5
-        6
-        </Pattern>
+        <Pattern Desc="Trade Report" Type="ExactIgnoreCase">TradeReport.xlsx</Pattern>
       </Patterns>
 
       <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="N">

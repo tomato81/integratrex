@@ -103,7 +103,9 @@
     <Compile Include="Integrations\SupressDuplicates.cs" />
     <Compile Include="Integrations\MatchedFile.cs" />
     <Compile Include="Integrations\Pattern.cs" />
-    <Compile Include="Integrations\Source.cs" />
+    <Compile Include="Sources\LocalSrc.cs" />
+    <Compile Include="Sources\NetworkSrc.cs" />
+    <Compile Include="Sources\Source.cs" />
     <Compile Include="Integratrex.cs" />
     <Compile Include="Service.cs">
       <SubType>Component</SubType>

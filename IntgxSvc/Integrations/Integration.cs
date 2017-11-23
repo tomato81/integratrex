@@ -356,7 +356,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // Run()
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
+                // log debug
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                
 
                 // check if blocking
                 if (!m_IntegrationInterruptEvent.WaitOne(Global.IntegrationInterruptWait)) {
@@ -373,8 +375,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // tracker jacker
                 IntegrationTracker T = new IntegrationTracker(m_Integration, m_Attrs);
 
-                // method logic
-                SvcLog.InfoFormat("Run Integration:{0}", m_Integration.Desc);                
+                // log integration
+                IntLog.InfoFormat("Run Integration:{0}", m_Integration.Desc);
 
                 // matched files
                 MatchedFile[] MatchedFiles;
@@ -405,16 +407,18 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-                
-                
 
-                
+
+                // method logic
+                IntLog.InfoFormat("Integration:{0} Scan Source:{1}", m_Integration.Desc, m_Integration.Source.Desc);
+
+
+
 
                 MatchedFile[] MatchedFiles = m_Source.Location.Scan(m_Patterns, p_T);
                 
 
-                // method logic
-                IntLog.InfoFormat("Scan Source:{0}", m_Integration.Desc);
+                
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -584,5 +588,106 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
 
     }   // IntegrationAttributes
+
+    /// <summary>
+    /// Base class for all integration objects
+    /// </summary>
+    public class IntegrationObject {
+
+        // log        
+        public ILog SvcLog;
+        public ILog DebugLog;
+        public ILog IntLog;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        protected IntegrationObject(object p_IntegrationObj) {
+
+            // log refs
+            SvcLog = LogManager.GetLogger(Global.ServiceLogName);
+            DebugLog = LogManager.GetLogger(Global.DebugLogName);
+
+
+            ExtractObjAttrs(p_IntegrationObj);
+        }
+
+        /// <summary>
+        /// Does the referenced property require dynamic text processing?
+        /// </summary>
+        /// <param name="p_Info">the property</param>
+        /// <returns>true false</returns>
+        protected bool IsDynamic(PropertyInfo p_Info) {
+            return m_DynamicText.ContainsKey(p_Info.Name);
+        }
+        protected bool IsDynamic(string p_propertyName) {
+            return m_DynamicText.ContainsKey(p_propertyName);
+        }
+        /// <summary>
+        /// Compiled Dynamic Text
+        /// </summary>
+        protected Dictionary<string, DynamicTextParser> DynamicText {
+            get {
+                return m_DynamicText;
+            }
+        }
+        // member
+        private Dictionary<string, DynamicTextParser> m_DynamicText = new Dictionary<string, DynamicTextParser>();
+
+        /// <summary>
+        /// Find all attributes of the integration object, and compile any dynamic text
+        /// </summary>
+        protected void ExtractObjAttrs(object p_IntegrationObj) {
+            try {
+                Type T = p_IntegrationObj.GetType();
+                m_ObjectProps = T.GetProperties();
+                foreach (PropertyInfo P in m_ObjectProps) {
+                    if (P.PropertyType == typeof(string)) {
+                        string text = P.GetValue(p_IntegrationObj).ToString();
+                        DynamicTextParser DyText = new DynamicTextParser(text);
+                        if (DyText.Compile()) {
+                            m_DynamicText.Add(P.Name, DyText);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Adds a new dynamic element to the collection
+        /// </summary>
+        /// <param name="p_key"></param>
+        /// <param name="p_text"></param>
+        protected void AddDynamicText(string p_key, string p_text) {
+            if (m_DynamicText.ContainsKey(p_key)) {
+                throw new Exception(string.Format("a dynamic text element with the key {0} already exists", p_key));
+            }
+            DynamicTextParser DyText = new DynamicTextParser(p_text);
+            if (DyText.Compile()) {
+                m_DynamicText.Add(p_key, DyText);
+            }
+        }
+
+        protected PropertyInfo[] ObjectProps {
+            get {
+                return m_ObjectProps;
+            }
+        }
+        // member
+        private PropertyInfo[] m_ObjectProps;
+
+        /// <summary>
+        /// Create Logger
+        /// </summary>
+        /// <param name="p_name"></param>
+        /// <returns></returns>
+        protected ILog CreateLogger(string p_name) {
+            return LogManager.GetLogger(p_name);
+        }
+
+    }   // IntegrationObject
 
 }

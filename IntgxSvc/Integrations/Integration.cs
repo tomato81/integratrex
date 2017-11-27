@@ -48,6 +48,23 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
 
+        /// <summary>
+        /// Set Logger
+        /// </summary>
+        /// <param name="p_Logger">the logger</param>
+        public void SetLogger(ILog p_Logger) {
+            IntInstLog = p_Logger;
+        }
+
+        /// <summary>
+        /// Log this integration
+        /// </summary>
+        public ILog Log {
+            get {
+                return IntInstLog;
+            }
+        }
+
         // members
         private IntegrationAttributes m_Attrs;
         private XIntegration m_Integration;
@@ -55,12 +72,26 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private MatchedFile[] m_MatchedFiles;
         private int m_matchCount;
         private DirectoryInfo m_WorkingDi;  // a time stamped folder used for a particular execution of an integration (typically only created if the scan returns results)               
+
+        // log
+        private ILog IntInstLog;    // log of THIS integration
     }  
 
     /// <summary>
     /// Manages the execution of an Integration - directly corresponds to an <Integration> ... </Integration> in the configuration file
     /// </summary>
-    public class IntegrationManager {
+    public class IntegrationManager : IDisposable {
+
+
+
+        public static Dictionary<string, IntegrationManager> m_IntegrationManagers = new Dictionary<string, IntegrationManager>();
+
+        public static IntegrationManager GetIntegrationManager(string p_integration) {
+            if(!m_IntegrationManagers.ContainsKey(p_integration)) {
+                throw new KeyNotFoundException();
+            }
+            return m_IntegrationManagers[p_integration];
+        }
 
         // logs
         private ILog SvcLog;    // service log
@@ -115,11 +146,16 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Constructor
         /// </summary>
         /// <param name="p_IntegrationConfig"></param>
-        public IntegrationManager(XIntegration p_Integration, ManualResetEvent p_IntegrationInterruptEvent) {                          
+        public IntegrationManager(XIntegration p_Integration, ManualResetEvent p_IntegrationInterruptEvent) {                     
             // set locals
             m_IntegrationInterruptEvent = p_IntegrationInterruptEvent;
             m_Integration = p_Integration;
             m_Attrs = new IntegrationAttributes(p_Integration);
+            // add this integration to the static list
+            if (m_IntegrationManagers.ContainsKey(p_Integration.Desc)) {
+                throw new Exception("this shouldn't be ... why does this integration already exist?");
+            }
+            m_IntegrationManagers.Add(m_Integration.Desc, this);
             // intialize sub-systems
             InitializeMgr();
             InitializeLog();
@@ -130,10 +166,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             m_Timer = new ScheduleTimer();            
         }
 
-        private void InitializeMgr() {
-            
-
-            
+        /// <summary>
+        /// Initialization code
+        /// </summary>
+        private void InitializeMgr() {            
         }
 
         /// <summary>
@@ -238,10 +274,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // source!
                 IntegrationSourceFactory F = new IntegrationSourceFactory();
                 m_Source = F.Create(m_Integration.Source);
-                
+
                 //Source.TraceSource.Listeners.Add(IntegrationInstLog);
                 // log
-                IntLog.InfoFormat("Integration source intialized:{0}", m_Integration.Source.Desc);
+                IntInstLog.InfoFormat("Integration source intialized:{0}", m_Integration.Source.Desc);
             }
             catch(Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -257,7 +293,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {                
                 // start schedule
                 m_Timer.Start();
-                IntLog.InfoFormat("Schedule started:{0}", m_Integration.Desc);
+                IntInstLog.InfoFormat("Schedule started:{0}", m_Integration.Desc);
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -271,7 +307,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
                 m_Timer.Stop();
-                IntLog.InfoFormat("Schedule stopped:{0}", m_Integration.Desc);
+                IntInstLog.InfoFormat("Schedule stopped:{0}", m_Integration.Desc);
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -374,9 +410,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
                 // tracker jacker
                 IntegrationTracker T = new IntegrationTracker(m_Integration, m_Attrs);
+                T.SetLogger(IntInstLog);
 
                 // log integration
-                IntLog.InfoFormat("Run Integration:{0}", m_Integration.Desc);
+                IntInstLog.InfoFormat("Run Integration:{0}", m_Integration.Desc);
 
                 // matched files
                 MatchedFile[] MatchedFiles;
@@ -410,7 +447,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
 
                 // method logic
-                IntLog.InfoFormat("Integration:{0} Scan Source:{1}", m_Integration.Desc, m_Integration.Source.Desc);
+                IntInstLog.InfoFormat("Integration:{0} Scan Source:{1}", m_Integration.Desc, m_Integration.Source.Desc);
 
 
 
@@ -438,7 +475,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // method logic
-                IntLog.InfoFormat("Get Files:{0}", m_Integration.Desc);
+                IntInstLog.InfoFormat("Get Files:{0}", m_Integration.Desc);
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -458,7 +495,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // method logic
-                IntLog.InfoFormat("Working Transform:{0}", m_Integration.Desc);
+                IntInstLog.InfoFormat("Working Transform:{0}", m_Integration.Desc);
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -478,7 +515,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // method logic
-                IntLog.InfoFormat("Source Transform:{0}", m_Integration.Desc);
+                IntInstLog.InfoFormat("Source Transform:{0}", m_Integration.Desc);
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -498,7 +535,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // method logic
-                IntLog.InfoFormat("Run Responses:{0}", m_Integration.Desc);
+                IntInstLog.InfoFormat("Run Responses:{0}", m_Integration.Desc);
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -508,6 +545,36 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             } 
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing) {
+            if (!disposedValue) {
+                if (disposing) {
+                    // TODO: dispose managed state (managed objects).
+                    m_IntegrationManagers.Remove(m_Integration.Desc);
+                }
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~IntegrationManager() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose() {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
 
     }   // IntegrationManager
 
@@ -613,6 +680,16 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
+        /// Create Logger
+        /// </summary>
+        /// <param name="p_name"></param>
+        /// <returns></returns>
+        protected void SetLogger(ILog p_Log) {
+            Log = p_Log;
+        }
+        protected ILog Log;
+
+        /// <summary>
         /// Does the referenced property require dynamic text processing?
         /// </summary>
         /// <param name="p_Info">the property</param>
@@ -679,14 +756,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         // member
         private PropertyInfo[] m_ObjectProps;
 
-        /// <summary>
-        /// Create Logger
-        /// </summary>
-        /// <param name="p_name"></param>
-        /// <returns></returns>
-        protected ILog CreateLogger(string p_name) {
-            return LogManager.GetLogger(p_name);
-        }
+
 
     }   // IntegrationObject
 

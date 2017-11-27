@@ -26,8 +26,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public LocalSrc(string p_sourceDesc, XSourceLocation p_XSourceLocation) :
             base(p_XSourceLocation) {
-            // integration log
-            IntLog = CreateLogger(p_sourceDesc);
+
 
             m_description = p_sourceDesc;
             m_XLocalSrc = (XLocalSrc)p_XSourceLocation;
@@ -56,7 +55,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
-                IntLog.InfoFormat("Scanning {0}", Description);
+                p_T.Log.InfoFormat("Scanning {0}", Description);
 
                 string folder = IsDynamic("Folder") ? DynamicText["Folder"].Run(p_T.Attrs.GetAttrs()) : m_XLocalSrc.Folder;
 
@@ -71,22 +70,25 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     foreach (FileInfo Fi in Files) {
                         if (P.IsMatch(Fi.Name)) {
                             Matches.Add(new MatchedFile(Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc));
+
+                            p_T.Log.InfoFormat("Matched {0} at {1} using Pattern {2}", Fi.Name, Fi.DirectoryName, P.ToString());
+
                         }
                     }
                 }
 
             }
             catch (DirectoryNotFoundException ex) {
-                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                p_T.Log.WarnFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }
             catch (DriveNotFoundException ex) {
-                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                p_T.Log.WarnFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }
             catch (IOException ex) {
-                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                p_T.Log.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }
             catch (Exception ex) {
-                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                p_T.Log.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {

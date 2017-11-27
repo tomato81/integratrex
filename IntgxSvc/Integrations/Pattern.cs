@@ -40,20 +40,56 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
     }   // PatternFactory
 
+    public abstract class Pattern : IPattern {
+
+        // members
+        protected XPattern m_Pattern;        
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Pattern(XPattern p_P) {
+            m_Pattern = p_P;            
+        }
+
+        /// <summary>
+        /// Does the filename match the pattern?
+        /// </summary>
+        /// <param name="p_filename">match this filename against the pattern</param>
+        /// <returns>boolean</returns>
+        public abstract bool IsMatch(string p_filename);
+
+        /// <summary>
+        /// Pattern Type
+        /// </summary>
+        public XPatternType PatternType {
+            get {
+                return m_Pattern.Type;
+            }
+        }
+
+        /// <summary>
+        /// Describes the pattern
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() {
+            return string.Format("{0} {1} {2}", Enum.GetName(typeof(XPatternType), PatternType), m_Pattern.Desc, m_Pattern.Text);
+        }
+
+    }
+
     /// <summary>
     /// Exact File Matching Pattern
     /// </summary>
-    public class ExactPattern : IPattern {
+    public class ExactPattern : Pattern {
 
         // members
-        private XPattern m_Pattern;
         private StringComparison m_StringComparison;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public ExactPattern(XPattern p_P) {           
-            m_Pattern = p_P; ;
+        public ExactPattern(XPattern p_P) : base(p_P) {                       
             m_StringComparison = p_P.Type == XPatternType.ExactIgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
         }
 
@@ -62,17 +98,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_filename">match this filename against the pattern</param>
         /// <returns>boolean</returns>
-        public bool IsMatch(string p_filename) {
+        public override bool IsMatch(string p_filename) {
             return m_Pattern.Text[0].Equals(p_filename, m_StringComparison);
-        }
-
-        /// <summary>
-        /// Pattern Type
-        /// </summary>
-        public XPatternType PatternType {
-            get {
-                return m_Pattern.Type;
-            }
         }
 
     }   // SimplePattern
@@ -80,16 +107,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// Simple File Matching Pattern
     /// </summary>
-    public class SimplePattern : IPattern {
-
-        // members
-        private XPattern m_Pattern;
+    public class SimplePattern : Pattern {
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public SimplePattern(XPattern p_P) {
-            m_Pattern = p_P;
+        public SimplePattern(XPattern p_P) 
+            : base(p_P) {            
         }
 
         /// <summary>
@@ -97,20 +121,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_filename">match this filename against the pattern</param>
         /// <returns>boolean</returns>
-        public bool IsMatch(string p_filename) {
+        public override bool IsMatch(string p_filename) {
             if(Operators.LikeString(p_filename, m_Pattern.Text[0], CompareMethod.Text)) {
                 return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// Pattern Type
-        /// </summary>
-        public XPatternType PatternType {
-            get {
-                return m_Pattern.Type;
-            }
         }
 
     }   // SimplePattern
@@ -118,17 +133,16 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// Regular Expression File Matching Pattern
     /// </summary>
-    public class RegExPattern : IPattern {
+    public class RegExPattern : Pattern {
 
         // members
-        private Regex m_RegEx;
-        private XPattern m_Pattern;
+        private Regex m_RegEx;        
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public RegExPattern(XPattern p_P) {
-            m_Pattern = p_P;
+        public RegExPattern(XPattern p_P) 
+            : base(p_P) {            
             m_RegEx = new Regex(p_P.Text[0]);
         }
 
@@ -137,21 +151,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_filename">match this filename against the pattern</param>
         /// <returns>boolean</returns>
-        public bool IsMatch(string p_filename) {
+        public override bool IsMatch(string p_filename) {
             Match M = m_RegEx.Match(p_filename);
             if(M.Success && M.Value.Equals(p_filename, StringComparison.OrdinalIgnoreCase)) {
                 return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// Pattern Type
-        /// </summary>
-        public XPatternType PatternType {
-            get {
-                return m_Pattern.Type;
-            }
         }
 
     }   // RegExPattern

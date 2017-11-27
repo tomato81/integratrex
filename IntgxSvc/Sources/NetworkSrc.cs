@@ -26,8 +26,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public NetworkSrc(string p_sourceDesc, XSourceLocation p_XSourceLocation) :
             base(p_XSourceLocation) {
-            // integration log
-            IntLog = CreateLogger(p_sourceDesc);
 
             m_description = p_sourceDesc;
             m_XNetworkSrc = (XNetworkSrc)p_XSourceLocation;
@@ -56,7 +54,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
-                IntLog.InfoFormat("Scanning {0}", Description);
+                p_T.Log.InfoFormat("Scanning {0}", Description);
 
                 string folder = IsDynamic("Folder") ? DynamicText["Folder"].Run(p_T.Attrs.GetAttrs()) : m_XNetworkSrc.Folder;
 
@@ -69,6 +67,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // go thru each pattern
                 foreach (IPattern P in p_Pattern) {
                     foreach (FileInfo Fi in Files) {
+                        p_T.Log.InfoFormat("Contact {0}", Fi.FullName);
+
                         if (P.IsMatch(Fi.Name)) {
                             Matches.Add(new MatchedFile(Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc));
                         }

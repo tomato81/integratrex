@@ -13,7 +13,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     public interface IPattern {
         bool IsMatch(string p_fileName);
         XPatternType PatternType { get; }
-
+        string ToString();
     }   // IPattern
 
 

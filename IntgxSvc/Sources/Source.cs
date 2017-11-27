@@ -98,16 +98,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         // member
         private ISourceLocation m_SourceLocation;
 
-        private XSource m_Source;
-        
+        // XSource
+        private XSource m_Source;        
 
         /// <summary>
         /// Constructor
         /// </summary>
         protected IntegrationSource(XSource p_Source) 
             : base(p_Source) {
-            // log of this integration
-            IntLog = CreateLogger(p_Source.Desc);
+            // things
         }                   
 
     }   // IntegrationSource

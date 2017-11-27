@@ -4,14 +4,48 @@
   <Integrations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="c2infosys.com/Integratrex/Service.Config.xsd">
 
 
+    <Integration Desc="Test Local-Local Integration 2" Enable="Y">
+
+      <Schedule>
+        <Continuous Interval="20" />
+      </Schedule>
+
+      <Source Desc="Files Directory">
+        <Local Folder="C:\\Sandbox\\Source\\Files" />
+      </Source>
+
+      <Patterns>
+        <Pattern Desc="file1 pattern" Type="ExactIgnoreCase">file1.txt</Pattern>
+        <Pattern Desc="file2 pattern" Type="ExactIgnoreCase">file2.txt</Pattern>
+      </Patterns>
+
+      <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="N">
+        <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f yyyyMMddhhmmss)</Rename>
+      </OnContact>
+
+      <Responses>
+        <Response Desc="Copy to Local Folder" Enable="Y">
+          <Rename>?{File.WorkingName}_?(Date -f yyyyMMddhhmmss)</Rename>
+          <Target>
+            <Local Action="Copy" Overwrite="Y" Folder="C:\\Sandbox\\Target\\?(Date -f 'yyyyMMdd')" />
+          </Target>
+        </Response>
+      </Responses>
+
+      <Log Level="Information" Enable="Y">
+        <Email To="brad.edey@gmail.com" Subject="Integratrex - Send Trade Report Log" />
+      </Log>
+
+    </Integration>
+    
     <Integration Desc="Test Local-Local Integration" Enable="Y">
 
       <Schedule>
-        <Continuous Interval="30" />        
+        <Continuous Interval="20" />        
       </Schedule>
 
       <Source Desc="C Drive on Local Computer">
-        <Network Folder="C:\\Sandbox\\Source\\?(Date -f 'yyyyMMdd')" />
+        <Local Folder="C:\\Sandbox\\Source\\?(Date -f 'yyyyMMdd')" />
       </Source>
 
       <Patterns>

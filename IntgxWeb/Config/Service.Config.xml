@@ -7,11 +7,11 @@
     <Integration Desc="Test Local-Local Integration 2" Enable="Y">
 
       <Schedule>
-        <Continuous Interval="20" />
+        <Continuous Interval="31" />
       </Schedule>
 
       <Source Desc="Files Directory">
-        <Local Folder="C:\\Sandbox\\Source\\Files" />
+        <Local Folder="C:\\Sandbox\\Integratrex\\Source" />
       </Source>
 
       <Patterns>
@@ -19,7 +19,10 @@
         <Pattern Desc="file2 pattern" Type="ExactIgnoreCase">file2.txt</Pattern>
       </Patterns>
 
-      <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="N">
+      <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="Y" CalculateMD5="Y" CalculateSHA1="Y">
+        <SupressDuplicates Enable="Y">
+          <MatchBy FileName="Y" FileSize="Y" LastModifiedDate="Y" MD5="Y" SHA1="Y" />
+        </SupressDuplicates>
         <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f yyyyMMddhhmmss)</Rename>
       </OnContact>
 
@@ -37,15 +40,18 @@
       </Log>
 
     </Integration>
-    
+
+<!--
+
+
     <Integration Desc="Test Local-Local Integration" Enable="Y">
 
       <Schedule>
-        <Continuous Interval="20" />        
+        <Continuous Interval="20" />
       </Schedule>
 
       <Source Desc="C Drive on Local Computer">
-        <Local Folder="C:\\Sandbox\\Source\\?(Date -f 'yyyyMMdd')" />
+      <Local Folder="C:\\Sandbox\\Integratrex\\Source\\?(Date -f 'yyyyMMdd')" />
       </Source>
 
       <Patterns>
@@ -53,7 +59,7 @@
         <Pattern Desc="file2 pattern" Type="ExactIgnoreCase">file2.txt</Pattern>
       </Patterns>
 
-      <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="N">
+      <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="Y" CalculateMD5="Y" CalculateSHA1="Y">
         <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f yyyyMMddhhmmss)</Rename>
       </OnContact>
 
@@ -61,7 +67,7 @@
         <Response Desc="Copy to Local Folder" Enable="Y">
           <Rename>?{File.WorkingName}_?(Date -f yyyyMMddhhmmss)</Rename>
           <Target>
-            <Local Action="Copy" Overwrite="Y" Folder="C:\\Sandbox\\Target\\?(Date -f 'yyyyMMdd')" />
+            <Local Action="Copy" Overwrite="Y" Folder="C:\\Sandbox\\Integratrex\\Target\\?(Date -f 'yyyyMMdd')" />
           </Target>
         </Response>
       </Responses>
@@ -71,11 +77,12 @@
       </Log>
 
     </Integration>
+
     
     <Integration Desc="Send Trade Report" Enable="Y">
 
-      <Schedule>                
-        <Calendar Occurs="Week" Offset="3" TimeOfDay="5:04 PM" />        
+      <Schedule>
+        <Calendar Occurs="Week" Offset="3" TimeOfDay="5:04 PM" />
       </Schedule>
 
       <Source Desc="Network Drive">
@@ -110,8 +117,6 @@
       </Log>
 
     </Integration>
-
-    <!--
 
   <Integration Desc="Ship Log Files" Enable="Y">
 

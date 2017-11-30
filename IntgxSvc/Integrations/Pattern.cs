@@ -5,11 +5,12 @@ using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
 
 using C2InfoSys.FileIntegratrex.Lib;
+using System.Diagnostics;
 
 namespace C2InfoSys.FileIntegratrex.Svc {
 
     /// <summary>
-    /// File matching Pattern Factory
+    /// File Matching Pattern Object Factory
     /// </summary>
     public class PatternFactory {
 
@@ -40,6 +41,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
     }   // PatternFactory
 
+    /// <summary>
+    /// File Matching Pattern Base Class
+    /// </summary>
     public abstract class Pattern : IPattern {
 
         // members
@@ -49,6 +53,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Constructor
         /// </summary>
         public Pattern(XPattern p_P) {
+            // this array should have exactly 1 element
+            Debug.Assert(p_P.Text.Length == 1);
+            // set the XPattern
             m_Pattern = p_P;            
         }
 
@@ -73,10 +80,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <returns></returns>
         public override string ToString() {
-            return string.Format("{0} {1} {2}", Enum.GetName(typeof(XPatternType), PatternType), m_Pattern.Desc, m_Pattern.Text);
+            return string.Format("{0} {1} {2}", Enum.GetName(typeof(XPatternType), PatternType), m_Pattern.Desc, m_Pattern.Text[0]);
         }
 
-    }
+    }   // Pattern
 
     /// <summary>
     /// Exact File Matching Pattern

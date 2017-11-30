@@ -14,8 +14,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         bool IsMatch(string p_fileName);
         XPatternType PatternType { get; }
         string ToString();
-    }   // IPattern
 
+    }   // IPattern
 
     /// <summary>
     /// Integration Source Location
@@ -23,11 +23,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     public interface ISourceLocation {
         string Description { get; }        
         MatchedFile[] Scan(IPattern[] p_Pattern, IntegrationTracker p_T);
-        void Get(MatchedFile[] p_Mf);
-        void Delete(MatchedFile[] p_Mf);        
-        void Rename(MatchedFile[] p_Mf, string[] p_rename);
-        void DeleteFolder(string p_folder);
-        void Ping();              
+        void Get(MatchedFile[] p_Mf, IntegrationTracker p_T);
+        void Delete(MatchedFile[] p_Mf, IntegrationTracker p_T);        
+        void Rename(MatchedFile[] p_Mf, string[] p_rename, IntegrationTracker p_T);
+        void DeleteFolder(string p_folder, IntegrationTracker p_T);
+        void Ping(IntegrationTracker p_T);
+        bool CanCalc();
 
     }   // ISourceLocation
 

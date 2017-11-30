@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 // lawg
 using log4net;
@@ -65,12 +66,49 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
 
+        /// <summary>
+        /// Create the integration working directory
+        /// </summary>
+        /// <returns></returns>
+        public void CreateWorkingDi() {
+            try {
+                if(!m_WorkingDi.Exists) {
+                    m_WorkingDi.Create();
+                }
+
+                // update MatchedFiles
+
+
+
+            }
+            catch(Exception ex) {
+                throw ex;
+            }
+        }        
+
+        /// <summary>
+        /// Matched Files
+        /// </summary>
+        public MatchedFile[] MatchedFiles { get => m_MatchedFiles; set => m_MatchedFiles = value; }
+        public DirectoryInfo WorkingDi { get => m_WorkingDi; }
+        public XIntegration Integration { get => m_Integration; }
+
+
+        /// <summary>
+        /// Number of Matched Files 
+        /// </summary>
+        public int MatchCount {
+            get {
+                return MatchedFiles == null ? 0 : MatchedFiles.Length;
+            }
+        }
+
         // members
         private IntegrationAttributes m_Attrs;
         private XIntegration m_Integration;
         private DateTime m_RunDate;
         private MatchedFile[] m_MatchedFiles;
-        private int m_matchCount;
+        
         private DirectoryInfo m_WorkingDi;  // a time stamped folder used for a particular execution of an integration (typically only created if the scan returns results)               
 
         // log
@@ -82,10 +120,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// </summary>
     public class IntegrationManager : IDisposable {
 
-
-
+        // all active integration manager
         public static Dictionary<string, IntegrationManager> m_IntegrationManagers = new Dictionary<string, IntegrationManager>();
-
+        /// <summary>
+        /// Get the integration manager for a named integration
+        /// </summary>
+        /// <param name="p_integration">integration name</param>
+        /// <returns>integration manager</returns>
         public static IntegrationManager GetIntegrationManager(string p_integration) {
             if(!m_IntegrationManagers.ContainsKey(p_integration)) {
                 throw new KeyNotFoundException();
@@ -115,6 +156,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private IPattern[] m_Patterns;
         private DirectoryInfo m_IntegrationDi;  // this folder stores any support files necessrary for this integration to run (e.g. psftp scripts)
         private DirectoryInfo m_WorkingDi;  // root folder for this integration's timestamped integration instance folders        
+
+        private MatchHistory m_MatchHistory;
 
         /// <summary>
         /// Integration Function
@@ -169,7 +212,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Initialization code
         /// </summary>
-        private void InitializeMgr() {            
+        private void InitializeMgr() {
+            m_MatchHistory = new MatchHistory(m_Integration.OnContact.SupressDuplicates);
         }
 
         /// <summary>
@@ -415,12 +459,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // log integration
                 IntInstLog.InfoFormat("Run Integration:{0}", m_Integration.Desc);
 
-                // matched files
-                MatchedFile[] MatchedFiles;
-
                 // steps               
-                ScanSource(T);
-                GetFiles(T);
+                ScanSource(T);                
+                GetFiles(T);                
                 WorkingTransform(T);
                 SourceTransform(T);
                 RunResponses(T);
@@ -449,10 +490,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // method logic
                 IntInstLog.InfoFormat("Integration:{0} Scan Source:{1}", m_Integration.Desc, m_Integration.Source.Desc);
 
+                                
+                m_Source.Location.Scan(m_Patterns, p_T);
 
-
-
-                MatchedFile[] MatchedFiles = m_Source.Location.Scan(m_Patterns, p_T);
+                
                 
 
                 
@@ -476,6 +517,36 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // method logic
                 IntInstLog.InfoFormat("Get Files:{0}", m_Integration.Desc);
+
+                // were files matched?
+                if (p_T.MatchCount == 0) {
+                    return;
+                }
+
+                Debug.Assert(!p_T.WorkingDi.Exists);
+
+                // create the working directory
+                p_T.CreateWorkingDi();
+                // apply working folder to matched files
+                foreach(MatchedFile M in p_T.MatchedFiles) {
+                    M.SetWorkingDi(p_T.WorkingDi);
+                }
+                // get files into the working directory
+                m_Source.Location.Get(p_T.MatchedFiles, p_T);
+                
+                // examine files
+                foreach (MatchedFile M in p_T.MatchedFiles) {
+                    if (p_T.Integration.OnContact.CalculateSHA1 == XOnContactCalculateSHA1.Y) {
+                        M.SHA1 = GetSHA1(M);
+                    }
+                    if (p_T.Integration.OnContact.CalculateMD5 == XOnContactCalculateMD5.Y) {
+                        M.MD5 = GetMD5(M);
+                    }
+                }
+
+                // add to match history
+                m_MatchHistory.Add(p_T.MatchedFiles);
+
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -496,6 +567,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // method logic
                 IntInstLog.InfoFormat("Working Transform:{0}", m_Integration.Desc);
+
+                
+
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -576,7 +650,204 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
         #endregion
 
+
+        /// <summary>
+        /// Get the SHA1 Hash of the Matched file - reading from the source location
+        /// </summary>
+        /// <param name="p_Mf">Matched File</param>
+        private string GetSHA1(MatchedFile p_Mf) {
+            try {
+                string sha1 = string.Empty;
+                FileInfo Fi = new FileInfo(string.Format("{0}\\{1}", p_Mf.Folder, p_Mf.OrigName));
+                using (FileStream Fin = new FileStream(Fi.FullName, FileMode.Open)) {
+                    using (SHA1Managed SHA1 = new SHA1Managed()) {
+                        byte[] hash = SHA1.ComputeHash(Fin);
+                        StringBuilder Sb = new StringBuilder(2 * hash.Length);
+                        foreach (byte b in hash) {
+                            Sb.AppendFormat("{0:X2}", b);
+                        }
+                        sha1 = Sb.ToString();
+                    }
+                }
+                return sha1;
+            }
+            catch (Exception ex) {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Get the MD5 Hash of the Matched file - reading from the source location
+        /// </summary>
+        /// <param name="p_Mf">Matched File</param>
+        private string GetMD5(MatchedFile p_Mf) {
+            try {
+                string md5 = string.Empty;
+
+                
+
+                FileInfo Fi = new FileInfo(string.Format("{0}\\{1}", p_Mf.Folder, p_Mf.OrigName));
+                using (MD5 MDFive = MD5.Create()) {
+                    using (FileStream Fin = new FileStream(Fi.FullName, FileMode.Open)) {
+                        byte[] hash = MDFive.ComputeHash(Fin);
+                        StringBuilder Sb = new StringBuilder(2 * hash.Length);
+                        foreach (byte b in hash) {
+                            Sb.AppendFormat("{0:X2}", b);
+                        }
+                        md5 = Sb.ToString();
+                    }
+                }
+                return md5;
+            }
+            catch (Exception ex) {
+                throw ex;
+            }
+        }
+
     }   // IntegrationManager
+
+    /// <summary>
+    /// File Match History
+    /// </summary>
+    public class MatchHistory {
+
+
+        private XSupressDuplicates m_SupressDuplicates;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public MatchHistory(XSupressDuplicates p_SupressDuplicates) {
+            m_SupressDuplicates = p_SupressDuplicates;
+        }
+
+        /// <summary>
+        /// Are duplicates being supressed?
+        /// </summary>
+        public bool SupressDuplciates {
+            get {
+                return m_SupressDuplicates.Enable == XSupressDuplicatesEnable.Y;
+            }
+        }
+
+        /// <summary>
+        /// Active methods used to identify duplicates
+        /// </summary>
+        private bool MD5 {
+            get {
+                return m_SupressDuplicates.MatchBy.MD5 == XMatchByMD5.Y;
+            }
+        }
+        private bool SHA1 {
+            get {
+                return m_SupressDuplicates.MatchBy.SHA1 == XMatchBySHA1.Y;
+            }
+        }
+        private bool FileName {
+            get {
+                return m_SupressDuplicates.MatchBy.FileName == XMatchByFileName.Y;
+            }
+        }
+        private bool FileSize {
+            get {
+                return m_SupressDuplicates.MatchBy.FileSize == XMatchByFileSize.Y;
+            }
+        }
+        private bool LastModifiedDate {
+            get {
+                return m_SupressDuplicates.MatchBy.LastModifiedDate == XMatchByLastModifiedDate.Y;                
+            }
+        }
+
+        /// <summary>
+        /// Is the Matched File a duplicate?
+        /// </summary>
+        /// <param name="p_M"></param>
+        /// <returns></returns>
+        public bool IsDuplicate(MatchedFile p_M) {
+            try {
+                // matched flags
+                bool fileName = false;
+                bool fileSize = false;
+                bool fileDt = false;
+                bool fileMD5 = false;
+                bool fileSHA1 = false;
+                
+                // check for matches
+                if (m_FileNames.Contains(p_M.OrigName)) {
+                    fileName = true;
+                    if (m_FileNameSize[p_M.OrigName].Contains(p_M.FileSize)) {
+                        fileSize = true;
+                    }
+                    if (m_FileNameLastMod[p_M.OrigName].Contains(p_M.LastModifiedUTC)) {
+                        fileDt = true;
+                    }
+                }
+                if(m_MD5.Contains(p_M.MD5)) {
+                    fileMD5 = true;
+                }
+                if (m_SHA1.Contains(p_M.SHA1)) {
+                    fileSHA1 = true;
+                }
+
+                // is it a match?
+                bool match = ((FileName ? fileName : true) && (FileSize ? fileSize : true) && (LastModifiedDate ? fileDt : true))
+                    && (MD5 == fileMD5)
+                    && (SHA1 == fileSHA1);
+                // out
+                return match;
+            }
+            catch(Exception ex) {
+                throw ex;
+            }
+        }
+
+        private HashSet<string> m_MD5 = new HashSet<string>();
+        private HashSet<string> m_SHA1 = new HashSet<string>();
+        private HashSet<string> m_FileNames = new HashSet<string>();
+        //private HashSet<string> m_SHA1 = new HashSet<string>();
+
+        private Dictionary<string, HashSet<long>> m_FileNameSize = new Dictionary<string, HashSet<long>>();
+        private Dictionary<string, HashSet<long>> m_FileNameLastMod = new Dictionary<string, HashSet<long>>();
+
+        /// <summary>
+        /// Add a Matched File to the duplicate list
+        /// </summary>
+        /// <param name="p_Mf">a Matched File</param>
+        public void Add(MatchedFile p_Mf) {
+            // add the file name
+            m_FileNames.Add(p_Mf.OrigName);
+            // add the file hashs
+            if (p_Mf.MD5.Length > 0) {
+                m_MD5.Add(p_Mf.MD5);
+            }
+            if (p_Mf.SHA1.Length > 0) {
+                m_SHA1.Add(p_Mf.SHA1);
+            }           
+            // add the file size            
+            if(!m_FileNameSize.ContainsKey(p_Mf.OrigName)) {
+                m_FileNameSize.Add(p_Mf.OrigName, new HashSet<long>());
+            }
+            m_FileNameSize[p_Mf.OrigName].Add(p_Mf.FileSize);
+            // add the last modified date
+            if (!m_FileNameLastMod.ContainsKey(p_Mf.OrigName)) {
+                m_FileNameLastMod.Add(p_Mf.OrigName, new HashSet<long>());
+            }            
+            m_FileNameLastMod[p_Mf.OrigName].Add(p_Mf.LastModifiedUTC);
+        }
+
+        /// <summary>
+        /// Add an array of Matched Files to the duplicate list
+        /// </summary>
+        /// <param name="p_Mf">an array of Matched Files</param>
+        public void Add(MatchedFile[] p_Mf) {
+            foreach(MatchedFile M in p_Mf) {
+                Add(M);
+            }
+        }
+
+
+    }   // MatchHistory
 
 
     /// <summary>
@@ -723,6 +994,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                         string text = P.GetValue(p_IntegrationObj).ToString();
                         DynamicTextParser DyText = new DynamicTextParser(text);
                         if (DyText.Compile()) {
+                            DebugLog.DebugFormat("Extracted Property {0}.{1}{2}Compiling:{3}{4}", T.Name, P.Name, Environment.NewLine, Environment.NewLine, text);                            
                             m_DynamicText.Add(P.Name, DyText);
                         }
                     }
@@ -748,6 +1020,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
 
+        /// <summary>
+        /// Object Properties
+        /// </summary>
         protected PropertyInfo[] ObjectProps {
             get {
                 return m_ObjectProps;
@@ -755,8 +1030,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
         // member
         private PropertyInfo[] m_ObjectProps;
-
-
 
     }   // IntegrationObject
 

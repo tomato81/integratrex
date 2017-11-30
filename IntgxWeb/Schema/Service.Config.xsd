@@ -217,6 +217,7 @@
       <xs:extension base="XObject">
         <xs:all>
           <xs:element name="Rename" type="XRenameOnContact" minOccurs="0" />
+          <xs:element name="SupressDuplicates" type="XSupressDuplicates" minOccurs="0" />
         </xs:all>
         <xs:attribute name="MoveToWorkingArea" use="required">
           <xs:simpleType>
@@ -305,8 +306,7 @@
   <xs:complexType name="XResponse">
     <xs:complexContent>
       <xs:extension base="XObject">
-        <xs:all>
-          <xs:element name="SupressDuplicates" type="XSupressDuplicates" minOccurs="0" />
+        <xs:all>          
           <xs:element name="Rename" type="XRenameResponse" minOccurs="0" />
           <xs:element name="Transform" type="XTransform" minOccurs="0" />
           <xs:element name="Target" type="XTarget" />

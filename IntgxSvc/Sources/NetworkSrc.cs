@@ -70,7 +70,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                         p_T.Log.InfoFormat("Contact {0}", Fi.FullName);
 
                         if (P.IsMatch(Fi.Name)) {
-                            Matches.Add(new MatchedFile(Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc));
+                            Matches.Add(new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc));
                         }
                     }
                 }
@@ -100,7 +100,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Get matched files from source location and write to the working directory
         /// </summary>
         /// <param name="p_Mf"></param>
-        public void Get(MatchedFile[] p_Mf) {
+        public void Get(MatchedFile[] p_Mf, IntegrationTracker p_T) {
             throw new NotImplementedException();
         }
 
@@ -108,7 +108,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Delete matched files from the source location
         /// </summary>
         /// <param name="p_Mf"></param>
-        public void Delete(MatchedFile[] p_Mf) {
+        public void Delete(MatchedFile[] p_Mf, IntegrationTracker p_T) {
             throw new NotImplementedException();
         }
 
@@ -117,14 +117,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_Mf"></param>
         /// <param name="p_rename"></param>
-        public void Rename(MatchedFile[] p_Mf, string[] p_rename) {
+        public void Rename(MatchedFile[] p_Mf, string[] p_rename, IntegrationTracker p_T) {
             throw new NotImplementedException();
         }
 
         /// <summary>
         /// Ping the source location to verify connectivity
         /// </summary>
-        public void Ping() {
+        public void Ping(IntegrationTracker p_T) {
             throw new NotImplementedException();
         }
 
@@ -132,8 +132,16 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Delete the deepest sub-directory from the given location
         /// </summary>
         /// <param name="p_folder"></param>
-        public void DeleteFolder(string p_folder) {
+        public void DeleteFolder(string p_folder, IntegrationTracker p_T) {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Can MD5 or SHA1 be calculated at the source?
+        /// </summary>
+        /// <returns></returns>
+        public bool CanCalc() {
+            return true;
         }
 
     }   // end of class

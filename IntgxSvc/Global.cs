@@ -22,14 +22,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     public static class Global {
 
         // high level globals
-        public static readonly int ServiceStopWaitTime = 5000;  // 5 seconds
-        public static readonly int MainLoopStartTimeout = 10000;    // 10 seconds
-        public static readonly int MainLoopCycleTime = 10 * 1000;    // 1 second
+        public static readonly int ServiceStopWaitTime = 5 * 1000;  // 5 seconds
+        public static readonly int MainLoopStartTimeout = 10 * 1000;    // 10 seconds
+        public static readonly int MainLoopCycleTime = 10 * 1000;    // 10 seconds
 
         public static readonly int IntegrationInterruptWait = 5000;  // 5 seconds
         public static readonly int IntegrationInterruptTimeout = (5 * 60000);  // 5 minutes        
-        public static readonly int SysQueueTimeout = 1;
-        public static readonly int XmlQueueTimeout = 1;
+        public static readonly int SysQueueTimeout = 600;   // 10 minutes
+        public static readonly int XmlQueueTimeout = 600;   // 10 minutes
                 
         public static readonly string DebugLogName = "DebugLog";
         public static readonly string ServiceLogName = "ServiceLog";

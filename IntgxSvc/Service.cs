@@ -165,6 +165,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     Message SysMsg = null;
                     try {
                         SysMsg = SysQ.Receive(TimeOut);
+
+                        
+
                     }
                     catch (MessageQueueException ex) {
                         SvcLog.WarnFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);                        
@@ -202,6 +205,24 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     Message XmlMsg = null;
                     try {
                         XmlMsg = XmlQ.Receive(TimeOut);
+
+                        if(XmlMsg.MessageType != MessageType.Normal) {
+                            // message is not normal
+                        }
+
+                        string messsage = XmlMsg.Body.ToString();
+
+                        
+                        // the message is an integation
+                        // it can be added to integrations 
+                        // or it can be run once and discarded
+                        // maybe it depends on the schedule??
+                        // if it is recurring then add it to integrations
+                        // BUT - if it only contains one IMMEDIATE schedule, just run it and discard
+
+                        // add a method to Ingratrex that can pull in the xml message and... do what it has to do
+                        
+                        
                     }
                     catch(MessageQueueException ex) {
                         XmlLog.WarnFormat("Message Queue: {0} receive timeout after {1}. Message={2}", XmlQ.QueueName, Global.XmlQueueTimeout.ToString(), ex.Message);

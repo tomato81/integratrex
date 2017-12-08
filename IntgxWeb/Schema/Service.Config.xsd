@@ -41,6 +41,7 @@
       <xs:extension base="XObject">
         <xs:sequence>
           <xs:element name="Continuous" type="XContinuous" minOccurs="0" maxOccurs="1" />
+          <xs:element name="Immediate" type="XImmediate" minOccurs="0" maxOccurs="1" />
           <xs:element name="Calendar" type="XCalendar" minOccurs="0" maxOccurs="99" />
         </xs:sequence>
       </xs:extension>
@@ -96,6 +97,13 @@
           </xs:simpleType>
         </xs:attribute>
 
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="XImmediate">
+    <xs:complexContent>
+      <xs:extension base="XObject">
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

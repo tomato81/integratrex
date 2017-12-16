@@ -100,7 +100,7 @@
     <Compile Include="Helpers\ScheduleHelper.cs" />
     <Compile Include="Integrations\Integration.cs" />
     <Compile Include="Integrations\Interfaces.cs" />
-    <Compile Include="Integrations\SupressDuplicates.cs" />
+    <Compile Include="Integrations\OnContact.cs" />
     <Compile Include="Integrations\MatchedFile.cs" />
     <Compile Include="Integrations\Pattern.cs" />
     <Compile Include="Sources\LocalSrc.cs" />

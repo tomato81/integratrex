@@ -72,8 +72,8 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
                 //TestBusinessCalendarEdits();
                 //TestOptions();
                 //ParseDynamicText();
-                //TestDynamicTextParser();
-                TestScanner();
+                TestDynamicTextParser();
+                //TestScanner();
                 //TestScheduleTimer();
 
                 //TestBusinessCalendar();
@@ -116,7 +116,7 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
 
                 //string incoming = "\\\\\\\\someserver\\\\reportshare\\\\?(Date -f yyyyMMdd)";
 
-                string incoming = ((XNetworkSrc)I.Integration[0].Source.Item).Folder;
+                string incoming = ((XNetworkSrc)I.Integration[0].Source.Item).Path.Value;
 
                 /*
                 Scanner S = new Scanner(incoming);
@@ -135,7 +135,8 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
                 DynamicTextParser P = new DynamicTextParser(incoming);
                 P.Compile();
 
-                string text = P.Run(D);
+                //string text = P.Run(D);
+                string text = "Nononononon";
                 Console.WriteLine(text);
 
 
@@ -160,7 +161,7 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
                 // http://parsingintro.sourceforge.net/
 
 
-                FileInfo Fi = new FileInfo(@"..\..\NoDyText.txt");
+                FileInfo Fi = new FileInfo(@"..\..\FnSample3.txt");
                 StreamReader Fin = new StreamReader(Fi.OpenRead());
 
                 string incoming = Fin.ReadToEnd();
@@ -208,9 +209,14 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
 
                 DynamicTextParser RT = new DynamicTextParser(incoming);
 
+                RT.OnValueRequired += delegate (object sender, OnValueRequiredEventArgs e) {
+                    e.Result = Attrs[e.Name];
+                };
+
                 RT.Compile();
 
-                string result = RT.Run(Attrs);
+                //string result = RT.Run(Attrs);
+                string result = RT.Run();
 
 
                 Console.WriteLine();
@@ -431,7 +437,7 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
 
 
 
-                foreach(XResponse R in I.Responses.Response) {
+                foreach(XResponse R in I.Responses) {
 
                     Console.WriteLine(string.Format("\t{0}", R.Desc));
                 }

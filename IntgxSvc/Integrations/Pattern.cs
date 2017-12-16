@@ -54,7 +54,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public Pattern(XPattern p_P) {
             // this array should have exactly 1 element
-            Debug.Assert(p_P.Text.Length == 1);
+            Debug.Assert(p_P.Value.Length == 1);
             // set the XPattern
             m_Pattern = p_P;            
         }
@@ -80,7 +80,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <returns></returns>
         public override string ToString() {
-            return string.Format("{0} {1} {2}", Enum.GetName(typeof(XPatternType), PatternType), m_Pattern.Desc, m_Pattern.Text[0]);
+            return string.Format("{0} {1} {2}", Enum.GetName(typeof(XPatternType), PatternType), m_Pattern.Desc, m_Pattern.Value);
         }
 
     }   // Pattern
@@ -106,7 +106,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_filename">match this filename against the pattern</param>
         /// <returns>boolean</returns>
         public override bool IsMatch(string p_filename) {
-            return m_Pattern.Text[0].Equals(p_filename, m_StringComparison);
+            return m_Pattern.Value.Equals(p_filename, m_StringComparison);
         }
 
     }   // SimplePattern
@@ -129,7 +129,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_filename">match this filename against the pattern</param>
         /// <returns>boolean</returns>
         public override bool IsMatch(string p_filename) {
-            if(Operators.LikeString(p_filename, m_Pattern.Text[0], CompareMethod.Text)) {
+            if(Operators.LikeString(p_filename, m_Pattern.Value, CompareMethod.Text)) {
                 return true;
             }
             return false;
@@ -150,7 +150,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public RegExPattern(XPattern p_P) 
             : base(p_P) {            
-            m_RegEx = new Regex(p_P.Text[0]);
+            m_RegEx = new Regex(p_P.Value);
         }
 
         /// <summary>

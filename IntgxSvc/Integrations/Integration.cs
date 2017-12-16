@@ -29,25 +29,92 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Constructor
         /// </summary>
-        public IntegrationTracker(XIntegration p_Integration, IntegrationAttributes p_Attrs) {
+        public IntegrationTracker(IntegrationManager p_Manager) {
             // set locals
-            m_Attrs = p_Attrs;
-            m_Integration = p_Integration;       
+            m_Manager = p_Manager;            
             // set up working dirs
             string dtStamp = string.Format("{0:s}", DateTime.Now).Replace(" ", "").Replace(":", "").Replace(".", "").Replace("-", "");
-            string work = Path.Combine(Global.AppSettings.IntegratrexWorkFolder, m_Integration.Desc, Global.WorkInstDir, dtStamp);            
+            string work = Path.Combine(Global.AppSettings.IntegratrexWorkFolder, Integration.Desc, Global.WorkInstDir, dtStamp);
             // create some objects
-            m_WorkingDi = new DirectoryInfo(work);            
+            m_MatchedFiles = new List<MatchedFile>();
+            m_WorkingDi = new DirectoryInfo(work);
+            // intial attribute context
+            SetAttrsInitialContext();
         }
         
         /// <summary>
-        /// Get at the integration attributes
+        /// Constructor Helper
         /// </summary>
-        public IntegrationAttributes Attrs {
+        private void SetAttrsInitialContext() {
+            Manager.Attributes.Files = m_MatchedFiles;
+        }
+
+        /// <summary>
+        /// Attach Dynamic Text Events
+        /// </summary>
+        private void HookupDTextEvents() {
+            // hookup dtext events
+            Manager.OnContact.OnValueRequired += ValueRequired;
+            Manager.Source.OnValueRequired += ValueRequired;
+        }
+
+        /// <summary>
+        /// Attach Integration Events
+        /// </summary>
+        private void HookupIntegrationEvents() {
+            // hookup events            
+            Manager.Source.OnFileMatch += SourceScan_OnContact;
+            Manager.Source.OnGotFile += SourceGet_OnGot;
+        }
+        
+        /// <summary>
+        /// Integration Value is Required!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ValueRequired(object sender, OnValueRequiredEventArgs e) {
+            e.Result = Manager.Attributes.GetReplacementValue(e.Name);
+        }
+
+        /// <summary>
+        /// Matched Files
+        /// </summary>
+        public List<MatchedFile> MatchedFiles { get => m_MatchedFiles; }
+        public DirectoryInfo WorkingDi { get => m_WorkingDi; }
+        public XIntegration Integration { get => m_Manager.Integration; }
+        public IntegrationAttributes Attrs { get => m_Manager.Attributes; }
+        public IntegrationManager Manager { get => m_Manager; }
+
+        /// <summary>
+        /// Number of Matched Files 
+        /// </summary>
+        public int MatchCount {
             get {
-                return m_Attrs;
+                return MatchedFiles.Count;
             }
         }
+
+        // members
+        private DateTime m_RunDate;
+        private readonly List<MatchedFile> m_MatchedFiles;
+        private readonly DirectoryInfo m_WorkingDi;  // a time stamped folder used for a particular execution of an integration (typically only created if the scan returns results)               
+        private IPattern[] m_Patterns;
+        private readonly IntegrationManager m_Manager;
+
+        // logs
+        private ILog SvcLog;    // service log
+        private ILog IntLog;    // log of ALL integrations          
+        private ILog DebugLog;  // debug log
+        private ILog IntInstLog;    // log of THIS integration            
+
+        /// <summary>
+        /// Log of this integration
+        /// </summary>
+        public ILog Log {
+            get {
+                return IntInstLog;
+            }
+        }   
 
         /// <summary>
         /// Set Logger
@@ -55,16 +122,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_Logger">the logger</param>
         public void SetLogger(ILog p_Logger) {
             IntInstLog = p_Logger;
-        }
-
-        /// <summary>
-        /// Log this integration
-        /// </summary>
-        public ILog Log {
-            get {
-                return IntInstLog;
-            }
-        }
+        }        
 
         /// <summary>
         /// Create the integration working directory
@@ -79,41 +137,198 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // update MatchedFiles
 
 
-
             }
             catch(Exception ex) {
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// Integration Source -> File Match!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SourceScan_OnContact(object sender, OnFileMatchEventArgs e) {
+            // log
+            IntInstLog.InfoFormat("Matched file {0}", e.MatchedFile.OriginalName);
+            // set integration attributes File context
+            Manager.Attributes.File = e.MatchedFile;
+            // add to the match list
+            MatchedFiles.Add(e.MatchedFile);            
+            // can duplicates be identified at the integration source?
+            if(Manager.OnContact.SupressDuplicates.CanIDAtSource) {
+                if(Manager.OnContact.SupressDuplicates.IsDuplicate(e.MatchedFile)) {
+                    e.MatchedFile.Supress = true;
+                    return; // not much else to do
+                }
+            }
+            // set the working directory
+            e.MatchedFile.SetWorkingDi(WorkingDi);
+            // will the name of the working file be different from the name at the source?
+            if(Manager.OnContact.RenameWorkingCopy) {
+                // set working copy name
+                e.MatchedFile.SetWorkingFileName(Manager.OnContact.Rename());            
+            } else {
+                e.MatchedFile.SetWorkingFileName(e.MatchedFile.OriginalName);
+            }           
         }        
 
         /// <summary>
-        /// Matched Files
+        /// Integration Source -> Got File!
         /// </summary>
-        public MatchedFile[] MatchedFiles { get => m_MatchedFiles; set => m_MatchedFiles = value; }
-        public DirectoryInfo WorkingDi { get => m_WorkingDi; }
-        public XIntegration Integration { get => m_Integration; }
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SourceGet_OnGot(object sender, OnGotFileEventArgs e) {
+            IntInstLog.InfoFormat("Got file {0}", e.MatchedFile.OriginalName);
 
+            MatchedFile M = e.MatchedFile;
+
+            /*
+            // examine files
+            if (Integration.OnContact.CalculateSHA1 == XOnContactCalculateSHA1.Y) {
+                M.SHA1 = GetSHA1(M);                
+            }
+            if (Integration.OnContact.CalculateMD5 == XOnContactCalculateMD5.Y) {
+                M.MD5 = GetMD5(M);
+            }
+            */
+            
+
+            // maybe other things??
+            // can I rename here??
+        }
 
         /// <summary>
-        /// Number of Matched Files 
+        /// Scan the integration source
         /// </summary>
-        public int MatchCount {
-            get {
-                return MatchedFiles == null ? 0 : MatchedFiles.Length;
+        public void ScanSource() {
+            // scan the source and return a list of matches
+            // dont do anything else at this point
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+
+                // method logic
+                IntInstLog.InfoFormat("Integration:{0} Scan Source:{1}", Integration.Desc, Integration.Source.Desc);
+                // scan for files matching the patterns
+                Manager.Source.Location.Scan(m_Patterns);              
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
-        // members
-        private IntegrationAttributes m_Attrs;
-        private XIntegration m_Integration;
-        private DateTime m_RunDate;
-        private MatchedFile[] m_MatchedFiles;
-        
-        private DirectoryInfo m_WorkingDi;  // a time stamped folder used for a particular execution of an integration (typically only created if the scan returns results)               
+        /// <summary>
+        /// Retrive files from the integration source 
+        /// </summary>
+        public void GetFiles() {
+            // copy files from the source to the working directory
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                // method logic
+                IntInstLog.InfoFormat("Get Files:{0}", Integration.Desc);
 
-        // log
-        private ILog IntInstLog;    // log of THIS integration
-    }  
+                // were files matched?
+                if (MatchCount == 0) {
+                    return;
+                }
+
+                Debug.Assert(!WorkingDi.Exists);
+
+                // create the working directory
+                CreateWorkingDi();
+                // apply working folder to matched files
+                foreach (MatchedFile M in MatchedFiles) {
+                    M.SetWorkingDi(WorkingDi);
+                }
+                // get files into the working directory
+                Manager.Source.Location.Get(MatchedFiles);
+
+                
+
+                // add to match history
+                Manager.MatchHistory.Add(MatchedFiles);
+
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+            }
+        }
+
+        /// <summary>
+        /// Apply transforms to files in the working folder
+        /// </summary>
+        public void WorkingTransform() {
+            // make any necessary alterations to files in the working directory
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                // method logic
+                IntInstLog.InfoFormat("Working Transform:{0}", Integration.Desc);
+
+
+
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+            }
+        }
+
+        /// <summary>
+        /// Apply transforms to files at the source location
+        /// </summary>
+        public void SourceTransform() {
+            // make any necessary alterations the the source (delete, rename, etc.)
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                // method logic
+                IntInstLog.InfoFormat("Source Transform:{0}", Integration.Desc);
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+            }
+        }
+
+        /// <summary>
+        /// Run integration response actions
+        /// </summary>
+        public void RunResponses() {
+            // run each response in order            
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                // method logic
+                IntInstLog.InfoFormat("Run Responses:{0}", Integration.Desc);
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+            }
+        }
+
+
+    }
 
     /// <summary>
     /// Manages the execution of an Integration - directly corresponds to an <Integration> ... </Integration> in the configuration file
@@ -128,11 +343,60 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_integration">integration name</param>
         /// <returns>integration manager</returns>
         public static IntegrationManager GetIntegrationManager(string p_integration) {
-            if(!m_IntegrationManagers.ContainsKey(p_integration)) {
+            if (!m_IntegrationManagers.ContainsKey(p_integration)) {
                 throw new KeyNotFoundException();
             }
             return m_IntegrationManagers[p_integration];
         }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="p_IntegrationConfig"></param>
+        public IntegrationManager(XIntegration p_Integration, ManualResetEvent p_IntegrationInterruptEvent) {
+            // static things
+            if (m_IntegrationManagers.ContainsKey(p_Integration.Desc)) {
+                throw new Exception("this shouldn't be ... why does this integration already exist?");
+            }
+            // set locals
+            m_IntegrationInterruptEvent = p_IntegrationInterruptEvent;
+            m_Integration = p_Integration;
+            m_MatchHistory = new MatchHistory(p_Integration.OnContact.SupressDuplicates);
+            m_Attrs = new IntegrationAttributes(p_Integration);            
+            m_IntegrationManagers.Add(p_Integration.Desc, this);            
+            m_Patterns = new IPattern[p_Integration.Patterns.Count()];
+            m_OnContact = new OnContact(p_Integration.OnContact);
+            // intialize sub-systems        
+            InitializeLog();
+            InitializePatterns();
+            InitializeSource();
+            // setup timer            
+            m_RunAction = new Action(Run);
+            m_Timer = new ScheduleTimer();            
+        }
+               
+
+        // integration log listener
+        //private TraceListener IntegrationInstLog;   // this is for THIS integration        
+
+        // thread safety
+        private object m_Padlock = new object();
+        private int m_inRunMethod = 0;
+        private ManualResetEvent m_IntegrationInterruptEvent;
+
+        // readonly members
+        private readonly IntegrationAttributes m_Attrs;
+        private readonly XIntegration m_Integration;
+        private readonly ScheduleTimer m_Timer;        
+        private readonly IPattern[] m_Patterns;
+        private readonly DirectoryInfo m_IntegrationDi;  // this folder stores any support files necessrary for this integration to run (e.g. psftp scripts)
+        private readonly DirectoryInfo m_WorkingDi;  // root folder for this integration's timestamped integration instance folders        
+        private readonly MatchHistory m_MatchHistory;        
+        private readonly Action m_RunAction;
+        private readonly OnContact m_OnContact;
+
+        // other members
+        private IntegrationSource m_Source;
 
         // logs
         private ILog SvcLog;    // service log
@@ -140,35 +404,35 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private ILog DebugLog;  // debug log
         private ILog IntInstLog;    // log of THIS integration
 
-        // integration log listener
-        //private TraceListener IntegrationInstLog;   // this is for THIS integration        
+        /// <summary>
+        /// On Contact
+        /// </summary>
+        public OnContact OnContact { get => m_OnContact; }
 
-        // thread safety
-        private object m_Padlock = new object();
-        private int m_inRunMethod = 0;  
-        private ManualResetEvent m_IntegrationInterruptEvent;
+        /// <summary>
+        /// Integration Source
+        /// </summary>
+        public IntegrationSource Source { get => m_Source; }
 
-        // members
-        private IntegrationAttributes m_Attrs;
-        private XIntegration m_Integration;
-        private ScheduleTimer m_Timer;
-        private IntegrationSource m_Source;
-        private IPattern[] m_Patterns;
-        private DirectoryInfo m_IntegrationDi;  // this folder stores any support files necessrary for this integration to run (e.g. psftp scripts)
-        private DirectoryInfo m_WorkingDi;  // root folder for this integration's timestamped integration instance folders        
+        /// <summary>
+        /// XIntegration Object
+        /// </summary>
+        public XIntegration Integration { get => m_Integration; }
 
-        private MatchHistory m_MatchHistory;
+        /// <summary>
+        /// Integration Attributes
+        /// </summary>
+        public IntegrationAttributes Attributes { get => m_Attrs; }
 
         /// <summary>
         /// Integration Function
         /// </summary>
-        public Action RunAction {
-            get {
-                return m_RunAction;
-            }
-        }
-        // member
-        private Action m_RunAction;
+        public Action RunAction { get => m_RunAction; }        
+
+        /// <summary>
+        /// File Match History
+        /// </summary>
+        public MatchHistory MatchHistory { get => m_MatchHistory; }
 
         /// <summary>
         /// Log Level
@@ -180,40 +444,19 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     return (SourceLevels)Enum.Parse(typeof(SourceLevels), logLevelStr);
                 }
                 catch {
-                    return SourceLevels.All; 
+                    return SourceLevels.All;
                 }
             }
-        }
+        }        
 
         /// <summary>
-        /// Constructor
+        /// Get a new Integration Tracker
         /// </summary>
-        /// <param name="p_IntegrationConfig"></param>
-        public IntegrationManager(XIntegration p_Integration, ManualResetEvent p_IntegrationInterruptEvent) {                     
-            // set locals
-            m_IntegrationInterruptEvent = p_IntegrationInterruptEvent;
-            m_Integration = p_Integration;
-            m_Attrs = new IntegrationAttributes(p_Integration);
-            // add this integration to the static list
-            if (m_IntegrationManagers.ContainsKey(p_Integration.Desc)) {
-                throw new Exception("this shouldn't be ... why does this integration already exist?");
-            }
-            m_IntegrationManagers.Add(m_Integration.Desc, this);
-            // intialize sub-systems
-            InitializeMgr();
-            InitializeLog();
-            InitializePatterns();
-            InitializeSource();
-            // setup timer
-            m_RunAction = new Action(Run);
-            m_Timer = new ScheduleTimer();            
-        }
-
-        /// <summary>
-        /// Initialization code
-        /// </summary>
-        private void InitializeMgr() {
-            m_MatchHistory = new MatchHistory(m_Integration.OnContact.SupressDuplicates);
+        /// <returns></returns>
+        private IntegrationTracker NewTracker() {
+            IntegrationTracker T = new IntegrationTracker(this);
+            T.SetLogger(IntInstLog);
+            return T;
         }
 
         /// <summary>
@@ -254,51 +497,16 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
-        /// Extract Attributes from an XObject
-        /// </summary>
-        /// <param name="p_Obj">the XObject</param>
-        /// <returns>property dictionary</returns>
-        public Dictionary<string, object> ExtractAttrs(XObject p_XObj) {
-            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            try {
-                // empty dictionary
-                Dictionary<string, object> Attrs = new Dictionary<string, object>();
-                // reflect
-                Type T = p_XObj.GetType();
-                PropertyInfo[] Props = T.GetProperties();
-                // get 'em
-                foreach(PropertyInfo P in Props) {
-                    if (P.GetType().Equals(typeof(string))) {
-                        if (!P.GetType().IsValueType) {
-                            continue;
-                        }
-                    }
-                    string key = string.Format("{0}.{1}", T.Name, P.Name);
-                    object Val = P.GetValue(p_XObj);
-                    Attrs.Add(key, Val);
-                }
-                // return the completed attribute dictionary
-                return Attrs;
-            }
-            catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-                throw ex;
-            }
-        }
-
-        /// <summary>
         /// Initialize Patterns
         /// </summary>
         private void InitializePatterns() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            try {
-                // create the array
-                m_Patterns = new IPattern[m_Integration.Patterns.Pattern.Count()];
+            try {                
                 // source!
                 PatternFactory F = new PatternFactory();
                 // go thru the patterns
                 for(int i = 0; i < m_Patterns.Count(); i++) {
-                    m_Patterns[i] = F.Create(m_Integration.Patterns.Pattern[i]);
+                    m_Patterns[i] = F.Create(m_Integration.Patterns[i]);
                 }                
                 // log
                 IntLog.InfoFormat("File matching patterns intialized:{0}", m_Patterns.Count());
@@ -318,8 +526,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // source!
                 IntegrationSourceFactory F = new IntegrationSourceFactory();
                 m_Source = F.Create(m_Integration.Source);
-
-                //Source.TraceSource.Listeners.Add(IntegrationInstLog);
                 // log
                 IntInstLog.InfoFormat("Integration source intialized:{0}", m_Integration.Source.Desc);
             }
@@ -449,22 +655,21 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     }
                 }
 
+                // log integration
+                IntInstLog.InfoFormat("Run Integration:{0}", m_Integration.Desc);
+
                 // reset attributes
                 m_Attrs.Reset();
 
                 // tracker jacker
-                IntegrationTracker T = new IntegrationTracker(m_Integration, m_Attrs);
-                T.SetLogger(IntInstLog);
+                IntegrationTracker T = NewTracker();                                
 
-                // log integration
-                IntInstLog.InfoFormat("Run Integration:{0}", m_Integration.Desc);
-
-                // steps               
-                ScanSource(T);                
-                GetFiles(T);                
-                WorkingTransform(T);
-                SourceTransform(T);
-                RunResponses(T);
+                // integrate
+                T.ScanSource();
+                T.GetFiles();
+                T.WorkingTransform();
+                T.SourceTransform();
+                T.RunResponses();
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -474,151 +679,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 m_inRunMethod = 0;
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }            
-        }
-        
-        /// <summary>
-        /// Scan the integration source
-        /// </summary>
-        private void ScanSource(IntegrationTracker p_T) {
-            // scan the source and return a list of matches
-            // dont do anything else at this point
-            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-
-
-                // method logic
-                IntInstLog.InfoFormat("Integration:{0} Scan Source:{1}", m_Integration.Desc, m_Integration.Source.Desc);
-
-                                
-                m_Source.Location.Scan(m_Patterns, p_T);
-
-                
-                
-
-                
-            }
-            catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-                throw ex;
-            }
-            finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-            } 
-        }
-
-        /// <summary>
-        /// Retrive files from the integration source 
-        /// </summary>
-        private void GetFiles(IntegrationTracker p_T) {            
-            // copy files from the source to the working directory
-            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-                // method logic
-                IntInstLog.InfoFormat("Get Files:{0}", m_Integration.Desc);
-
-                // were files matched?
-                if (p_T.MatchCount == 0) {
-                    return;
-                }
-
-                Debug.Assert(!p_T.WorkingDi.Exists);
-
-                // create the working directory
-                p_T.CreateWorkingDi();
-                // apply working folder to matched files
-                foreach(MatchedFile M in p_T.MatchedFiles) {
-                    M.SetWorkingDi(p_T.WorkingDi);
-                }
-                // get files into the working directory
-                m_Source.Location.Get(p_T.MatchedFiles, p_T);
-                
-                // examine files
-                foreach (MatchedFile M in p_T.MatchedFiles) {
-                    if (p_T.Integration.OnContact.CalculateSHA1 == XOnContactCalculateSHA1.Y) {
-                        M.SHA1 = GetSHA1(M);
-                    }
-                    if (p_T.Integration.OnContact.CalculateMD5 == XOnContactCalculateMD5.Y) {
-                        M.MD5 = GetMD5(M);
-                    }
-                }
-
-                // add to match history
-                m_MatchHistory.Add(p_T.MatchedFiles);
-
-            }
-            catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-                throw ex;
-            }
-            finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-            } 
-        }
-
-        /// <summary>
-        /// Apply transforms to files in the working folder
-        /// </summary>
-        private void WorkingTransform(IntegrationTracker p_T) {
-            // make any necessary alterations to files in the working directory
-            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-                // method logic
-                IntInstLog.InfoFormat("Working Transform:{0}", m_Integration.Desc);
-
-                
-
-            }
-            catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-                throw ex;
-            }
-            finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-            } 
-        }
-
-        /// <summary>
-        /// Apply transforms to files at the source location
-        /// </summary>
-        private void SourceTransform(IntegrationTracker p_T) {
-            // make any necessary alterations the the source (delete, rename, etc.)
-            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-                // method logic
-                IntInstLog.InfoFormat("Source Transform:{0}", m_Integration.Desc);
-            }
-            catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-                throw ex;
-            }
-            finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-            } 
-        }        
-
-        /// <summary>
-        /// Run integration response actions
-        /// </summary>
-        private void RunResponses(IntegrationTracker p_T) {
-            // run each response in order            
-            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-                // method logic
-                IntInstLog.InfoFormat("Run Responses:{0}", m_Integration.Desc);
-            }
-            catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-                throw ex;
-            }
-            finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-            } 
-        }
+        }               
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
@@ -648,61 +709,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
-        #endregion
-
-
-        /// <summary>
-        /// Get the SHA1 Hash of the Matched file - reading from the source location
-        /// </summary>
-        /// <param name="p_Mf">Matched File</param>
-        private string GetSHA1(MatchedFile p_Mf) {
-            try {
-                string sha1 = string.Empty;
-                FileInfo Fi = new FileInfo(string.Format("{0}\\{1}", p_Mf.Folder, p_Mf.OrigName));
-                using (FileStream Fin = new FileStream(Fi.FullName, FileMode.Open)) {
-                    using (SHA1Managed SHA1 = new SHA1Managed()) {
-                        byte[] hash = SHA1.ComputeHash(Fin);
-                        StringBuilder Sb = new StringBuilder(2 * hash.Length);
-                        foreach (byte b in hash) {
-                            Sb.AppendFormat("{0:X2}", b);
-                        }
-                        sha1 = Sb.ToString();
-                    }
-                }
-                return sha1;
-            }
-            catch (Exception ex) {
-                throw ex;
-            }
-        }
-
-        /// <summary>
-        /// Get the MD5 Hash of the Matched file - reading from the source location
-        /// </summary>
-        /// <param name="p_Mf">Matched File</param>
-        private string GetMD5(MatchedFile p_Mf) {
-            try {
-                string md5 = string.Empty;
-
-                
-
-                FileInfo Fi = new FileInfo(string.Format("{0}\\{1}", p_Mf.Folder, p_Mf.OrigName));
-                using (MD5 MDFive = MD5.Create()) {
-                    using (FileStream Fin = new FileStream(Fi.FullName, FileMode.Open)) {
-                        byte[] hash = MDFive.ComputeHash(Fin);
-                        StringBuilder Sb = new StringBuilder(2 * hash.Length);
-                        foreach (byte b in hash) {
-                            Sb.AppendFormat("{0:X2}", b);
-                        }
-                        md5 = Sb.ToString();
-                    }
-                }
-                return md5;
-            }
-            catch (Exception ex) {
-                throw ex;
-            }
-        }
+        #endregion        
 
     }   // IntegrationManager
 
@@ -774,12 +781,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 bool fileSHA1 = false;
                 
                 // check for matches
-                if (m_FileNames.Contains(p_M.OrigName)) {
+                if (m_FileNames.Contains(p_M.OriginalName)) {
                     fileName = true;
-                    if (m_FileNameSize[p_M.OrigName].Contains(p_M.FileSize)) {
+                    if (m_FileNameSize[p_M.OriginalName].Contains(p_M.Size)) {
                         fileSize = true;
                     }
-                    if (m_FileNameLastMod[p_M.OrigName].Contains(p_M.LastModifiedUTC)) {
+                    if (m_FileNameLastMod[p_M.OriginalName].Contains(p_M.LastModifiedUTC)) {
                         fileDt = true;
                     }
                 }
@@ -816,7 +823,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_Mf">a Matched File</param>
         public void Add(MatchedFile p_Mf) {
             // add the file name
-            m_FileNames.Add(p_Mf.OrigName);
+            m_FileNames.Add(p_Mf.OriginalName);
             // add the file hashs
             if (p_Mf.MD5.Length > 0) {
                 m_MD5.Add(p_Mf.MD5);
@@ -825,15 +832,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 m_SHA1.Add(p_Mf.SHA1);
             }           
             // add the file size            
-            if(!m_FileNameSize.ContainsKey(p_Mf.OrigName)) {
-                m_FileNameSize.Add(p_Mf.OrigName, new HashSet<long>());
+            if(!m_FileNameSize.ContainsKey(p_Mf.OriginalName)) {
+                m_FileNameSize.Add(p_Mf.OriginalName, new HashSet<long>());
             }
-            m_FileNameSize[p_Mf.OrigName].Add(p_Mf.FileSize);
+            m_FileNameSize[p_Mf.OriginalName].Add(p_Mf.Size);
             // add the last modified date
-            if (!m_FileNameLastMod.ContainsKey(p_Mf.OrigName)) {
-                m_FileNameLastMod.Add(p_Mf.OrigName, new HashSet<long>());
+            if (!m_FileNameLastMod.ContainsKey(p_Mf.OriginalName)) {
+                m_FileNameLastMod.Add(p_Mf.OriginalName, new HashSet<long>());
             }            
-            m_FileNameLastMod[p_Mf.OrigName].Add(p_Mf.LastModifiedUTC);
+            m_FileNameLastMod[p_Mf.OriginalName].Add(p_Mf.LastModifiedUTC);
         }
 
         /// <summary>
@@ -842,6 +849,16 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_Mf">an array of Matched Files</param>
         public void Add(MatchedFile[] p_Mf) {
             foreach(MatchedFile M in p_Mf) {
+                Add(M);
+            }
+        }
+
+        /// <summary>
+        /// Add a list of Matched Files to the duplicate list
+        /// </summary>
+        /// <param name="p_Mf">a list of Matched Files</param>
+        public void Add(List<MatchedFile> p_Mf) {
+            foreach (MatchedFile M in p_Mf) {
                 Add(M);
             }
         }
@@ -860,7 +877,80 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public IntegrationAttributes(XIntegration p_Integration) {
             Integration(p_Integration);
-        }        
+            ExtractProperties();
+        }
+
+        /// <summary>
+        /// Extract Properties
+        /// </summary>
+        private void ExtractProperties() {
+            Type MatchedFileT = typeof(MatchedFile);
+            FileProps = MatchedFileT.GetProperties();
+        }
+
+        /// <summary>
+        /// Replace a Token with the corresponding value
+        /// </summary>
+        /// <param name="p_name"></param>
+        /// <returns></returns>
+        public object GetReplacementValue(string p_name) {
+            try {
+
+                p_name = p_name.ToUpperInvariant();
+
+                string[] elements = p_name.Split('.');
+         
+
+                if(elements.Length == 1) {
+                    return elements[0];
+                }
+                else if(elements.Length == 2) {
+                    // should replace the case values with constants
+                    switch(elements[0]) {
+                        case "FILE": {
+                                return GetFileAttr(elements[1]);                                
+                            }
+                        default: {
+                                // error handling here.
+                                return p_name;  
+                            }
+
+                    }
+
+                }
+                else {
+                    throw new Exception(string.Format("{0} is not a valid token for replacement", p_name));
+                }
+
+      
+            }
+            catch(Exception ex) {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Get a file attribute
+        /// </summary>
+        /// <param name="p_attr">file attribute</param>
+        /// <returns></returns>
+        private object GetFileAttr(string p_attr) {
+            /*
+             * VALID FILE ATTRIBUTES:
+             * OriginalName
+             * WorkingName
+             * Size
+             * LastModified
+             */
+
+            Type MatchedFileT = typeof(MatchedFile);
+            PropertyInfo P = MatchedFileT.GetProperty(p_attr);
+            return P.GetValue(File);            
+        }
+
+
+
+        private PropertyInfo[] FileProps;
 
         /// <summary>
         /// Add an integration to the attribute collection
@@ -884,24 +974,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
 
-        public void MatchedFiles(MatchedFile[] p_MatchedFiles) {
-
-        }
-
-        /// <summary>
-        /// Get an updated key-val set of integration attributes
-        /// </summary>
-        /// <returns></returns>
-        public Dictionary<string, object> GetAttrs() {
-            return m_IntegrationAttrs;
-        }
+        public List<MatchedFile> Files { get; set; }
+        public MatchedFile File { get; set; }
 
         /// <summary>
         /// Extract Attributes from an XObject
         /// </summary>
         /// <param name="p_Obj">the XObject</param>
         /// <returns>property dictionary</returns>
-        private Dictionary<string, object> ExtractAttrs(XObject p_XObj) {      
+        private Dictionary<string, object> ExtractAttrs(object p_XObj) {      
             // empty dictionary
             Dictionary<string, object> Attrs = new Dictionary<string, object>();
             // reflect
@@ -927,28 +1008,91 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
     }   // IntegrationAttributes
 
+
+
+
+    /// <summary>
+    /// DynamicReplacementRequiredEventArgs
+    /// </summary>
+    public class DynamicReplacementRequiredEventArgs : EventArgs {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="p_dynamicText"></param>
+        public DynamicReplacementRequiredEventArgs(string p_dynamicText) {
+            m_dynamicText = p_dynamicText;
+        }
+
+        /// <summary>
+        /// The dynamic text to be processed
+        /// </summary>
+        public string DynamicText {
+            get {
+                return m_dynamicText;  
+            }
+        }
+        // member
+        private readonly string m_dynamicText;
+        
+        /// <summary>
+        /// Result
+        /// </summary>
+        public string Result => m_result;
+        // member
+        private readonly string m_result;
+
+    }   // DynamicReplacementRequiredEventArgs
+
+
+    public sealed class DynamicTextAttribute : System.Attribute {        
+    }
+
     /// <summary>
     /// Base class for all integration objects
     /// </summary>
-    public class IntegrationObject {
+    public abstract class IntegrationObject {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        protected IntegrationObject() {
+            // log refs
+            SvcLog = LogManager.GetLogger(Global.ServiceLogName);
+            DebugLog = LogManager.GetLogger(Global.DebugLogName);
+            // compile dynamic text
+            CompileDynamicText();
+        }
 
         // log        
         public ILog SvcLog;
         public ILog DebugLog;
         public ILog IntLog;
+        
+        /// <summary>
+        /// Fires when a dynamic text replacement value is required
+        /// </summary>
+        public event EventHandler<OnValueRequiredEventArgs> OnValueRequired;
 
         /// <summary>
-        /// Constructor
+        /// Implement in child objects to compile dynamic text elements
         /// </summary>
-        protected IntegrationObject(object p_IntegrationObj) {
+        protected abstract void CompileDynamicText();
 
-            // log refs
-            SvcLog = LogManager.GetLogger(Global.ServiceLogName);
-            DebugLog = LogManager.GetLogger(Global.DebugLogName);
-
-
-            ExtractObjAttrs(p_IntegrationObj);
-        }
+        /// <summary>
+        /// Dynamic Text is required
+        /// </summary>
+        /// <param name="p_EventArgs"></param>
+        protected void ValueRequired(object sender, OnValueRequiredEventArgs p_EventArgs) {
+            if(OnValueRequired != null) {
+                OnValueRequired(sender, p_EventArgs);                
+                return;
+            }
+            // log it
+            IntLog.ErrorFormat("the dynamic value {0} was required, but the event is unhandled", p_EventArgs.Name);
+            // i guess just set the result to the original text?
+            p_EventArgs.Result = p_EventArgs.Name;            
+        }                        
 
         /// <summary>
         /// Create Logger
@@ -958,79 +1102,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         protected void SetLogger(ILog p_Log) {
             Log = p_Log;
         }
-        protected ILog Log;
+        protected ILog Log;    
 
-        /// <summary>
-        /// Does the referenced property require dynamic text processing?
-        /// </summary>
-        /// <param name="p_Info">the property</param>
-        /// <returns>true false</returns>
-        protected bool IsDynamic(PropertyInfo p_Info) {
-            return m_DynamicText.ContainsKey(p_Info.Name);
-        }
-        protected bool IsDynamic(string p_propertyName) {
-            return m_DynamicText.ContainsKey(p_propertyName);
-        }
-        /// <summary>
-        /// Compiled Dynamic Text
-        /// </summary>
-        protected Dictionary<string, DynamicTextParser> DynamicText {
-            get {
-                return m_DynamicText;
-            }
-        }
-        // member
-        private Dictionary<string, DynamicTextParser> m_DynamicText = new Dictionary<string, DynamicTextParser>();
-
-        /// <summary>
-        /// Find all attributes of the integration object, and compile any dynamic text
-        /// </summary>
-        protected void ExtractObjAttrs(object p_IntegrationObj) {
-            try {
-                Type T = p_IntegrationObj.GetType();
-                m_ObjectProps = T.GetProperties();
-                foreach (PropertyInfo P in m_ObjectProps) {
-                    if (P.PropertyType == typeof(string)) {
-                        string text = P.GetValue(p_IntegrationObj).ToString();
-                        DynamicTextParser DyText = new DynamicTextParser(text);
-                        if (DyText.Compile()) {
-                            DebugLog.DebugFormat("Extracted Property {0}.{1}{2}Compiling:{3}{4}", T.Name, P.Name, Environment.NewLine, Environment.NewLine, text);                            
-                            m_DynamicText.Add(P.Name, DyText);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex) {
-                throw ex;
-            }
-        }
-
-        /// <summary>
-        /// Adds a new dynamic element to the collection
-        /// </summary>
-        /// <param name="p_key"></param>
-        /// <param name="p_text"></param>
-        protected void AddDynamicText(string p_key, string p_text) {
-            if (m_DynamicText.ContainsKey(p_key)) {
-                throw new Exception(string.Format("a dynamic text element with the key {0} already exists", p_key));
-            }
-            DynamicTextParser DyText = new DynamicTextParser(p_text);
-            if (DyText.Compile()) {
-                m_DynamicText.Add(p_key, DyText);
-            }
-        }
-
-        /// <summary>
-        /// Object Properties
-        /// </summary>
-        protected PropertyInfo[] ObjectProps {
-            get {
-                return m_ObjectProps;
-            }
-        }
-        // member
-        private PropertyInfo[] m_ObjectProps;
 
     }   // IntegrationObject
+
+
+
 
 }

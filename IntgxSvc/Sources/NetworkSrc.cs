@@ -16,61 +16,63 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// Network Source
     /// </summary>
-    public class NetworkSrc : IntegrationObject, ISourceLocation {
+    public class NetworkSrc : IntegrationSource, ISourceLocation {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public NetworkSrc(XSource p_XSource, XNetworkSrc p_XNetworkSrc) :
+            base(p_XSource) {
+            m_XNetworkSrc = p_XNetworkSrc;            
+        }
 
         // XNetworkSrc object        
         private XNetworkSrc m_XNetworkSrc;
 
         /// <summary>
-        /// Constructor
+        /// Create and Compile Dynamic Text
         /// </summary>
-        public NetworkSrc(string p_sourceDesc, XSourceLocation p_XSourceLocation) :
-            base(p_XSourceLocation) {
-
-            m_description = p_sourceDesc;
-            m_XNetworkSrc = (XNetworkSrc)p_XSourceLocation;
+        protected override void CompileDynamicText() {
+            m_Folder = new DynamicTextParser(m_XNetworkSrc.Path.Value);
+            m_Folder.OnValueRequired += ValueRequired;
+            m_Folder.Compile();
         }
 
-        /// <summary>
-        /// Source Description
-        /// </summary>
-        public string Description {
-            get {
-                return m_description;
-            }
+
+        [DynamicText]
+        public string Folder() {   
+            return m_Folder.Run();                   
         }
-        // member
-        private string m_description;
+        private DynamicTextParser m_Folder;                     
 
         /// <summary>
         /// Scan the source location
         /// </summary>
         /// <param name="p_Pattern">the file matching patterns</param>
         /// <returns>a list of matched files</returns>
-        public MatchedFile[] Scan(IPattern[] p_Pattern, IntegrationTracker p_T) {
+        public void Scan(IPattern[] p_Pattern) {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
 
             HashSet<MatchedFile> Matches = new HashSet<MatchedFile>();
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
-                p_T.Log.InfoFormat("Scanning {0}", Description);
+                Log.InfoFormat("Scanning {0}", Description);
 
-                string folder = IsDynamic("Folder") ? DynamicText["Folder"].Run(p_T.Attrs.GetAttrs()) : m_XNetworkSrc.Folder;
-
-
-
+                string folder = Folder();
 
                 DirectoryInfo Di = new DirectoryInfo(folder);
                 FileInfo[] Files = Di.GetFiles();
 
-                // go thru each pattern
+                // go thru each patternp_T.Log.InfoFormat("Contact {0}", Fi.FullName);
                 foreach (IPattern P in p_Pattern) {
-                    foreach (FileInfo Fi in Files) {
-                        p_T.Log.InfoFormat("Contact {0}", Fi.FullName);
-
+                    foreach (FileInfo Fi in Files) {                        
                         if (P.IsMatch(Fi.Name)) {
-                            Matches.Add(new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc));
+                            MatchedFile Match = new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc);
+                            if (Matches.Add(new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc))) {
+                                // pew pew
+                                OnContactEvent(Match);
+                            }
                         }
                     }
                 }
@@ -92,15 +94,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             finally {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
-            // out
-            return Matches.ToArray<MatchedFile>();
         }
 
         /// <summary>
         /// Get matched files from source location and write to the working directory
         /// </summary>
         /// <param name="p_Mf"></param>
-        public void Get(MatchedFile[] p_Mf, IntegrationTracker p_T) {
+        public void Get(List<MatchedFile> p_Mf) {
             throw new NotImplementedException();
         }
 
@@ -108,7 +108,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Delete matched files from the source location
         /// </summary>
         /// <param name="p_Mf"></param>
-        public void Delete(MatchedFile[] p_Mf, IntegrationTracker p_T) {
+        public void Delete(List<MatchedFile> p_Mf) {
             throw new NotImplementedException();
         }
 
@@ -117,14 +117,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_Mf"></param>
         /// <param name="p_rename"></param>
-        public void Rename(MatchedFile[] p_Mf, string[] p_rename, IntegrationTracker p_T) {
+        public void Rename(List<MatchedFile> p_Mf, string[] p_rename) {
             throw new NotImplementedException();
         }
 
         /// <summary>
         /// Ping the source location to verify connectivity
         /// </summary>
-        public void Ping(IntegrationTracker p_T) {
+        public void Ping() {
             throw new NotImplementedException();
         }
 
@@ -132,7 +132,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Delete the deepest sub-directory from the given location
         /// </summary>
         /// <param name="p_folder"></param>
-        public void DeleteFolder(string p_folder, IntegrationTracker p_T) {
+        public void DeleteFolder(string p_folder) {
             throw new NotImplementedException();
         }
 

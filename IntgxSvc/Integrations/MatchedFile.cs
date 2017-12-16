@@ -1,21 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-using Newtonsoft.Json.Serialization;
-
 using C2InfoSys.FileIntegratrex.Lib;
+
 using Newtonsoft.Json;
+
 
 namespace C2InfoSys.FileIntegratrex.Svc {
 
     /// <summary>
     /// Matched File
     /// </summary>
-    public class MatchedFile : IEqualityComparer<MatchedFile> {
+    public class MatchedFile : IntegrationObject, IEqualityComparer<MatchedFile> {
 
         /// <summary>
         /// Constructor
@@ -27,7 +27,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             m_folder = p_folder;
             m_size = p_size;
             m_lastModified = p_lastModified;
-            m_lastModifiedUTC = p_lastModified.ToFileTimeUtc();
+            m_lastModifiedUTC = p_lastModified.ToFileTimeUtc();            
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Original file name at the integration source
         /// </summary>
-        public string OrigName {
+        public string OriginalName {
             get {
                 return m_origName;
             }
@@ -72,7 +72,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// File Size
         /// </summary>
-        public long FileSize {
+        public long Size {
             get {
                 return m_size;
             }
@@ -128,15 +128,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Supress response on this file?
         /// </summary>
-        public bool Supress {
-            get {
-                return m_supress;
-            }
-        }
+        public bool Supress { get; set; }
 
         public ISourceLocation Source { get => m_Source; set => m_Source = value; }
 
         private bool m_supress;
+        private DirectoryInfo m_WorkingDi;
         private FileInfo m_WorkingFi;
         private XIntegration m_Integration;
         private ISourceLocation m_Source;
@@ -147,7 +144,24 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_WorkingDi">working directory</param>
         public void SetWorkingDi(DirectoryInfo p_WorkingDi) {
-            m_WorkingFi = new FileInfo(string.Format("{0}\\{1}", p_WorkingDi.FullName, OrigName));
+            m_WorkingDi = p_WorkingDi;
+        }
+
+        /// <summary>
+        /// Set the Working File Name
+        /// </summary>
+        /// <param name="p_fileName">the file name</param>
+        public void SetWorkingFileName(string p_fileName) {
+            if(m_WorkingDi == null) {
+                throw new NullReferenceException("in SetWorkingFileName-MatchedFile.WorkingDi");
+            }
+            m_WorkingFi = new FileInfo(string.Format("{0}\\{1}", m_WorkingDi.FullName, p_fileName));
+        }
+
+        /// <summary>
+        /// Compile!
+        /// </summary>
+        protected override void CompileDynamicText() {            
         }
 
         /// <summary>
@@ -157,7 +171,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="y"></param>
         /// <returns></returns>
         public bool Equals(MatchedFile x, MatchedFile y) {
-            return x.OrigName.Equals(y.OrigName, StringComparison.Ordinal);
+            return x.OriginalName.Equals(y.OriginalName, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -166,7 +180,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="obj"></param>
         /// <returns></returns>
         public int GetHashCode(MatchedFile obj) {
-            return obj.OrigName.GetHashCode();
+            return obj.OriginalName.GetHashCode();
         }
 
         // properties
@@ -179,7 +193,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public static MatchedFile FromJson(string p_json) {
             return JsonConvert.DeserializeObject<MatchedFile>(p_json);
         }
-
+        
     }   // MatchedFile
 
 

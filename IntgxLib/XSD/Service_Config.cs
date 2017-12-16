@@ -44,7 +44,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XIntegration : XObject {
+    public partial class XIntegration {
 
         private XSchedule scheduleField;
 
@@ -52,9 +52,9 @@ namespace C2InfoSys.FileIntegratrex.Lib {
 
         private XOnContact onContactField;
 
-        private XPatterns patternsField;
+        private XPattern[] patternsField;
 
-        private XResponses responsesField;
+        private XResponse[] responsesField;
 
         private XLog logField;
 
@@ -93,7 +93,8 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         }
 
         /// <remarks/>
-        public XPatterns Patterns {
+        [System.Xml.Serialization.XmlArrayItemAttribute("Pattern", IsNullable=false)]
+        public XPattern[] Patterns {
             get {
                 return this.patternsField;
             }
@@ -103,7 +104,8 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         }
 
         /// <remarks/>
-        public XResponses Responses {
+        [System.Xml.Serialization.XmlArrayItemAttribute("Response", IsNullable=false)]
+        public XResponse[] Responses {
             get {
                 return this.responsesField;
             }
@@ -151,7 +153,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XSchedule : XObject {
+    public partial class XSchedule {
 
         private XContinuous continuousField;
 
@@ -185,7 +187,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XContinuous : XObject {
+    public partial class XContinuous {
 
         private string intervalField;
 
@@ -269,62 +271,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     }
 
     /// <remarks/>
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XEmailLog))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XLog))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XParameter))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XParameters))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XTargetLocation))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XDatabaseTgt))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XPowerShellTgt))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XProgramTgt))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XEmailTgt))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XSFTPTgt))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XFTPTgt))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XWebTgt))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XNetworkTgt))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XLocalTgt))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XTarget))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XDecompress))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XCompress))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XCompression))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XTextFile))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XTransform))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XRenameResponse))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XResponse))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XResponses))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XPattern))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XPatterns))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XMatchBy))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XSupressDuplicates))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XRenameOnContact))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XOnContact))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XCredentials))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XSourceLocation))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XSFTPSrc))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XFTPSrc))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XWebSrc))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XNetworkSrc))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XLocalSrc))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XSource))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XCalendar))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XContinuous))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XSchedule))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(XIntegration))]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XObject {
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XEmailLog : XObject {
+    public partial class XEmailLog {
 
         private string subjectField;
 
@@ -385,7 +337,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XLog : XObject {
+    public partial class XLog {
 
         private XEmailLog emailField;
 
@@ -495,11 +447,11 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XParameter : XObject {
+    public partial class XParameter {
 
         private string nameField;
 
-        private string[] textField;
+        private string valueField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
@@ -514,34 +466,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
 
         /// <remarks/>
         [System.Xml.Serialization.XmlTextAttribute()]
-        public string[] Text {
+        public string Value {
             get {
-                return this.textField;
+                return this.valueField;
             }
             set {
-                this.textField = value;
-            }
-        }
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XParameters : XObject {
-
-        private XParameter[] parameterField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("Parameter")]
-        public XParameter[] Parameter {
-            get {
-                return this.parameterField;
-            }
-            set {
-                this.parameterField = value;
+                this.valueField = value;
             }
         }
     }
@@ -561,7 +491,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XTargetLocation : XObject {
+    public partial class XTargetLocation {
     }
 
     /// <remarks/>
@@ -574,7 +504,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
 
         private XCredentials credentialsField;
 
-        private XParameters parametersField;
+        private XParameter[] parametersField;
 
         private XDatabaseTgtDBMS dBMSField;
 
@@ -597,7 +527,8 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         }
 
         /// <remarks/>
-        public XParameters Parameters {
+        [System.Xml.Serialization.XmlArrayItemAttribute("Parameter", IsNullable=false)]
+        public XParameter[] Parameters {
             get {
                 return this.parametersField;
             }
@@ -668,7 +599,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XCredentials : XObject {
+    public partial class XCredentials {
 
         private string userField;
 
@@ -776,7 +707,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XPowerShellTgt : XTargetLocation {
 
-        private XParameters parametersField;
+        private XParameter[] parametersField;
 
         private string[] textField;
 
@@ -791,7 +722,8 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         private XPowerShellTgtAction actionField;
 
         /// <remarks/>
-        public XParameters Parameters {
+        [System.Xml.Serialization.XmlArrayItemAttribute("Parameter", IsNullable=false)]
+        public XParameter[] Parameters {
             get {
                 return this.parametersField;
             }
@@ -888,7 +820,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XProgramTgt : XTargetLocation {
 
-        private XParameters parametersField;
+        private XParameter[] parametersField;
 
         private string pathField;
 
@@ -897,7 +829,8 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         private XProgramTgtAction actionField;
 
         /// <remarks/>
-        public XParameters Parameters {
+        [System.Xml.Serialization.XmlArrayItemAttribute("Parameter", IsNullable=false)]
+        public XParameter[] Parameters {
             get {
                 return this.parametersField;
             }
@@ -1077,17 +1010,23 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XSFTPTgt : XTargetLocation {
 
+        private XURI uRIField;
+
         private XCredentials credentialsField;
 
         private XSFTPTgtAction actionField;
 
         private XSFTPTgtOverwrite overwriteField;
 
-        private string uRIField;
-
-        private string portField;
-
-        private string folderField;
+        /// <remarks/>
+        public XURI URI {
+            get {
+                return this.uRIField;
+            }
+            set {
+                this.uRIField = value;
+            }
+        }
 
         /// <remarks/>
         public XCredentials Credentials {
@@ -1120,17 +1059,19 @@ namespace C2InfoSys.FileIntegratrex.Lib {
                 this.overwriteField = value;
             }
         }
+    }
 
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string URI {
-            get {
-                return this.uRIField;
-            }
-            set {
-                this.uRIField = value;
-            }
-        }
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
+    public partial class XURI {
+
+        private string portField;
+
+        private string valueField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute(DataType="integer")]
@@ -1144,13 +1085,13 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string Folder {
+        [System.Xml.Serialization.XmlTextAttribute()]
+        public string Value {
             get {
-                return this.folderField;
+                return this.valueField;
             }
             set {
-                this.folderField = value;
+                this.valueField = value;
             }
         }
     }
@@ -1189,17 +1130,23 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XFTPTgt : XTargetLocation {
 
+        private XURI uRIField;
+
         private XCredentials credentialsField;
 
         private XFTPTgtAction actionField;
 
         private XFTPTgtOverwrite overwriteField;
 
-        private string uRIField;
-
-        private string portField;
-
-        private string folderField;
+        /// <remarks/>
+        public XURI URI {
+            get {
+                return this.uRIField;
+            }
+            set {
+                this.uRIField = value;
+            }
+        }
 
         /// <remarks/>
         public XCredentials Credentials {
@@ -1230,39 +1177,6 @@ namespace C2InfoSys.FileIntegratrex.Lib {
             }
             set {
                 this.overwriteField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string URI {
-            get {
-                return this.uRIField;
-            }
-            set {
-                this.uRIField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="integer")]
-        public string Port {
-            get {
-                return this.portField;
-            }
-            set {
-                this.portField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string Folder {
-            get {
-                return this.folderField;
-            }
-            set {
-                this.folderField = value;
             }
         }
     }
@@ -1301,13 +1215,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XWebTgt : XTargetLocation {
 
-        private string uRIField;
+        private XURI uRIField;
 
-        private string portField;
+        private XCredentials credentialsField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string URI {
+        public XURI URI {
             get {
                 return this.uRIField;
             }
@@ -1317,13 +1230,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="integer")]
-        public string Port {
+        public XCredentials Credentials {
             get {
-                return this.portField;
+                return this.credentialsField;
             }
             set {
-                this.portField = value;
+                this.credentialsField = value;
             }
         }
     }
@@ -1336,20 +1248,19 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XNetworkTgt : XTargetLocation {
 
-        private string folderField;
+        private XPath pathField;
 
         private XNetworkTgtAction actionField;
 
         private XNetworkTgtOverwrite overwriteField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string Folder {
+        public XPath Path {
             get {
-                return this.folderField;
+                return this.pathField;
             }
             set {
-                this.folderField = value;
+                this.pathField = value;
             }
         }
 
@@ -1372,6 +1283,28 @@ namespace C2InfoSys.FileIntegratrex.Lib {
             }
             set {
                 this.overwriteField = value;
+            }
+        }
+    }
+
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
+    public partial class XPath {
+
+        private string valueField;
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlTextAttribute()]
+        public string Value {
+            get {
+                return this.valueField;
+            }
+            set {
+                this.valueField = value;
             }
         }
     }
@@ -1410,20 +1343,19 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XLocalTgt : XTargetLocation {
 
-        private string folderField;
+        private XPath pathField;
 
         private XLocalTgtAction actionField;
 
         private XLocalTgtOverwrite overwriteField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string Folder {
+        public XPath Path {
             get {
-                return this.folderField;
+                return this.pathField;
             }
             set {
-                this.folderField = value;
+                this.pathField = value;
             }
         }
 
@@ -1482,7 +1414,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XTarget : XObject {
+    public partial class XTarget {
 
         private XTargetLocation itemField;
 
@@ -1524,7 +1456,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XDecompress : XObject {
+    public partial class XDecompress {
 
         private XDecompressType typeField;
 
@@ -1598,7 +1530,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XCompress : XObject {
+    public partial class XCompress {
 
         private XCompressType typeField;
 
@@ -1672,14 +1604,14 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XCompression : XObject {
+    public partial class XCompression {
 
-        private XObject itemField;
+        private object itemField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute("Compress", typeof(XCompress))]
         [System.Xml.Serialization.XmlElementAttribute("Decompress", typeof(XDecompress))]
-        public XObject Item {
+        public object Item {
             get {
                 return this.itemField;
             }
@@ -1695,7 +1627,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XTextFile : XObject {
+    public partial class XTextFile {
 
         private XTextFileOriginalEncoding originalEncodingField;
 
@@ -1848,7 +1780,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XTransform : XObject {
+    public partial class XTransform {
 
         private XTextFile textFileField;
 
@@ -1881,18 +1813,18 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XRenameResponse : XObject {
+    public partial class XRenameResponse {
 
-        private string[] textField;
+        private string valueField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlTextAttribute()]
-        public string[] Text {
+        public string Value {
             get {
-                return this.textField;
+                return this.valueField;
             }
             set {
-                this.textField = value;
+                this.valueField = value;
             }
         }
     }
@@ -1903,7 +1835,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XResponse : XObject {
+    public partial class XResponse {
 
         private XRenameResponse renameField;
 
@@ -1987,35 +1919,13 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XResponses : XObject {
-
-        private XResponse[] responseField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("Response")]
-        public XResponse[] Response {
-            get {
-                return this.responseField;
-            }
-            set {
-                this.responseField = value;
-            }
-        }
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XPattern : XObject {
+    public partial class XPattern {
 
         private string descField;
 
         private XPatternType typeField;
 
-        private string[] textField;
+        private string valueField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
@@ -2041,12 +1951,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
 
         /// <remarks/>
         [System.Xml.Serialization.XmlTextAttribute()]
-        public string[] Text {
+        public string Value {
             get {
-                return this.textField;
+                return this.valueField;
             }
             set {
-                this.textField = value;
+                this.valueField = value;
             }
         }
     }
@@ -2076,20 +1986,72 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XPatterns : XObject {
+    public partial class XRenameOnContact {
 
-        private XPattern[] patternField;
+        private XRenameOnContactOriginal originalField;
+
+        private XRenameOnContactWorkingCopy workingCopyField;
+
+        private string valueField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("Pattern")]
-        public XPattern[] Pattern {
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public XRenameOnContactOriginal Original {
             get {
-                return this.patternField;
+                return this.originalField;
             }
             set {
-                this.patternField = value;
+                this.originalField = value;
             }
         }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public XRenameOnContactWorkingCopy WorkingCopy {
+            get {
+                return this.workingCopyField;
+            }
+            set {
+                this.workingCopyField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlTextAttribute()]
+        public string Value {
+            get {
+                return this.valueField;
+            }
+            set {
+                this.valueField = value;
+            }
+        }
+    }
+
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
+    public enum XRenameOnContactOriginal {
+
+        /// <remarks/>
+        Y,
+
+        /// <remarks/>
+        N,
+    }
+
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
+    public enum XRenameOnContactWorkingCopy {
+
+        /// <remarks/>
+        Y,
+
+        /// <remarks/>
+        N,
     }
 
     /// <remarks/>
@@ -2098,7 +2060,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XMatchBy : XObject {
+    public partial class XMatchBy {
 
         private XMatchByFileName fileNameField;
 
@@ -2237,7 +2199,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XSupressDuplicates : XObject {
+    public partial class XSupressDuplicates {
 
         private XMatchBy matchByField;
 
@@ -2284,85 +2246,11 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XRenameOnContact : XObject {
-
-        private XRenameOnContactOriginal originalField;
-
-        private XRenameOnContactWorkingCopy workingCopyField;
-
-        private string[] textField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public XRenameOnContactOriginal Original {
-            get {
-                return this.originalField;
-            }
-            set {
-                this.originalField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public XRenameOnContactWorkingCopy WorkingCopy {
-            get {
-                return this.workingCopyField;
-            }
-            set {
-                this.workingCopyField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlTextAttribute()]
-        public string[] Text {
-            get {
-                return this.textField;
-            }
-            set {
-                this.textField = value;
-            }
-        }
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public enum XRenameOnContactOriginal {
-
-        /// <remarks/>
-        Y,
-
-        /// <remarks/>
-        N,
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
-    [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public enum XRenameOnContactWorkingCopy {
-
-        /// <remarks/>
-        Y,
-
-        /// <remarks/>
-        N,
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XOnContact : XObject {
-
-        private XRenameOnContact renameField;
+    public partial class XOnContact {
 
         private XSupressDuplicates supressDuplicatesField;
+
+        private XRenameOnContact renameField;
 
         private XOnContactMoveToWorkingArea moveToWorkingAreaField;
 
@@ -2375,22 +2263,22 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         private XOnContactCalculateSHA1 calculateSHA1Field;
 
         /// <remarks/>
-        public XRenameOnContact Rename {
-            get {
-                return this.renameField;
-            }
-            set {
-                this.renameField = value;
-            }
-        }
-
-        /// <remarks/>
         public XSupressDuplicates SupressDuplicates {
             get {
                 return this.supressDuplicatesField;
             }
             set {
                 this.supressDuplicatesField = value;
+            }
+        }
+
+        /// <remarks/>
+        public XRenameOnContact Rename {
+            get {
+                return this.renameField;
+            }
+            set {
+                this.renameField = value;
             }
         }
 
@@ -2526,7 +2414,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XSourceLocation : XObject {
+    public partial class XSourceLocation {
     }
 
     /// <remarks/>
@@ -2537,27 +2425,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XSFTPSrc : XSourceLocation {
 
+        private XURI uRIField;
+
         private XCredentials credentialsField;
 
-        private string uRIField;
-
-        private string portField;
-
-        private string folderField;
-
         /// <remarks/>
-        public XCredentials Credentials {
-            get {
-                return this.credentialsField;
-            }
-            set {
-                this.credentialsField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string URI {
+        public XURI URI {
             get {
                 return this.uRIField;
             }
@@ -2567,24 +2440,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="integer")]
-        public string Port {
+        public XCredentials Credentials {
             get {
-                return this.portField;
+                return this.credentialsField;
             }
             set {
-                this.portField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string Folder {
-            get {
-                return this.folderField;
-            }
-            set {
-                this.folderField = value;
+                this.credentialsField = value;
             }
         }
     }
@@ -2597,27 +2458,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XFTPSrc : XSourceLocation {
 
+        private XURI uRIField;
+
         private XCredentials credentialsField;
 
-        private string uRIField;
-
-        private string portField;
-
-        private string folderField;
-
         /// <remarks/>
-        public XCredentials Credentials {
-            get {
-                return this.credentialsField;
-            }
-            set {
-                this.credentialsField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string URI {
+        public XURI URI {
             get {
                 return this.uRIField;
             }
@@ -2627,24 +2473,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="integer")]
-        public string Port {
+        public XCredentials Credentials {
             get {
-                return this.portField;
+                return this.credentialsField;
             }
             set {
-                this.portField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string Folder {
-            get {
-                return this.folderField;
-            }
-            set {
-                this.folderField = value;
+                this.credentialsField = value;
             }
         }
     }
@@ -2657,13 +2491,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XWebSrc : XSourceLocation {
 
-        private string uRIField;
+        private XURI uRIField;
 
-        private string portField;
+        private XCredentials credentialsField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string URI {
+        public XURI URI {
             get {
                 return this.uRIField;
             }
@@ -2673,13 +2506,12 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="integer")]
-        public string Port {
+        public XCredentials Credentials {
             get {
-                return this.portField;
+                return this.credentialsField;
             }
             set {
-                this.portField = value;
+                this.credentialsField = value;
             }
         }
     }
@@ -2692,16 +2524,15 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XNetworkSrc : XSourceLocation {
 
-        private string folderField;
+        private XPath pathField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string Folder {
+        public XPath Path {
             get {
-                return this.folderField;
+                return this.pathField;
             }
             set {
-                this.folderField = value;
+                this.pathField = value;
             }
         }
     }
@@ -2714,16 +2545,15 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XLocalSrc : XSourceLocation {
 
-        private string folderField;
+        private XPath pathField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string Folder {
+        public XPath Path {
             get {
-                return this.folderField;
+                return this.pathField;
             }
             set {
-                this.folderField = value;
+                this.pathField = value;
             }
         }
     }
@@ -2734,7 +2564,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XSource : XObject {
+    public partial class XSource {
 
         private XSourceLocation itemField;
 
@@ -2773,7 +2603,7 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
-    public partial class XCalendar : XObject {
+    public partial class XCalendar {
 
         private XCalendarOccurs occursField;
 

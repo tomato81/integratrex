@@ -20,14 +20,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// Integration Source Location
     /// </summary>
-    public interface ISourceLocation {
+    public interface ISourceLocation {        
+        
         string Description { get; }        
-        MatchedFile[] Scan(IPattern[] p_Pattern, IntegrationTracker p_T);
-        void Get(MatchedFile[] p_Mf, IntegrationTracker p_T);
-        void Delete(MatchedFile[] p_Mf, IntegrationTracker p_T);        
-        void Rename(MatchedFile[] p_Mf, string[] p_rename, IntegrationTracker p_T);
-        void DeleteFolder(string p_folder, IntegrationTracker p_T);
-        void Ping(IntegrationTracker p_T);
+        void Scan(IPattern[] p_Pattern);
+        void Get(List<MatchedFile> p_Mf);
+        void Delete(List<MatchedFile> p_Mf);        
+        void Rename(List<MatchedFile> p_Mf, string[] p_rename);
+        void DeleteFolder(string p_folder);
+        void Ping();
         bool CanCalc();
 
     }   // ISourceLocation

@@ -44,7 +44,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// File Matching Pattern Base Class
     /// </summary>
-    public abstract class Pattern : IPattern {
+    public abstract class Pattern : IntegrationObject, IPattern {
 
         // members
         protected XPattern m_Pattern;        
@@ -53,10 +53,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Constructor
         /// </summary>
         public Pattern(XPattern p_P) {
-            // this array should have exactly 1 element
-            Debug.Assert(p_P.Value.Length == 1);
             // set the XPattern
-            m_Pattern = p_P;            
+            m_Pattern = p_P;
+            CompileDynamicText();
         }
 
         /// <summary>
@@ -109,6 +108,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             return m_Pattern.Value.Equals(p_filename, m_StringComparison);
         }
 
+        /// <summary>
+        /// Create and Compile Dynamic Text
+        /// </summary>
+        protected override void CompileDynamicText() {
+        }
+
     }   // SimplePattern
 
     /// <summary>
@@ -133,6 +138,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Create and Compile Dynamic Text
+        /// </summary>
+        protected override void CompileDynamicText() {
         }
 
     }   // SimplePattern
@@ -164,6 +175,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Create and Compile Dynamic Text
+        /// </summary>
+        protected override void CompileDynamicText() {
         }
 
     }   // RegExPattern

@@ -4,11 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.IO;
 
-// lawg
-using log4net;
-using log4net.Appender;
-using log4net.Layout;
-using log4net.Repository.Hierarchy;
+// lib
 using C2InfoSys.FileIntegratrex.Lib;
 
 namespace C2InfoSys.FileIntegratrex.Svc {
@@ -93,82 +89,176 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// On Got File Event Args
     /// </summary>
-    public class OnGotFileEventArgs : EventArgs {
+    public class OnGotFileEventArgs : IntegrationEventArgs {
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="p_MatchedFile"></param>
-        public OnGotFileEventArgs(MatchedFile p_MatchedFile) {
-            MatchedFile = p_MatchedFile;
+        public OnGotFileEventArgs(MatchedFile p_MatchedFile)
+            : base() {
+            m_MatchedFile = p_MatchedFile;
         }
 
-        // the matched file
-        public readonly MatchedFile MatchedFile;
+        /// <summary>
+        /// The Matched File
+        /// </summary>
+        public MatchedFile MatchedFile => m_MatchedFile;
+        public readonly MatchedFile m_MatchedFile;
 
     }   // OnGotFileEventArgs
 
     /// <summary>
+    /// Renamed a file event args
+    /// </summary>
+    public class OnRenamedFileEventArgs : IntegrationEventArgs {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="p_MatchedFile"></param>
+        public OnRenamedFileEventArgs(MatchedFile p_MatchedFile, string p_originalName, string p_renamedTo)
+            : base() {
+            m_MatchedFile = p_MatchedFile;
+            OriginalName = p_originalName;
+            RenamedTo = p_renamedTo;
+        }
+
+        /// <summary>
+        /// The Matched File
+        /// </summary>
+        public MatchedFile MatchedFile => m_MatchedFile;
+        private readonly MatchedFile m_MatchedFile;
+
+        /// <summary>
+        /// Original File Name
+        /// </summary>
+        public readonly string OriginalName;
+
+        /// <summary>
+        /// Renamed File
+        /// </summary>
+        public readonly string RenamedTo;
+
+    }   // OnRenamedFileEventArgs
+
+    /// <summary>
+    /// Transform Source Event Args
+    /// </summary>
+    public class TransformSourceEventArgs : IntegrationEventArgs {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="p_MatchedFile">the matched file</param>
+        public TransformSourceEventArgs(List<MatchedFile> p_MatchedFiles)
+            : base() {
+            MatchedFiles = p_MatchedFiles;
+        }
+
+        /// <summary>
+        /// The Matched File
+        /// </summary>        
+        public readonly List<MatchedFile> MatchedFiles;
+        
+        /// <summary>
+        /// Flag if any transforms have been applied
+        /// </summary>
+        public bool HasTransforms = false;
+
+    }   // TransformSourceEventArgs
+
+    /// <summary>
     /// Integration Source Base
     /// </summary>
-    public abstract class IntegrationSource : IntegrationObject {
+    public abstract class IntegrationSource : IntegrationObject, ISourceLocation {
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="p_Source">X object</param>
         /// <param name="p_SourceLocation">Source Location</param>
-        public IntegrationSource(XSource p_Source, ISourceLocation p_SourceLocation) :
+        public IntegrationSource(XSource p_Source) :
             base() {
             m_Source = p_Source;
-            m_SourceLocation = p_SourceLocation;
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="p_Source">X object</param>
-        protected IntegrationSource(XSource p_Source)
-            : base() {
-            // things
-        }
 
         /// <summary>
         /// On Matched File Contact
         /// </summary>
-        public event EventHandler<OnFileMatchEventArgs> OnFileMatch;
+        public event EventHandler<OnFileMatchEventArgs> Match;
 
         /// <summary>
         /// After a file has been retrived from the source
         /// </summary>
-        public event EventHandler<OnGotFileEventArgs> OnGotFile;
+        public event EventHandler<OnGotFileEventArgs> GotFile;
+
+
+
+        public event EventHandler<TransformSourceEventArgs> DoTransform;
+
+        // integration events
+        public event EventHandler<IntegrationEventArgs> ScanSource;
+        public event EventHandler<IntegrationEventArgs> GetFiles;
+        public event EventHandler<IntegrationEventArgs> DeleteFiles;        
+        public event EventHandler<IntegrationEventArgs> DoDeleteFolder;
+        public event EventHandler<IntegrationEventArgs> DoPing;
 
         /// <summary>
         /// Fire the OnContact Event
         /// </summary>
         /// <param name="p_M"></param>
-        protected void OnContactEvent(MatchedFile p_M) {
-            OnFileMatch?.Invoke(this, new OnFileMatchEventArgs(p_M));
+        protected void MatchEvent(MatchedFile p_M) {
+            Match?.Invoke(this, new OnFileMatchEventArgs(p_M));
         }
 
         /// <summary>
         /// Fire the OnContact Event
         /// </summary>
         /// <param name="p_M"></param>
-        protected void OnGotFileEvent(MatchedFile p_M) {
-            OnGotFile?.Invoke(this, new OnGotFileEventArgs(p_M));
+        protected void GotFileEvent(MatchedFile p_M) {
+            GotFile?.Invoke(this, new OnGotFileEventArgs(p_M));
         }
 
         /// <summary>
-        /// Source Location
+        /// Transform Source Event
         /// </summary>
-        public ISourceLocation Location {
-            get {
-                return m_SourceLocation;
-            }
+        /// <param name="p_Args">Event Args</param>
+        protected void DoTransformEvent(TransformSourceEventArgs p_Args) {
+            DoTransform?.Invoke(this, p_Args);
         }
-        // member
-        private ISourceLocation m_SourceLocation;
+
+        /// <summary>
+        /// Scanning!
+        /// </summary>
+        protected void OnScanEvent() {
+            ScanSource?.Invoke(this, IntegrationEventArgs.Empty);
+        }
+
+        protected void GetFileEvent() {
+            GetFiles?.Invoke(this, IntegrationEventArgs.Empty);
+        }
+
+        protected void DeleteFileEvent() {
+            DeleteFiles?.Invoke(this, IntegrationEventArgs.Empty);
+        }
+
+        protected void DeleteFolderEvent() {
+            DoDeleteFolder?.Invoke(this, IntegrationEventArgs.Empty);
+        }
+
+        protected void PingEvent() {
+            DoPing?.Invoke(this, IntegrationEventArgs.Empty);
+        }
+
+        public abstract void Scan(IPattern[] p_Pattern);
+        public abstract void Get(List<MatchedFile> p_Mf);
+        public abstract void Delete(List<MatchedFile> p_Mf);
+        public abstract void Transform(List<MatchedFile> p_Mf);
+        public abstract void DeleteFolder(string p_folder);
+        public abstract void Ping();
+        public abstract bool CanCalc();
 
         // XSource
         private XSource m_Source;

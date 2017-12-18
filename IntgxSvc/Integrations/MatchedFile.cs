@@ -40,13 +40,56 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
+        /// Get File Extension from File Name
+        /// </summary>
+        /// <param name="p_name">the file name</param>
+        /// <returns>file extension</returns>
+        private string GetFileExtension(string p_name) {
+            if (!p_name.Contains(".")) {
+                return string.Empty;
+            } else {
+                return p_name.Substring(p_name.LastIndexOf('.'));
+            }            
+        }
+
+        /// <summary>
+        /// Get File Name Without Extension
+        /// </summary>
+        /// <param name="p_name">the file name</param>
+        /// <returns>file extension</returns>
+        private string RemoveExtension(string p_name) {
+            if (!p_name.Contains(".")) {
+                return p_name;
+            }
+            else {
+                return p_name.Substring(0, p_name.LastIndexOf('.'));
+            }
+        }
+
+        /// <summary>
         /// Original file name at the integration source
         /// </summary>
         public string OriginalName {
             get {
                 return m_origName;
             }
-        }        
+        }
+        /// <summary>
+        /// Transformed file name at the integration source
+        /// </summary>
+        public string OriginalNameNoExt {
+            get {
+                return RemoveExtension(m_origName);
+            }
+        }
+        /// <summary>
+        /// Transformed file name extension at the integration source
+        /// </summary>
+        public string OriginalNameExt {
+            get {
+                return GetFileExtension(m_origName);
+            }
+        }
         private string m_origName;
 
         /// <summary>
@@ -56,8 +99,53 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             get {
                 return m_fileName;
             }
+            set {
+                m_fileName = value;
+            }
         }
+        /// <summary>
+        /// Transformed file name at the integration source
+        /// </summary>
+        public string NameNoExt {
+            get {
+                return RemoveExtension(m_fileName);
+            }
+        }
+        /// <summary>
+        /// Transformed file name extension at the integration source
+        /// </summary>
+        public string Ext {
+            get {
+                return GetFileExtension(m_fileName);
+            }
+        }
+        // member
         private string m_fileName;
+
+        /// <summary>
+        /// Working Name
+        /// </summary>
+        public string WorkingName {
+            get {
+                return m_WorkingFi.Name;
+            }
+        }
+        /// <summary>
+        /// Transformed file name at the integration source
+        /// </summary>
+        public string WorkingNameNoExt {
+            get {
+                return RemoveExtension(m_WorkingFi.Name);
+            }
+        }
+        /// <summary>
+        /// Transformed file name extension at the integration source
+        /// </summary>
+        public string WorkingNameExt {
+            get {
+                return m_WorkingFi.Extension;
+            }
+        }
 
         /// <summary>
         /// Source Folder or Remote Folder

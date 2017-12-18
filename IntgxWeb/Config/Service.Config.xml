@@ -4,6 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns="c2infosys.com/Integratrex/Service.Config.xsd">
+
   <Integration Desc="Test Local-Local Integration 2" Enable="Y">
     <Schedule>
       <Continuous Interval="31" />
@@ -21,11 +22,11 @@
       <SupressDuplicates Enable="Y">
         <MatchBy FileName="Y" FileSize="Y" LastModifiedDate="Y" MD5="Y" SHA1="Y" />
       </SupressDuplicates>
-      <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f yyyyMMddhhmmss)</Rename>
+      <Rename Original="Y" WorkingCopy="Y">?{File.NameNoExt}_?(Date -f 'yyyyMMddhhmmss')?{File.Ext}</Rename>
     </OnContact>
     <Responses>
       <Response Desc="Copy to Local Folder" Enable="Y">
-        <Rename>?{File.WorkingName}_?(Date -f yyyyMMddhhmmss)</Rename>
+        <Rename>?{File.WorkingName}_?(Date -f 'yyyyMMddhhmmss')</Rename>
         <Target>
           <Local Action="Copy" Overwrite="Y">
             <Path>C:\\Sandbox\\Integratrex\\Target\\?(Date -f 'yyyyMMdd')</Path>
@@ -37,6 +38,7 @@
       <Email To="brad.edey@gmail.com" Subject="Integratrex - Send Trade Report Log" />
     </Log>
   </Integration>
+  <!--
   <Integration Desc="Test Local-Local Integration" Enable="Y">
     <Schedule>
       <Continuous Interval="20" />
@@ -312,4 +314,5 @@ Patterns Used:
       <Email To="errors@somedomain.com" Subject="Integratrex - Send Trade Report Log" />
     </Log>
   </Integration>
+  -->
 </Integrations>

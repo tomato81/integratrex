@@ -24,7 +24,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// Tracks a single execution of an integration
     /// </summary>
-    public class IntegrationTracker {
+    public class IntegrationTracker : IDisposable {
 
         /// <summary>
         /// Constructor
@@ -37,7 +37,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             string work = Path.Combine(Global.AppSettings.IntegratrexWorkFolder, Integration.Desc, Global.WorkInstDir, dtStamp);
             // create some objects
             m_MatchedFiles = new List<MatchedFile>();
-            m_WorkingDi = new DirectoryInfo(work);
+            m_WorkingDi = new DirectoryInfo(work);            
+            // hookup tracker events
+            HookupIntegrationEvents();
+            HookupDTextEvents();
             // intial attribute context
             SetAttrsInitialContext();
         }
@@ -62,11 +65,49 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Attach Integration Events
         /// </summary>
         private void HookupIntegrationEvents() {
-            // hookup events            
-            Manager.Source.OnFileMatch += SourceScan_OnContact;
-            Manager.Source.OnGotFile += SourceGet_OnGot;
+            // source
+            Manager.Source.Match += SourceScan_OnContact;
+            Manager.Source.GotFile += SourceGet_OnGot;
+            Manager.Source.DoTransform += Source_DoTransform;
         }
-        
+
+        /// <summary>
+        /// Transform Files at Source
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Source_DoTransform(object sender, TransformSourceEventArgs e) {            
+            // what we do?
+            if(Manager.OnContact.RenameOriginal) {
+                e.HasTransforms = true;
+            }            
+            // go thru the files
+            foreach (MatchedFile F in e.MatchedFiles) {
+                // set File context                
+                Attrs.File = F;
+                // do rename
+                F.Name = Manager.OnContact.Rename();
+            }
+        }
+
+        /// <summary>
+        /// Renamed File Event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Source_OnRenamedFileAtSource(object sender, OnRenamedFileEventArgs e) {
+            IntInstLog.InfoFormat("Renamed source file from {0} to {1}", e.OriginalName, e.RenamedTo);
+        }
+
+        /// <summary>
+        /// Rename Event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Source_OnRename(object sender, IntegrationEventArgs e) {
+            IntInstLog.Info("Source Rename");
+        }
+
         /// <summary>
         /// Integration Value is Required!
         /// </summary>
@@ -102,8 +143,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private readonly IntegrationManager m_Manager;
 
         // logs
-        private ILog SvcLog;    // service log
-        private ILog IntLog;    // log of ALL integrations          
+        private ILog SvcLog;    // service log          
         private ILog DebugLog;  // debug log
         private ILog IntInstLog;    // log of THIS integration            
 
@@ -120,8 +160,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Set Logger
         /// </summary>
         /// <param name="p_Logger">the logger</param>
-        public void SetLogger(ILog p_Logger) {
-            IntInstLog = p_Logger;
+        public void SetLogger(ILog p_SvcLog, ILog p_DebugLog, ILog p_IntInstLog) {
+            SvcLog = p_SvcLog;
+            DebugLog = p_DebugLog;
+            IntInstLog = p_IntInstLog;
         }        
 
         /// <summary>
@@ -165,12 +207,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // set the working directory
             e.MatchedFile.SetWorkingDi(WorkingDi);
             // will the name of the working file be different from the name at the source?
-            if(Manager.OnContact.RenameWorkingCopy) {
-                // set working copy name
+            if(Manager.OnContact.RenameWorkingCopy) {                
                 e.MatchedFile.SetWorkingFileName(Manager.OnContact.Rename());            
             } else {
                 e.MatchedFile.SetWorkingFileName(e.MatchedFile.OriginalName);
             }           
+
+            
+
+
         }        
 
         /// <summary>
@@ -211,7 +256,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // method logic
                 IntInstLog.InfoFormat("Integration:{0} Scan Source:{1}", Integration.Desc, Integration.Source.Desc);
                 // scan for files matching the patterns
-                Manager.Source.Location.Scan(m_Patterns);              
+                Manager.Source.Scan(Manager.Patterns);              
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -247,7 +292,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     M.SetWorkingDi(WorkingDi);
                 }
                 // get files into the working directory
-                Manager.Source.Location.Get(MatchedFiles);
+                Manager.Source.Get(MatchedFiles);
 
                 
 
@@ -297,6 +342,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // method logic
                 IntInstLog.InfoFormat("Source Transform:{0}", Integration.Desc);
+                // transform!
+                Manager.Source.Transform(MatchedFiles);
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -327,8 +374,38 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
 
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
 
-    }
+        protected virtual void Dispose(bool disposing) {
+            if (!disposedValue) {
+                if (disposing) {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~IntegrationTracker() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose() {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+
+    }   // IntegrationTracker
 
     /// <summary>
     /// Manages the execution of an Integration - directly corresponds to an <Integration> ... </Integration> in the configuration file
@@ -425,6 +502,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public IntegrationAttributes Attributes { get => m_Attrs; }
 
         /// <summary>
+        /// Patterns
+        /// </summary>
+        public IPattern[] Patterns { get => m_Patterns;  }
+
+        /// <summary>
         /// Integration Function
         /// </summary>
         public Action RunAction { get => m_RunAction; }        
@@ -455,7 +537,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <returns></returns>
         private IntegrationTracker NewTracker() {
             IntegrationTracker T = new IntegrationTracker(this);
-            T.SetLogger(IntInstLog);
+            T.SetLogger(DebugLog, SvcLog, IntInstLog);
             return T;
         }
 
@@ -526,6 +608,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // source!
                 IntegrationSourceFactory F = new IntegrationSourceFactory();
                 m_Source = F.Create(m_Integration.Source);
+                // events!
+                m_Source.ScanSource += Source_OnScan;
+
                 // log
                 IntInstLog.InfoFormat("Integration source intialized:{0}", m_Integration.Source.Desc);
             }
@@ -533,6 +618,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// Scanning!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Source_OnScan(object sender, EventArgs e) {
+            IntInstLog.InfoFormat("{0} Scanning!", "Some Integration");
         }
 
         /// <summary>
@@ -662,14 +756,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 m_Attrs.Reset();
 
                 // tracker jacker
-                IntegrationTracker T = NewTracker();                                
-
-                // integrate
-                T.ScanSource();
-                T.GetFiles();
-                T.WorkingTransform();
-                T.SourceTransform();
-                T.RunResponses();
+                using (IntegrationTracker T = NewTracker()) {
+                    // integrate
+                    T.ScanSource();
+                    T.GetFiles();                    
+                    T.WorkingTransform();
+                    T.SourceTransform();
+                    T.RunResponses();
+                }
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -896,7 +990,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public object GetReplacementValue(string p_name) {
             try {
 
-                p_name = p_name.ToUpperInvariant();
+                
 
                 string[] elements = p_name.Split('.');
          
@@ -905,10 +999,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     return elements[0];
                 }
                 else if(elements.Length == 2) {
+                    // to upper the class! 
+                    elements[0] = elements[0].ToUpperInvariant();
                     // should replace the case values with constants
-                    switch(elements[0]) {
-                        case "FILE": {
+                    switch (elements[0]) {
+                        case AttrClass.FILE: {
                                 return GetFileAttr(elements[1]);                                
+                            }
+                        case AttrClass.FILES: {
+                                return "";
                             }
                         default: {
                                 // error handling here.
@@ -1005,48 +1104,64 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             return Attrs;           
         }
 
+        private class AttrClass {
+
+            public const string FILE = "FILE";
+            public const string FILES = "FILES";
+
+        }
 
     }   // IntegrationAttributes
 
-
-
-
     /// <summary>
-    /// DynamicReplacementRequiredEventArgs
+    /// Integration Error Event Args
     /// </summary>
-    public class DynamicReplacementRequiredEventArgs : EventArgs {
+    public class IntegrationErrorEventArgs : EventArgs {
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="p_dynamicText"></param>
-        public DynamicReplacementRequiredEventArgs(string p_dynamicText) {
-            m_dynamicText = p_dynamicText;
+        /// <param name="p_Ex">Exception</param>
+        public IntegrationErrorEventArgs(Exception p_Ex) {
+            m_Ex = p_Ex;
         }
 
-        /// <summary>
-        /// The dynamic text to be processed
-        /// </summary>
-        public string DynamicText {
-            get {
-                return m_dynamicText;  
-            }
-        }
-        // member
-        private readonly string m_dynamicText;
-        
         /// <summary>
         /// Result
         /// </summary>
-        public string Result => m_result;
+        public Exception Exception => m_Ex;
         // member
-        private readonly string m_result;
+        private readonly Exception m_Ex;
 
-    }   // DynamicReplacementRequiredEventArgs
+    }   // IntegrationErrorEventArgs
 
+    /// <summary>
+    /// Integration Event Args
+    /// </summary>
+    public class IntegrationEventArgs : EventArgs {
 
-    public sealed class DynamicTextAttribute : System.Attribute {        
-    }
+        /// <summary>
+        /// Empty!
+        /// </summary>
+        public static new IntegrationEventArgs Empty {
+            get {
+                return new IntegrationEventArgs();
+            }
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>        
+        public IntegrationEventArgs() {            
+        }
+
+    }   // IntegrationEventArgs
+
+    /// <summary>
+    /// Use to Identify Dynamic Text Functions
+    /// </summary>
+    public sealed class DynamicTextAttribute : System.Attribute {
+    }   // DynamicTextAttribute
 
     /// <summary>
     /// Base class for all integration objects
@@ -1057,22 +1172,31 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Constructor
         /// </summary>
         protected IntegrationObject() {
-            // log refs
-            SvcLog = LogManager.GetLogger(Global.ServiceLogName);
-            DebugLog = LogManager.GetLogger(Global.DebugLogName);
-            // compile dynamic text
-            CompileDynamicText();
+            // log refs 
+            DebugLog = LogManager.GetLogger(Global.DebugLogName);            
         }
 
-        // log        
-        public ILog SvcLog;
+        // debug log       
         public ILog DebugLog;
-        public ILog IntLog;
         
         /// <summary>
         /// Fires when a dynamic text replacement value is required
         /// </summary>
         public event EventHandler<OnValueRequiredEventArgs> OnValueRequired;
+
+        /// <summary>
+        /// Fires when an error occurs on the integration object
+        /// </summary>
+        public event EventHandler<IntegrationErrorEventArgs> OnError;
+        
+        /// <summary>
+        /// On Error
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="p_args"></param>
+        protected void ErrorEvent(IntegrationErrorEventArgs p_Args) {             
+            OnError?.Invoke(this, p_Args);
+        }
 
         /// <summary>
         /// Implement in child objects to compile dynamic text elements
@@ -1084,14 +1208,19 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_EventArgs"></param>
         protected void ValueRequired(object sender, OnValueRequiredEventArgs p_EventArgs) {
-            if(OnValueRequired != null) {
-                OnValueRequired(sender, p_EventArgs);                
-                return;
+            try {
+                if (OnValueRequired != null) {
+                    OnValueRequired(sender, p_EventArgs);
+                    return;
+                }
+                throw new NullReferenceException("IntegrationObject.OnValueRequired event handler is not attached");
             }
-            // log it
-            IntLog.ErrorFormat("the dynamic value {0} was required, but the event is unhandled", p_EventArgs.Name);
-            // i guess just set the result to the original text?
-            p_EventArgs.Result = p_EventArgs.Name;            
+            catch (Exception ex) {
+                // set the return val to an error
+                p_EventArgs.Result = "{TEXT_ERROR}";
+                // raise error event
+                ErrorEvent(new IntegrationErrorEventArgs(ex));
+            }
         }                        
 
         /// <summary>
@@ -1106,8 +1235,5 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
 
     }   // IntegrationObject
-
-
-
 
 }

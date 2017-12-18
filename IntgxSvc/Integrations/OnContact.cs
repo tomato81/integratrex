@@ -21,6 +21,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public OnContact(XOnContact p_XOnContact) {
             m_XOnContact = p_XOnContact;
             m_SupressDuplicates = new SupressDuplicates(p_XOnContact.SupressDuplicates);
+            // compile dynamic text
+            CompileDynamicText();
         }
 
         // members
@@ -93,9 +95,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
-        /// Rename the orignal file at the source location?
+        /// Rename the original file at the source location?
         /// </summary>
-        public bool RenameOrignal {
+        public bool RenameOriginal {
             get {
                 return X.Rename.Original == XRenameOnContactOriginal.Y;
             }
@@ -130,7 +132,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// Helps check for duplicate files in source locations
     /// </summary>
-    public class SupressDuplicates { 
+    public class SupressDuplicates : IntegrationObject { 
 
         // members
         private readonly XSupressDuplicates m_XSupressDuplicates;
@@ -148,9 +150,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Constructor
         /// </summary>
-        public SupressDuplicates(XSupressDuplicates p_XSupressDuplicates)
-            : base()  {
+        public SupressDuplicates(XSupressDuplicates p_XSupressDuplicates) {
             m_XSupressDuplicates = p_XSupressDuplicates;
+            // compile dynamic text
+            CompileDynamicText();
         }      
 
         /// <summary>
@@ -238,6 +241,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             catch (Exception ex) {
                 throw ex;
             }           
+        }
+
+        /// <summary>
+        /// Compile Dynamcic Text
+        /// </summary>
+        protected override void CompileDynamicText() {
+            // nada
         }
 
     }   // SupressDuplicates

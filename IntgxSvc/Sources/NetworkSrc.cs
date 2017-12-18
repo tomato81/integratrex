@@ -18,16 +18,18 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// </summary>
     public class NetworkSrc : IntegrationSource, ISourceLocation {
 
+        // XNetworkSrc object        
+        private XNetworkSrc m_XNetworkSrc;
+
         /// <summary>
         /// Constructor
         /// </summary>
         public NetworkSrc(XSource p_XSource, XNetworkSrc p_XNetworkSrc) :
             base(p_XSource) {
-            m_XNetworkSrc = p_XNetworkSrc;            
-        }
-
-        // XNetworkSrc object        
-        private XNetworkSrc m_XNetworkSrc;
+            m_XNetworkSrc = p_XNetworkSrc;
+            
+            CompileDynamicText();
+        }        
 
         /// <summary>
         /// Create and Compile Dynamic Text
@@ -37,7 +39,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             m_Folder.OnValueRequired += ValueRequired;
             m_Folder.Compile();
         }
-
 
         [DynamicText]
         public string Folder() {   
@@ -50,15 +51,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_Pattern">the file matching patterns</param>
         /// <returns>a list of matched files</returns>
-        public void Scan(IPattern[] p_Pattern) {
+        public override void Scan(IPattern[] p_Pattern) {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
 
             HashSet<MatchedFile> Matches = new HashSet<MatchedFile>();
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-
-                Log.InfoFormat("Scanning {0}", Description);
-
+                // scanning
+                OnScanEvent();
+                // scan logic
                 string folder = Folder();
 
                 DirectoryInfo Di = new DirectoryInfo(folder);
@@ -71,25 +72,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                             MatchedFile Match = new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc);
                             if (Matches.Add(new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc))) {
                                 // pew pew
-                                OnContactEvent(Match);
+                                MatchEvent(Match);
                             }
                         }
                     }
                 }
 
-            }
-            catch (DirectoryNotFoundException ex) {
-                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-            }
-            catch (DriveNotFoundException ex) {
-                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-            }
-            catch (IOException ex) {
-                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-            }
+            }            
             catch (Exception ex) {
-                IntLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-                throw ex;
+                ErrorEvent(new IntegrationErrorEventArgs(ex));
             }
             finally {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
@@ -100,16 +91,28 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Get matched files from source location and write to the working directory
         /// </summary>
         /// <param name="p_Mf"></param>
-        public void Get(List<MatchedFile> p_Mf) {
-            throw new NotImplementedException();
+        public override void Get(List<MatchedFile> p_Mf) {
+            try {
+                
+                throw new NotImplementedException();
+            }
+            catch(Exception ex) {
+                ErrorEvent(new IntegrationErrorEventArgs(ex));
+            }
         }
 
         /// <summary>
         /// Delete matched files from the source location
         /// </summary>
         /// <param name="p_Mf"></param>
-        public void Delete(List<MatchedFile> p_Mf) {
-            throw new NotImplementedException();
+        public override void Delete(List<MatchedFile> p_Mf) {
+            try {
+                
+                throw new NotImplementedException();
+            }
+            catch (Exception ex) {
+                ErrorEvent(new IntegrationErrorEventArgs(ex));
+            }            
         }
 
         /// <summary>
@@ -117,30 +120,48 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_Mf"></param>
         /// <param name="p_rename"></param>
-        public void Rename(List<MatchedFile> p_Mf, string[] p_rename) {
-            throw new NotImplementedException();
+        public override void Transform(List<MatchedFile> p_Mf) {
+            try {
+                
+                throw new NotImplementedException();
+            }
+            catch (Exception ex) {
+                ErrorEvent(new IntegrationErrorEventArgs(ex));
+            }            
         }
 
         /// <summary>
         /// Ping the source location to verify connectivity
         /// </summary>
-        public void Ping() {
-            throw new NotImplementedException();
+        public override void Ping() {            
+            try {
+                
+                throw new NotImplementedException();
+            }
+            catch (Exception ex) {
+                ErrorEvent(new IntegrationErrorEventArgs(ex));
+            }
         }
 
         /// <summary>
         /// Delete the deepest sub-directory from the given location
         /// </summary>
         /// <param name="p_folder"></param>
-        public void DeleteFolder(string p_folder) {
-            throw new NotImplementedException();
+        public override void DeleteFolder(string p_folder) {            
+            try {
+                
+                throw new NotImplementedException();
+            }
+            catch (Exception ex) {
+                ErrorEvent(new IntegrationErrorEventArgs(ex));
+            }
         }
 
         /// <summary>
         /// Can MD5 or SHA1 be calculated at the source?
         /// </summary>
         /// <returns></returns>
-        public bool CanCalc() {
+        public override bool CanCalc() {
             return true;
         }
 

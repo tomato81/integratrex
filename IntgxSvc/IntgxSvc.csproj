@@ -99,6 +99,7 @@
     <Compile Include="Helpers\PSFTPProcessWrapper.cs" />
     <Compile Include="Helpers\ScheduleHelper.cs" />
     <Compile Include="Integrations\Integration.cs" />
+    <Compile Include="Integrations\IntegrationObject.cs" />
     <Compile Include="Integrations\Interfaces.cs" />
     <Compile Include="Integrations\OnContact.cs" />
     <Compile Include="Integrations\MatchedFile.cs" />

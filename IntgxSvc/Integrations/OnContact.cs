@@ -18,9 +18,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Constructor
         /// </summary>
         /// <param name="p_XOnContact"></param>
-        public OnContact(XOnContact p_XOnContact) {
+        public OnContact(XOnContact p_XOnContact) {          
             m_XOnContact = p_XOnContact;
             m_SupressDuplicates = new SupressDuplicates(p_XOnContact.SupressDuplicates);
+            // assign functions
+            GetSHA1 = _GetSHA1;
+            GetMD5 = _GetMD5;           
             // compile dynamic text
             CompileDynamicText();
         }
@@ -52,7 +55,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 string sha1 = string.Empty;
                 FileInfo Fi = new FileInfo(string.Format("{0}\\{1}", p_Mf.Folder, p_Mf.OriginalName));
-                using (FileStream Fin = new FileStream(Fi.FullName, FileMode.Open)) {
+                using (FileStream Fin = new FileStream(Fi.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
                     using (SHA1Managed SHA1 = new SHA1Managed()) {
                         byte[] hash = SHA1.ComputeHash(Fin);
                         StringBuilder Sb = new StringBuilder(2 * hash.Length);
@@ -78,7 +81,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 string md5 = string.Empty;
                 FileInfo Fi = new FileInfo(string.Format("{0}\\{1}", p_Mf.Folder, p_Mf.OriginalName));
                 using (MD5 MDFive = MD5.Create()) {
-                    using (FileStream Fin = new FileStream(Fi.FullName, FileMode.Open)) {
+                    using (FileStream Fin = new FileStream(Fi.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
                         byte[] hash = MDFive.ComputeHash(Fin);
                         StringBuilder Sb = new StringBuilder(2 * hash.Length);
                         foreach (byte b in hash) {
@@ -91,6 +94,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
             catch (Exception ex) {
                 throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Delete matched files from the source location?
+        /// </summary>
+        public bool DeleteFromSource {
+            get {
+                return X.DeleteFromSource == XOnContactDeleteFromSource.Y;
             }
         }
 
@@ -136,11 +148,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
         // members
         private readonly XSupressDuplicates m_XSupressDuplicates;
-        private HashSet<string> m_MD5;
-        private HashSet<string> m_Names;
-        private Dictionary<string, int> m_Sizes;
-        private Dictionary<string, DateTime> m_LastModified;
-        private Dictionary<string, string> m_NameMD5;
+        private HashSet<string> m_MD5 = new HashSet<string>();
+        private HashSet<string> m_Names = new HashSet<string>();
+        private Dictionary<string, int> m_Sizes = new Dictionary<string, int>();
+        private Dictionary<string, DateTime> m_LastModified = new Dictionary<string, DateTime>();
+        private Dictionary<string, string> m_NameMD5 = new Dictionary<string, string>();
 
         /// <summary>
         /// The X object
@@ -234,11 +246,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     if (X.MatchBy.MD5 == XMatchByMD5.Y) {                        
                         return m_MD5.Contains(p_Mf.MD5);
                     }
-                }                
-                // NOTE: log something - supress duplciates is activated, but no detection conditions have been specified
+                }                           
+                // supress duplicates is activated, but no detection conditions have been specified
                 return false;
             }
             catch (Exception ex) {
+                ErrorEvent(ex);
+                // not sure what to do here
                 throw ex;
             }           
         }

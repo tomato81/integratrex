@@ -7,7 +7,7 @@
 
   <Integration Desc="Test Local-Local Integration 2" Enable="Y">
     <Schedule>
-      <Continuous Interval="31" />
+      <Continuous Interval="20" />
     </Schedule>
     <Source Desc="Files Directory">
       <Local>
@@ -17,12 +17,13 @@
     <Patterns>
       <Pattern Desc="file1 pattern" Type="ExactIgnoreCase">file1.txt</Pattern>
       <Pattern Desc="file2 pattern" Type="ExactIgnoreCase">file2.txt</Pattern>
+      <Pattern Desc="file3 pattern" Type="ExactIgnoreCase">file3.txt</Pattern>
     </Patterns>
-    <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="Y" CalculateMD5="Y" CalculateSHA1="Y">
+    <OnContact MoveToWorkingArea="Y" DeleteFromSource="N" StoreFileInfo="Y" CalculateMD5="Y" CalculateSHA1="Y">
       <SupressDuplicates Enable="Y">
         <MatchBy FileName="Y" FileSize="Y" LastModifiedDate="Y" MD5="Y" SHA1="Y" />
       </SupressDuplicates>
-      <Rename Original="Y" WorkingCopy="Y">?{File.NameNoExt}_?(Date -f 'yyyyMMddhhmmss')?{File.Ext}</Rename>
+      <Rename Original="N" WorkingCopy="Y">?{File.NameNoExt}_?(Date -f 'yyyyMMddhhmmss')?{File.Ext}</Rename>
     </OnContact>
     <Responses>
       <Response Desc="Copy to Local Folder" Enable="Y">
@@ -53,7 +54,7 @@
       <Pattern Desc="file2 pattern" Type="ExactIgnoreCase">file2.txt</Pattern>
     </Patterns>
     <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="Y" CalculateMD5="Y" CalculateSHA1="Y">
-      <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f yyyyMMddhhmmss)</Rename>
+      <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f 'yyyyMMddhhmmss')</Rename>
     </OnContact>
     <Responses>
       <Response Desc="Copy to Local Folder" Enable="Y">
@@ -84,11 +85,11 @@
       <Pattern Desc="Trade Report" Type="ExactIgnoreCase">TradeReport.xlsx</Pattern>
     </Patterns>
     <OnContact MoveToWorkingArea="Y" DeleteFromSource="Y" StoreFileInfo="N" CalculateMD5="N" CalculateSHA1="N">
-      <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f yyyyMMddhhmmss)</Rename>
+      <Rename Original="N" WorkingCopy="Y">?{File.OriginalName}_?(Date -f 'yyyyMMddhhmmss')</Rename>
     </OnContact>
     <Responses>
       <Response Desc="Send to Bank" Enable="Y">
-        <Rename>?{File.WorkingName}_?(Date -f yyyyMMddhhmmss)</Rename>
+        <Rename>?{File.WorkingName}_?(Date -f 'yyyyMMddhhmmss')</Rename>
         <Target>
           <FTP Action="Upload" Overwrite="Y">
             <URI Port="21">ftp.somedomain.com/reports</URI>

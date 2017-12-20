@@ -53,34 +53,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <returns>a list of matched files</returns>
         public override void Scan(IPattern[] p_Pattern) {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-
-            HashSet<MatchedFile> Matches = new HashSet<MatchedFile>();
-            try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-                // scanning
-                OnScanEvent();
-                // scan logic
-                string folder = Folder();
-
-                DirectoryInfo Di = new DirectoryInfo(folder);
-                FileInfo[] Files = Di.GetFiles();
-
-                // go thru each patternp_T.Log.InfoFormat("Contact {0}", Fi.FullName);
-                foreach (IPattern P in p_Pattern) {
-                    foreach (FileInfo Fi in Files) {                        
-                        if (P.IsMatch(Fi.Name)) {
-                            MatchedFile Match = new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc);
-                            if (Matches.Add(new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc))) {
-                                // pew pew
-                                MatchEvent(Match);
-                            }
-                        }
-                    }
-                }
-
+            try { 
+                throw new NotImplementedException();
             }            
             catch (Exception ex) {
-                ErrorEvent(new IntegrationErrorEventArgs(ex));
+                ErrorEvent(ex);
             }
             finally {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
@@ -97,7 +74,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 throw new NotImplementedException();
             }
             catch(Exception ex) {
-                ErrorEvent(new IntegrationErrorEventArgs(ex));
+                ErrorEvent(ex);
             }
         }
 
@@ -111,7 +88,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 throw new NotImplementedException();
             }
             catch (Exception ex) {
-                ErrorEvent(new IntegrationErrorEventArgs(ex));
+                ErrorEvent(ex);
             }            
         }
 
@@ -126,7 +103,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 throw new NotImplementedException();
             }
             catch (Exception ex) {
-                ErrorEvent(new IntegrationErrorEventArgs(ex));
+                ErrorEvent(ex);
             }            
         }
 
@@ -139,7 +116,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 throw new NotImplementedException();
             }
             catch (Exception ex) {
-                ErrorEvent(new IntegrationErrorEventArgs(ex));
+                ErrorEvent(ex);
             }
         }
 
@@ -153,7 +130,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 throw new NotImplementedException();
             }
             catch (Exception ex) {
-                ErrorEvent(new IntegrationErrorEventArgs(ex));
+                ErrorEvent(ex);
             }
         }
 

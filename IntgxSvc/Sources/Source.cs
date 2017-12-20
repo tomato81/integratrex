@@ -69,71 +69,116 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     }   // IntegrationSourceFactory    
 
     /// <summary>
+    /// Scan Source Event Args
+    /// </summary>
+    public class ScanSourceEventArgs : IntegrationEventArgs {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public ScanSourceEventArgs(string p_location) {
+            Location = p_location;
+        }
+
+        /// <summary>
+        /// Scan location as a string
+        /// </summary>
+        public readonly string Location;
+
+    }   // ScanSourceEventArgs
+
+    /// <summary>
     /// On File Match Event Args
     /// </summary>
-    public class OnFileMatchEventArgs : EventArgs {
+    public class OnFileMatchEventArgs : IntegrationEventArgs {
         
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="p_MatchedFile"></param>
-        public OnFileMatchEventArgs(MatchedFile p_MatchedFile) {
+        public OnFileMatchEventArgs(MatchedFile p_MatchedFile, string p_location) {
             MatchedFile = p_MatchedFile;
+            Location = p_location;
         }
 
-        // the matched file
-        public readonly MatchedFile MatchedFile;    
+        /// <summary>
+        /// The Matched File
+        /// </summary>
+        public readonly MatchedFile MatchedFile;
+
+        /// <summary>
+        /// The Location as a string
+        /// </summary>
+        public readonly string Location;
 
     }   // OnFileMatchEventArgs
 
     /// <summary>
     /// On Got File Event Args
     /// </summary>
-    public class OnGotFileEventArgs : IntegrationEventArgs {
+    public class GotFileEventArgs : IntegrationEventArgs {
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="p_MatchedFile"></param>
-        public OnGotFileEventArgs(MatchedFile p_MatchedFile)
+        public GotFileEventArgs(MatchedFile p_MatchedFile)
             : base() {
-            m_MatchedFile = p_MatchedFile;
+            MatchedFile = p_MatchedFile;
         }
 
         /// <summary>
         /// The Matched File
         /// </summary>
-        public MatchedFile MatchedFile => m_MatchedFile;
-        public readonly MatchedFile m_MatchedFile;
+        public readonly MatchedFile MatchedFile;
+        
+
+    }   // OnGotFileEventArgs
+
+
+    /// <summary>
+    /// On Got File Event Args
+    /// </summary>
+    public class GotFilesEventArgs : IntegrationEventArgs {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="p_MatchedFiles">Matched Files</param>
+        public GotFilesEventArgs(List<MatchedFile> p_MatchedFiles)
+            : base() {
+            MatchedFiles = p_MatchedFiles;
+        }
+
+        /// <summary>
+        /// The Downloaded Files
+        /// </summary>
+        public readonly List<MatchedFile> MatchedFiles;
+
 
     }   // OnGotFileEventArgs
 
     /// <summary>
     /// Renamed a file event args
     /// </summary>
-    public class OnRenamedFileEventArgs : IntegrationEventArgs {
+    public class FileRenamedEventArgs : IntegrationEventArgs {
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="p_MatchedFile"></param>
-        public OnRenamedFileEventArgs(MatchedFile p_MatchedFile, string p_originalName, string p_renamedTo)
+        /// <param name="p_renamedFrom">the original file name</param>
+        /// <param name="p_renamedTo">the new file name</param>
+        public FileRenamedEventArgs(string p_renamedFrom, string p_renamedTo)
             : base() {
-            m_MatchedFile = p_MatchedFile;
-            OriginalName = p_originalName;
+            // set locals
+            RenamedFrom = p_renamedFrom;
             RenamedTo = p_renamedTo;
         }
 
         /// <summary>
-        /// The Matched File
-        /// </summary>
-        public MatchedFile MatchedFile => m_MatchedFile;
-        private readonly MatchedFile m_MatchedFile;
-
-        /// <summary>
         /// Original File Name
         /// </summary>
-        public readonly string OriginalName;
+        public readonly string RenamedFrom;
 
         /// <summary>
         /// Renamed File
@@ -168,6 +213,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
     }   // TransformSourceEventArgs
 
+    
+
     /// <summary>
     /// Integration Source Base
     /// </summary>
@@ -183,7 +230,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             m_Source = p_Source;
         }
 
-
         /// <summary>
         /// On Matched File Contact
         /// </summary>
@@ -192,33 +238,54 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// After a file has been retrived from the source
         /// </summary>
-        public event EventHandler<OnGotFileEventArgs> GotFile;
+        public event EventHandler<GotFileEventArgs> GotFile;
 
-
+        /// <summary>
+        /// After all files have been retrived from the source
+        /// </summary>
+        public event EventHandler<GotFilesEventArgs> GotFiles;
 
         public event EventHandler<TransformSourceEventArgs> DoTransform;
 
+        public event EventHandler<FileRenamedEventArgs> FileRenamed;
+
         // integration events
-        public event EventHandler<IntegrationEventArgs> ScanSource;
+        public event EventHandler<ScanSourceEventArgs> ScanSource;
         public event EventHandler<IntegrationEventArgs> GetFiles;
-        public event EventHandler<IntegrationEventArgs> DeleteFiles;        
+        
+
+        public event EventHandler<IntegrationEventArgs> DeleteFiles;
+        public event EventHandler<IntegrationFileEventArgs> DeletedFile;
+        public event EventHandler<IntegrationFilesEventArgs> DeletedFiles;
+
         public event EventHandler<IntegrationEventArgs> DoDeleteFolder;
         public event EventHandler<IntegrationEventArgs> DoPing;
 
-        /// <summary>
-        /// Fire the OnContact Event
-        /// </summary>
-        /// <param name="p_M"></param>
-        protected void MatchEvent(MatchedFile p_M) {
-            Match?.Invoke(this, new OnFileMatchEventArgs(p_M));
-        }
+        
 
         /// <summary>
         /// Fire the OnContact Event
         /// </summary>
-        /// <param name="p_M"></param>
+        /// <param name="p_M">the matched file</param>
+        /// <param name="p_location">the location as a string</param>
+        protected void MatchEvent(MatchedFile p_M, string p_location) {
+            Match?.Invoke(this, new OnFileMatchEventArgs(p_M, p_location));
+        }
+
+        /// <summary>
+        /// Fire the GotFileEvent Event
+        /// </summary>
+        /// <param name="p_M">downloaded file</param>
         protected void GotFileEvent(MatchedFile p_M) {
-            GotFile?.Invoke(this, new OnGotFileEventArgs(p_M));
+            GotFile?.Invoke(this, new GotFileEventArgs(p_M));
+        }
+
+        /// <summary>
+        /// Fire the Got
+        /// </summary>
+        /// <param name="p_M">downloaded files</param>
+        protected void GotFilesEvent(List<MatchedFile> p_M) {
+            GotFiles?.Invoke(this, new GotFilesEventArgs(p_M));
         }
 
         /// <summary>
@@ -230,18 +297,36 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
-        /// Scanning!
+        /// Renamed File Event
         /// </summary>
-        protected void OnScanEvent() {
-            ScanSource?.Invoke(this, IntegrationEventArgs.Empty);
+        /// <param name="p_renamedFrom">original name</param>
+        /// <param name="p_renamedTo">renamed</param>
+        protected void RenamedFileEvent(string p_renamedFrom, string p_renamedTo) {
+            FileRenamed?.Invoke(this, new FileRenamedEventArgs(p_renamedFrom, p_renamedTo));
         }
 
-        protected void GetFileEvent() {
+        /// <summary>
+        /// Scanning!
+        /// </summary>
+        /// <param name="p_location">scan location as string</param>
+        protected void OnScanEvent(string p_location) {
+            ScanSource?.Invoke(this, new ScanSourceEventArgs(p_location));
+        }
+
+        protected void GetFilesEvent() {
             GetFiles?.Invoke(this, IntegrationEventArgs.Empty);
         }
 
-        protected void DeleteFileEvent() {
+        protected void DeleteFilesEvent() {
             DeleteFiles?.Invoke(this, IntegrationEventArgs.Empty);
+        }
+
+        protected void DeletedFileEvent(MatchedFile p_File) {
+            DeletedFile?.Invoke(this, new IntegrationFileEventArgs(p_File));
+        }
+
+        protected void DeletedFilesEvent(List<MatchedFile> p_Files) {
+            DeletedFiles?.Invoke(this, new IntegrationFilesEventArgs(p_Files));            
         }
 
         protected void DeleteFolderEvent() {
@@ -268,9 +353,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public string Description {
             get {
-                return m_Source.Desc;
+                return string.IsNullOrWhiteSpace(m_Source.Desc) ? "(none)" : m_Source.Desc;
             }
-        }                         
+        }
+
+        /// <summary>
+        /// To String
+        /// </summary>
+        /// <returns>a string representation of the object</returns>
+        public override string ToString() {
+            return Description;
+        }
 
     }   // IntegrationSource
     

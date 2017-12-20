@@ -53,35 +53,35 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <returns>a list of matched files</returns>
         public override void Scan(IPattern[] p_Pattern) {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-
+            // method logic
             HashSet<MatchedFile> Matches = new HashSet<MatchedFile>();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-
-                // scanning
-                OnScanEvent();
-                // scan logic
-                string folder = Folder();
-
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
+                // scan logic - first things first - what is the scan location?
+                string folder = Folder();                
+                // local folder
                 DirectoryInfo Di = new DirectoryInfo(folder);
+                // scanning
+                OnScanEvent(Di.FullName);
                 FileInfo[] Files = Di.GetFiles();
-
-                // go thru each patternp_T.Log.InfoFormat("Contact {0}", Fi.FullName);
+                // go thru each pattern
                 foreach (IPattern P in p_Pattern) {
                     foreach (FileInfo Fi in Files) {
                         if (P.IsMatch(Fi.Name)) {
                             MatchedFile Match = new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc);
                             if (Matches.Add(new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc))) {
                                 // pew pew
-                                MatchEvent(Match);  
+                                MatchEvent(Match, folder); 
+                            }
+                            else {
+                                ErrorEvent("Unexpected File Match. A subsequent pattern {0} has matched on: {1}", P.ToString(), Fi.Name);
                             }
                         }
                     }
                 }
-
             }
             catch (Exception ex) {
-                ErrorEvent(new IntegrationErrorEventArgs(ex));
+                ErrorEvent(ex);
             }
             finally {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
@@ -93,46 +93,79 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_Mf"></param>
         public override void Get(List<MatchedFile> p_Mf) {        
-            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();            
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-
                 // getting
-                GetFileEvent();
-
+                GetFilesEvent();
                 // go thru matched files
                 foreach(MatchedFile F in p_Mf) {
                     // source file
                     FileInfo SourceFi = new FileInfo(string.Format("{0}\\{1}", F.Folder, F.OriginalName));
                     // the source file should definately exist
                     if (!SourceFi.Exists) {
-                        ErrorEvent(new IntegrationErrorEventArgs(new FileNotFoundException("File is missing from integration source", F.Name)));
+                        ErrorEvent(new FileNotFoundException("File is missing from integration source", F.Name));
+                        // should an error flag be set on the matched file object???
                     }
                     else {
                         // copy to working area
                         SourceFi.CopyTo(F.WorkingFi.FullName, false);
                         // got one
-                        GotFileEvent(F);
+                        GotFileEvent(F);                        
                     }
                 }
+                // got all
+                GotFilesEvent(p_Mf);
             }
             catch (Exception ex) {
-                ErrorEvent(new IntegrationErrorEventArgs(ex));
+                ErrorEvent(ex);
             }
             finally {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
-
         }
 
         /// <summary>
         /// Delete matched files from the source location
         /// </summary>
-        /// <param name="p_Mf"></param>
-        public override void Delete(List<MatchedFile> p_Mf) {
-            DeleteFileEvent();
-            throw new NotImplementedException();
+        /// <param name="p_Mf">matched files</param>
+        public override void Delete(List<MatchedFile> p_Mf) {          
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
+                // deleting
+                DeleteFilesEvent();
+                // go thru matched files
+                foreach (MatchedFile F in p_Mf) {
+                    // source file
+                    FileInfo SourceFi = new FileInfo(string.Format("{0}\\{1}", F.Folder, F.Name));
+                    // the source file should definately exist
+                    if (!SourceFi.Exists) {
+                        ErrorEvent(new FileNotFoundException("File is missing from integration source", F.Name));                        
+                    }
+                    else {
+                        try {
+                            // delete from source                                                        
+                            SourceFi.Delete();
+                            DeletedFileEvent(F);
+                        }
+                        catch(UnauthorizedAccessException ex) {
+                            ErrorEvent(ex);
+                        }
+                        catch(IOException ex) {
+                            ErrorEvent(ex);
+                        }                        
+                    }
+                }
+                // deleted them all!
+                DeletedFilesEvent(p_Mf);
+            }
+            catch (Exception ex) {
+                ErrorEvent(ex);
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+            }
         }
 
         /// <summary>
@@ -150,7 +183,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
                 // perform transforms on the model
                 DoTransformEvent(Args);
-
                 // but were there any?
                 if(!Args.HasTransforms) {
                     return;
@@ -166,24 +198,27 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     FileInfo SourceFi = new FileInfo(string.Format("{0}\\{1}", F.Folder, F.OriginalName));
                     // it better exist...
                     if(!SourceFi.Exists) {
-                        ErrorEvent(new IntegrationErrorEventArgs(
-                            new FileNotFoundException("Source file is unexpectedly missing", SourceFi.FullName)));
+                        ErrorEvent(new FileNotFoundException("Source file is unexpectedly missing", SourceFi.FullName));
                         continue;
                     }
                     // target file
                     FileInfo RenameFi = new FileInfo(string.Format("{0}\\{1}", F.Folder, F.Name));
                     // it better not exist...
                     if (RenameFi.Exists) {
-                        ErrorEvent(new IntegrationErrorEventArgs(
-                            new Exception(string.Format("Source transform error: A file with the name {0} already exists at the source location {1}", RenameFi.Name, RenameFi.DirectoryName))));
+                        ErrorEvent(string.Format("Source transform error: A file with the name {0} already exists at the source location {1}", RenameFi.Name, RenameFi.DirectoryName));
                         continue;
                     }
-                    // do the rename
-                    SourceFi.MoveTo(RenameFi.FullName);
+                    // if it is actually different 
+                    if (!SourceFi.Name.Equals(RenameFi.Name)) {                      
+                        // do the rename
+                        SourceFi.MoveTo(RenameFi.FullName);
+                        // raise the event
+                        RenamedFileEvent(F.OriginalName, RenameFi.Name);
+                    }
                 }
             }
             catch (Exception ex) {
-                ErrorEvent(new IntegrationErrorEventArgs(ex));
+                ErrorEvent(ex);
             }
             finally {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);

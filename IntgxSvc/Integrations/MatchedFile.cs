@@ -27,7 +27,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             m_folder = p_folder;
             m_size = p_size;
             m_lastModified = p_lastModified;
-            m_lastModifiedUTC = p_lastModified.ToFileTimeUtc();            
+            m_lastModifiedUTC = p_lastModified.ToFileTimeUtc();
+            Deleted = false;
         }
 
         /// <summary>
@@ -104,7 +105,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
         /// <summary>
-        /// Transformed file name at the integration source
+        /// Transformed file name at the integration source without the file extension
         /// </summary>
         public string NameNoExt {
             get {
@@ -112,7 +113,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
         /// <summary>
-        /// Transformed file name extension at the integration source
+        /// Transformed file extension at the integration source
         /// </summary>
         public string Ext {
             get {
@@ -131,7 +132,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
         /// <summary>
-        /// Transformed file name at the integration source
+        /// Working file name
         /// </summary>
         public string WorkingNameNoExt {
             get {
@@ -139,7 +140,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             }
         }
         /// <summary>
-        /// Transformed file name extension at the integration source
+        /// Working file extension
         /// </summary>
         public string WorkingNameExt {
             get {
@@ -218,6 +219,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public bool Supress { get; set; }
 
+        /// <summary>
+        /// Has the file been deleted from the source?
+        /// </summary>
+        public bool Deleted { get; set; }
+
         public ISourceLocation Source { get => m_Source; set => m_Source = value; }
 
         private bool m_supress;
@@ -264,16 +270,22 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
         /// <summary>
         /// Get Hash Code
+        /// </summary>        
+        /// <returns>a hash code</returns>
+        public new int GetHashCode() {
+            return OriginalName.GetHashCode();
+        }
+
+        /// <summary>
+        /// Get Hash Code
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj">an object</param>
+        /// <returns>a hash code</returns>
         public int GetHashCode(MatchedFile obj) {
             return obj.OriginalName.GetHashCode();
         }
 
         // properties
-
-
         public string ToJson() {
             return JsonConvert.SerializeObject(this);
         }

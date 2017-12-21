@@ -5,11 +5,11 @@
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns="c2infosys.com/Integratrex/Service.Config.xsd">
 
-  <Integration Desc="Test Local-Local Integration 2" Enable="Y">
+  <Integration Desc="Local-Local" Enable="Y">
     <Schedule>
       <Continuous Interval="20" />
     </Schedule>
-    <Source Desc="Files Directory">
+    <Source Desc="FileX Pickup">
       <Local>
         <Path>C:\\Sandbox\\Integratrex\\Source\\?(Date -f 'yyyyMMdd')</Path>
       </Local>
@@ -26,7 +26,7 @@
       <Rename Original="N" WorkingCopy="Y">?{File.NameNoExt}_?(Date -f 'yyyyMMddhhmmss')?{File.Ext}</Rename>
     </OnContact>
     <Responses>
-      <Response Desc="Copy to Local Folder" Enable="Y">
+      <Response Desc="Target Folder" Enable="Y">
         <Rename>?{File.WorkingName}_?(Date -f 'yyyyMMddhhmmss')</Rename>
         <Target>
           <Local Action="Copy" Overwrite="Y">

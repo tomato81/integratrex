@@ -12,6 +12,10 @@ using Newtonsoft.Json;
 
 namespace C2InfoSys.FileIntegratrex.Svc {
 
+
+    
+
+
     /// <summary>
     /// Matched File
     /// </summary>
@@ -28,7 +32,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             m_size = p_size;
             m_lastModified = p_lastModified;
             m_lastModifiedUTC = p_lastModified.ToFileTimeUtc();
-            Deleted = false;
+            Deleted = false;            
         }
 
         /// <summary>

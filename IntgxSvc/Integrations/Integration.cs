@@ -382,6 +382,37 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
+        /// Supress Responses on Duplicate Files
+        /// </summary>
+        public void SupressDuplicates() {
+            // make any necessary alterations to files in the working directory
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+
+                // are we supressing?
+                if(!Manager.MatchHistory.SupressDuplciates) {
+                    return; // nope
+                }
+
+                // check each file vs. the match history
+                foreach(MatchedFile F in MatchedFiles) {
+                    if(Manager.MatchHistory.IsDuplicate(F)) {
+                        F.Supress = true;
+                        IntInstLog.InfoFormat("[{0}] - Supressing File from Previous Run", F.WorkingFi.FullName);
+                    }
+                }
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+            }
+        }
+
+        /// <summary>
         /// Apply transforms to files in the working folder
         /// </summary>
         public void WorkingTransform() {
@@ -433,7 +464,36 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+
                 
+
+
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+            }
+        }
+
+        /// <summary>
+        /// Update the File Match History
+        /// </summary>
+        public void UpdateMatchHistory() {
+            // run each response in order            
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+
+                // add em'
+                foreach(MatchedFile F in MatchedFiles) {
+                    // if the file was not supressed
+                    if(!F.Supress) {
+                        Manager.MatchHistory.Add(F);
+                    }
+                }
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -857,10 +917,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 using (IntegrationTracker T = NewTracker()) {
                     // integrate
                     T.ScanSource();
-                    T.GetFiles();                    
+                    T.GetFiles();
+                    T.SupressDuplicates();
                     T.WorkingTransform();
                     T.SourceTransform();
                     T.RunResponses();
+                    T.UpdateMatchHistory();
                 }
             }
             catch (Exception ex) {
@@ -961,10 +1023,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Is the Matched File a duplicate?
         /// </summary>
-        /// <param name="p_M"></param>
-        /// <returns></returns>
+        /// <param name="p_M">the Matched File</param>
+        /// <returns>duplicate flag</returns>
         public bool IsDuplicate(MatchedFile p_M) {
             try {
+
+           
+
                 // matched flags
                 bool fileName = false;
                 bool fileSize = false;
@@ -989,6 +1054,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     fileSHA1 = true;
                 }
 
+
                 // is it a match?
                 bool match = ((FileName ? fileName : true) && (FileSize ? fileSize : true) && (LastModifiedDate ? fileDt : true))
                     && (MD5 == fileMD5)
@@ -1003,8 +1069,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
         private HashSet<string> m_MD5 = new HashSet<string>();
         private HashSet<string> m_SHA1 = new HashSet<string>();
-        private HashSet<string> m_FileNames = new HashSet<string>();
-        //private HashSet<string> m_SHA1 = new HashSet<string>();
+        private HashSet<string> m_FileNames = new HashSet<string>();        
 
         private Dictionary<string, HashSet<long>> m_FileNameSize = new Dictionary<string, HashSet<long>>();
         private Dictionary<string, HashSet<long>> m_FileNameLastMod = new Dictionary<string, HashSet<long>>();

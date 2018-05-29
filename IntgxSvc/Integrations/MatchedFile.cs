@@ -14,9 +14,23 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
 
     /// <summary>
+    /// Use to compare matched files
+    /// </summary>
+    public class MatchedFileComparer : IEqualityComparer<MatchedFile> {
+
+        public bool Equals(MatchedFile p_Lhs, MatchedFile p_Rhs) {
+            return (p_Lhs.OriginalName.Equals(p_Rhs.OriginalName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public int GetHashCode(MatchedFile p_Mf) {
+            return p_Mf.GetHashCode();
+        }
+    }
+
+    /// <summary>
     /// Matched File
     /// </summary>
-    public class MatchedFile : IntegrationObject, IEqualityComparer<MatchedFile> {
+    public class MatchedFile : IntegrationObject, IEquatable<MatchedFile> {
 
         /// <summary>
         /// Constructor
@@ -87,6 +101,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Transformed file name extension at the integration source
         /// </summary>
+        
         public string OriginalNameExt {
             get {
                 return GetFileExtension(m_origName);
@@ -108,6 +123,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Transformed file name at the integration source without the file extension
         /// </summary>
+        
         public string NameNoExt {
             get {
                 return RemoveExtension(m_fileName);
@@ -116,6 +132,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Transformed file extension at the integration source
         /// </summary>
+        
         public string Ext {
             get {
                 return GetFileExtension(m_fileName);
@@ -127,6 +144,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Working Name
         /// </summary>
+        
         public string WorkingName {
             get {
                 return m_WorkingFi.Name;
@@ -135,6 +153,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Working file name
         /// </summary>
+        
         public string WorkingNameNoExt {
             get {
                 return RemoveExtension(m_WorkingFi.Name);
@@ -143,6 +162,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Working file extension
         /// </summary>
+        
         public string WorkingNameExt {
             get {
                 return m_WorkingFi.Extension;
@@ -217,14 +237,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
         /// <summary>
         /// Supress response on this file?
-        /// </summary>
+        /// </summary>        
         public bool Supress { get; set; }
 
         /// <summary>
         /// Has the file been deleted from the source?
-        /// </summary>
+        /// </summary>        
         public bool Deleted { get; set; }
 
+        
         public ISourceLocation Source { get => m_Source; set => m_Source = value; }
 
         private bool m_supress;
@@ -275,26 +296,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <returns>a hash code</returns>
         public new int GetHashCode() {
             return OriginalName.GetHashCode();
-        }
+        } 
 
         /// <summary>
-        /// Get Hash Code
+        /// Compare
         /// </summary>
-        /// <param name="obj">an object</param>
-        /// <returns>a hash code</returns>
-        public int GetHashCode(MatchedFile obj) {
-            return obj.OriginalName.GetHashCode();
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool Equals(MatchedFile other) {
+            return new MatchedFileComparer().Equals(this, other);
         }
 
-        // properties
-        public string ToJson() {
-            return JsonConvert.SerializeObject(this);
-        }
-
-        public static MatchedFile FromJson(string p_json) {
-            return JsonConvert.DeserializeObject<MatchedFile>(p_json);
-        }
-        
     }   // MatchedFile
 
 

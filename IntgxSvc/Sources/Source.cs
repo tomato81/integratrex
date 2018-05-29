@@ -19,8 +19,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <summary>
         /// Constructor
         /// </summary>
-        public IntegrationSourceFactory()
-        {
+        public IntegrationSourceFactory() {
         }
 
         /// <summary>
@@ -28,8 +27,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_XSource">XSource</param>
         /// <returns></returns>
-        public IntegrationSource Create(XSource p_XSource)
-        {
+        public IntegrationSource Create(XSource p_XSource) {
+
             // interface to a source 
             IntegrationSource Source;
             
@@ -137,7 +136,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
 
     /// <summary>
-    /// On Got File Event Args
+    /// On Got Files Event Args
     /// </summary>
     public class GotFilesEventArgs : IntegrationEventArgs {
 
@@ -300,7 +299,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Renamed File Event
         /// </summary>
         /// <param name="p_renamedFrom">original name</param>
-        /// <param name="p_renamedTo">renamed</param>
+        /// <param name="p_renamedTo">new name</param>
         protected void RenamedFileEvent(string p_renamedFrom, string p_renamedTo) {
             FileRenamed?.Invoke(this, new FileRenamedEventArgs(p_renamedFrom, p_renamedTo));
         }
@@ -337,6 +336,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             DoPing?.Invoke(this, IntegrationEventArgs.Empty);
         }
 
+        // integration source activities to be implemented in derived class
         public abstract void Scan(IPattern[] p_Pattern);
         public abstract void Get(List<MatchedFile> p_Mf);
         public abstract void Delete(List<MatchedFile> p_Mf);

@@ -24,7 +24,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         // high level globals
         public static readonly int ServiceStopWaitTime = 10 * 1000;  // 10 seconds
         public static readonly int MainLoopStartTimeout = 10 * 1000;    // 10 seconds
-        public static readonly int MainLoopCycleTime = 10 * 1000;    // 10 seconds
+        public static readonly int MainLoopCycleTime = 1 * 1000;    // 1 second(s)
 
         public static readonly int IntegrationInterruptWait = 5000;  // 5 seconds
         public static readonly int IntegrationInterruptTimeout = (5 * 60000);  // 5 minutes        
@@ -33,12 +33,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 
         public static readonly string DebugLogName = "DebugLog";
         public static readonly string ServiceLogName = "ServiceLog";
-        public static readonly string SysLogName = "SysQueueLog";
-        public static readonly string XmlLogName = "XmlQueueLog";
+        public static readonly string SysLogName = "SystemQueueLog";
+        public static readonly string XmlLogName = "XMLQueueLog";
         public static readonly string IntegrationLogName = "Integration";
         public static readonly string MasterThreadName = "Integratrex.MainLoop";
-        public static readonly string SysThreadName = "Integratrex.SysQueue";
-        public static readonly string XmlThreadName = "Integratrex.XmlQueue";
+        //public static readonly string SysThreadName = "Integratrex.SysQueue";
+        //public static readonly string XmlThreadName = "Integratrex.XmlQueue";
         public static SourceLevels ServiceLogLevel { get; set; }
         public static NetworkCredential SmtpCredential { get; set; }
         public static ThreadPriority SvcPriority = ThreadPriority.AboveNormal;
@@ -61,6 +61,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             /// {0=Message}
             /// </summary>
             public static string SysMessage = "Sys Message Received: {0}";
+            public static string XmlMessage = "XML Message Received: {0}";
 
             /// <summary>
             /// {0=Event}
@@ -92,7 +93,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // integration intialization activities 5###
             public static string ERR5001 = "ERROR; Integration Source did not intialize correctly.";
 
-            // integration run activities 6###
+            // integration run activities 6### 
 
             // XML queue activities 7###
             
@@ -103,6 +104,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // configuration errors 1###_#
             public static string ERR1001guess
                 = "ERROR; Multiple integrations with Desc \"{0}\" are present in the configuration file. All integrations must have a unique description. Only the first integration will be scheduled, others are ignored.";
+
+        }
+
+        public static class WarnMessage {
+
+            public static readonly string WARN1000 = "";
 
         }
 

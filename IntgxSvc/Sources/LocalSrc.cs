@@ -54,7 +54,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public override void Scan(IPattern[] p_Pattern) {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             // method logic
-            HashSet<MatchedFile> Matches = new HashSet<MatchedFile>();
+            HashSet<MatchedFile> Matches = new HashSet<MatchedFile>(new MatchedFileComparer());
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
                 // scan logic - first things first - what is the scan location?
@@ -69,6 +69,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     foreach (FileInfo Fi in Files) {
                         if (P.IsMatch(Fi.Name)) {
                             MatchedFile Match = new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc);
+
+                            
                             if (Matches.Add(new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc))) {
                                 // pew pew
                                 MatchEvent(Match, folder); 
@@ -169,26 +171,25 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
-        /// Rename matched files in the source location
+        /// Transform files at the source location
         /// </summary>
-        /// <param name="p_Mf"></param>
-        /// <param name="p_rename"></param>
+        /// <param name="p_Mf">the matched files</param>        
         public override void Transform(List<MatchedFile> p_Mf) {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
-
+                // transform event arguments
                 TransformSourceEventArgs Args = new TransformSourceEventArgs(p_Mf);
 
                 // perform transforms on the model
                 DoTransformEvent(Args);
-                // but were there any?
+                // were any transforms performed?
                 if(!Args.HasTransforms) {
                     return;
                 }
 
-                // go thru matched files and perform actual transforms at the source
+                // go thru matched files (model) and perform **actual** transforms at the source location
                 foreach (MatchedFile F in p_Mf) {
                     // name changed?
                     if(F.Name.Equals(F.OriginalName)) {

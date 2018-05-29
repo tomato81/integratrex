@@ -87,9 +87,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             finally {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }         
-        }
-
-        
+        }        
 
         /// <summary>
         /// Start Schedules

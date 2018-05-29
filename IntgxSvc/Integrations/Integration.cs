@@ -18,6 +18,7 @@ using log4net.Repository.Hierarchy;
 using C2InfoSys.Schedule;
 using C2InfoSys.FileIntegratrex.Lib;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace C2InfoSys.FileIntegratrex.Svc {
 
@@ -106,7 +107,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void Source_DoTransform(object sender, TransformSourceEventArgs e) {            
             // what we do?
             if(Manager.OnContact.RenameOriginal) {
-
                 // go thru the files
                 foreach (MatchedFile F in e.MatchedFiles) {
                     // set File context                
@@ -114,10 +114,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     // do rename
                     F.Name = Manager.OnContact.Rename();
                 }
-
+                // transforms have been performed
                 e.HasTransforms = true;
-            }            
-            
+            }                        
         }
 
         /// <summary>
@@ -361,7 +360,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 
 
                 // add to match history
-                Manager.MatchHistory.Add(MatchedFiles);
+//                Manager.MatchHistory.Add(MatchedFiles);
 
             }
             catch (Exception ex) {
@@ -556,10 +555,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             if (m_IntegrationManagers.ContainsKey(p_Integration.Desc)) {
                 throw new Exception("this shouldn't be ... why does this integration already exist?");
             }
+            
             // set locals
             m_IntegrationInterruptEvent = p_IntegrationInterruptEvent;
-            m_Integration = p_Integration;
-            m_MatchHistory = new MatchHistory(p_Integration.OnContact.SupressDuplicates);
+            m_Integration = p_Integration;          
+            m_MatchHistory = new MatchHistory(p_Integration.OnContact.SupressDuplicates, new FileInfo(Path.Combine(Global.AppSettings.IntegratrexWorkFolder, p_Integration.Desc, Global.WorkSupprtDir, string.Concat("match", ".hist"))));
             m_Attrs = new IntegrationAttributes(p_Integration);            
             m_IntegrationManagers.Add(p_Integration.Desc, this);            
             m_Patterns = new IPattern[p_Integration.Patterns.Count()];
@@ -567,7 +567,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // some events
             m_OnContact.OnError += OnContact_OnError;
             m_OnContact.DoLog += IntegrationObject_WriteLog;
-
             // intialize sub-systems        
             InitializeLog();
             InitializePatterns();
@@ -767,8 +766,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="sender">the object that raised the event</param>
         /// <param name="e">event args</param>
-        private void Source_OnError(object sender, IntegrationErrorEventArgs e) {            
-            IntInstLog.ErrorFormat("{0} [{1}]", m_Source.Description, e.Exception.Message);
+        private void Source_OnError(object sender, IntegrationErrorEventArgs e) {
+            IntInstLog.ErrorFormat("{0} [{1}]", m_Source.Description, e.Message);     
         }
 
         /// <summary>
@@ -786,7 +785,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public void StartSchedule() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {                
-                // start schedule
+                // start schedule                
                 m_Timer.Start();
                 IntInstLog.InfoFormat("{0} - Schedule Started", m_Integration.Desc);
             }
@@ -802,6 +801,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
                 m_Timer.Stop();
+
+                // save match history to file
+
+                
+
+
+
                 IntInstLog.InfoFormat("{0} - Schedule Stopped", m_Integration.Desc);
             }
             catch (Exception ex) {
@@ -817,7 +823,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {                
                 // method logic                           
                 m_Timer.ClearJobs();
-                EventQueue TimerEvents = new EventQueue();
+                EventQueue TimerEvents = new EventQueue();                
                 // handle continuous
                 if (m_Integration.Schedule.Continuous != null) {
                     SimpleInterval IntSched = null;
@@ -856,7 +862,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                         TimerEvents.Add(TimeSched);
                     }
                 }
-                // add the schedule to the timer
+                // add the schedule to the timer                
                 m_Timer.AddJob(TimerEvents, m_RunAction, new object[0]);
             }
             catch (Exception ex) {
@@ -905,7 +911,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // reset attributes
                 m_Attrs.Reset();
 
-                // tracker jacker
+                // integration activities
                 using (IntegrationTracker T = NewTracker()) {
                     // integrate
                     T.ScanSource();
@@ -966,12 +972,36 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
 
         private XSupressDuplicates m_SupressDuplicates;
+        private FileInfo m_MatchHistoryFi;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public MatchHistory(XSupressDuplicates p_SupressDuplicates) {
+        public MatchHistory(XSupressDuplicates p_SupressDuplicates, FileInfo p_MatchHistoryFi) {
+            m_MatchHistoryFi = p_MatchHistoryFi;
             m_SupressDuplicates = p_SupressDuplicates;
+            // read the history in
+            ReadMatchHistoryFile();
+        }
+        
+        /// <summary>
+        /// Read the match history from file
+        /// </summary>
+        private void ReadMatchHistoryFile() {
+            try {
+                if(!m_MatchHistoryFi.Exists) {
+                    return;
+                }
+                using(StreamReader Fin = new StreamReader(m_MatchHistoryFi.FullName, Encoding.ASCII)) {
+                    while(!Fin.EndOfStream) {                     
+                        MatchHistoryRecord R = JsonConvert.DeserializeObject<MatchHistoryRecord>(Fin.ReadLine());
+                        Add(R.Name, R.MD5, R.SHA1, R.Size, R.LastModifiedUTC);                      
+                    }
+                }               
+            }
+            catch(Exception ex) {
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -1018,17 +1048,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_M">the Matched File</param>
         /// <returns>duplicate flag</returns>
         public bool IsDuplicate(MatchedFile p_M) {
-            try {
-
-           
-
+            try {         
                 // matched flags
                 bool fileName = false;
                 bool fileSize = false;
                 bool fileDt = false;
                 bool fileMD5 = false;
-                bool fileSHA1 = false;
-                
+                bool fileSHA1 = false;                
                 // check for matches
                 if (m_FileNames.Contains(p_M.OriginalName)) {
                     fileName = true;
@@ -1045,8 +1071,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 if (m_SHA1.Contains(p_M.SHA1)) {
                     fileSHA1 = true;
                 }
-
-
                 // is it a match?
                 bool match = ((FileName ? fileName : true) && (FileSize ? fileSize : true) && (LastModifiedDate ? fileDt : true))
                     && (MD5 == fileMD5)
@@ -1071,25 +1095,16 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_Mf">a Matched File</param>
         public void Add(MatchedFile p_Mf) {
-            // add the file name
-            m_FileNames.Add(p_Mf.OriginalName);
-            // add the file hashs
-            if (p_Mf.MD5.Length > 0) {
-                m_MD5.Add(p_Mf.MD5);
+            // don't add duplicate files to the list
+            if(IsDuplicate(p_Mf)) {
+                return;
             }
-            if (p_Mf.SHA1.Length > 0) {
-                m_SHA1.Add(p_Mf.SHA1);
-            }           
-            // add the file size            
-            if(!m_FileNameSize.ContainsKey(p_Mf.OriginalName)) {
-                m_FileNameSize.Add(p_Mf.OriginalName, new HashSet<long>());
+            // write to file
+            using (StreamWriter Fout = new StreamWriter(m_MatchHistoryFi.FullName, true, Encoding.ASCII)) {                
+                Fout.WriteLine(JsonConvert.SerializeObject(new MatchHistoryRecord { Name = p_Mf.OriginalName, MD5 = p_Mf.MD5, SHA1 = p_Mf.SHA1, Size = p_Mf.Size, LastModifiedUTC = p_Mf.LastModifiedUTC }));
             }
-            m_FileNameSize[p_Mf.OriginalName].Add(p_Mf.Size);
-            // add the last modified date
-            if (!m_FileNameLastMod.ContainsKey(p_Mf.OriginalName)) {
-                m_FileNameLastMod.Add(p_Mf.OriginalName, new HashSet<long>());
-            }            
-            m_FileNameLastMod[p_Mf.OriginalName].Add(p_Mf.LastModifiedUTC);
+            // write to memory
+            Add(p_Mf.OriginalName, p_Mf.MD5, p_Mf.SHA1, p_Mf.Size, p_Mf.LastModifiedUTC);  
         }
 
         /// <summary>
@@ -1103,6 +1118,36 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
+        /// The guts of Add
+        /// </summary>
+        /// <param name="p_name">original name at scan location</param>
+        /// <param name="p_MD5">MD5 checksum</param>
+        /// <param name="p_SHA1">SHA1 checksum</param>
+        /// <param name="p_size">file size</param>
+        /// <param name="p_lastModifiedUTC">last modified date UTC</param>
+        private void Add(string p_name, string p_MD5, string p_SHA1, long p_size, long p_lastModifiedUTC) {
+            // add the file name
+            m_FileNames.Add(p_name);
+            // add the file hashs
+            if (p_MD5.Length > 0) {
+                m_MD5.Add(p_MD5);
+            }
+            if (p_SHA1.Length > 0) {
+                m_SHA1.Add(p_SHA1);
+            }
+            // add the file size            
+            if (!m_FileNameSize.ContainsKey(p_name)) {
+                m_FileNameSize.Add(p_name, new HashSet<long>());
+            }
+            m_FileNameSize[p_name].Add(p_size);
+            // add the last modified date
+            if (!m_FileNameLastMod.ContainsKey(p_name)) {
+                m_FileNameLastMod.Add(p_name, new HashSet<long>());
+            }
+            m_FileNameLastMod[p_name].Add(p_lastModifiedUTC);
+        }
+
+        /// <summary>
         /// Add a list of Matched Files to the duplicate list
         /// </summary>
         /// <param name="p_Mf">a list of Matched Files</param>
@@ -1110,6 +1155,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             foreach (MatchedFile M in p_Mf) {
                 Add(M);
             }
+        }
+
+        /// <summary>
+        /// To Serialize
+        /// </summary>
+        private class MatchHistoryRecord {
+            public string Name { get; set; }
+            public string MD5 { get; set; }
+            public string SHA1 { get; set; }
+            public long Size { get; set; }
+            public long LastModifiedUTC { get; set; }
         }
 
 
@@ -1143,12 +1199,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_name"></param>
         /// <returns></returns>
         public object GetReplacementValue(string p_name) {
-            try {
+            try {              
 
-                
-
-                string[] elements = p_name.Split('.');
-         
+                string[] elements = p_name.Split('.');       
 
                 if(elements.Length == 1) {
                     return elements[0];

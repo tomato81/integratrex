@@ -74,6 +74,9 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
         static void Main(string[] args) {
             try {
 
+
+
+
                 StopIntegratrex();
 
                 /*

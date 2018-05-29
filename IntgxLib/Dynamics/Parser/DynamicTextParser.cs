@@ -188,14 +188,14 @@ namespace C2InfoSys.FileIntegratrex.Lib
             }          
             switch(p_FnToken.Cargo) {
                 case "Date": {
-                        return new DateFn();                        
-                    }
+                    return new DateFn();                        
+                }
                 case "Format": {
-                        return new FormatFn();                        
-                    }
+                    return new FormatFn();                        
+                }
                 default: {
-                        throw new Exception(string.Format("{0} is not a function", p_FnToken.Cargo));
-                    }
+                    throw new Exception(string.Format("{0} is not a function", p_FnToken.Cargo));
+                }
             }            
         }
 

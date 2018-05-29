@@ -69,8 +69,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_Mf"></param>
         public override void Get(List<MatchedFile> p_Mf) {
-            try {
-                
+            try {                
                 throw new NotImplementedException();
             }
             catch(Exception ex) {

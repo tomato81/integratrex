@@ -22,7 +22,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     public static class Global {
 
         // high level globals
-        public static readonly int ServiceStopWaitTime = 5 * 1000;  // 5 seconds
+        public static readonly int ServiceStopWaitTime = 10 * 1000;  // 10 seconds
         public static readonly int MainLoopStartTimeout = 10 * 1000;    // 10 seconds
         public static readonly int MainLoopCycleTime = 10 * 1000;    // 10 seconds
 
@@ -55,6 +55,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public static class Messages {
             public static string EnterMethod = "Enter Method: {0}.{1}";
             public static string ExitMethod = "Exit Method: {0}.{1}";
+
+
+            /// <summary>
+            /// {0=Message}
+            /// </summary>
+            public static string SysMessage = "Sys Message Received: {0}";
+
+            /// <summary>
+            /// {0=Event}
+            /// </summary>
+            public static string ServiceEvent = "Service: {0}";
 
             /// <summary>
             /// {1=Class}.{2=Method}; {0=Exception}; Message: {3=Message}

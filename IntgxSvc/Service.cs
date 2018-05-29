@@ -17,7 +17,8 @@ using log4net;
 
 // C2
 using C2InfoSys.FileIntegratrex.Lib;
-
+using System.IO;
+using System.Xml;
 
 namespace C2InfoSys.FileIntegratrex.Svc {
 
@@ -57,7 +58,48 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             SvcLog = LogManager.GetLogger(Global.ServiceLogName);
             SysLog = LogManager.GetLogger(Global.SysLogName);
             XmlLog = LogManager.GetLogger(Global.XmlLogName);            
-        }        
+        }
+
+        /// <summary>
+        /// On Start
+        /// </summary>
+        /// <param name="args">arrrrrgs!</param>
+        protected override void OnStart(string[] args) {
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                // service master thread
+                SvcMasterThread = new Thread(new ThreadStart(new Action(MainLoop)));
+                SvcMasterThread.Name = Global.MasterThreadName;
+                SvcMasterThread.IsBackground = true;
+                SvcMasterThread.Priority = Global.SvcPriority;   // hm
+
+                // system queue thread
+                SysQueueThread = new Thread(new ThreadStart(new Action(SysLoop)));
+                SysQueueThread.Name = Global.SysThreadName;
+                SysQueueThread.IsBackground = true;
+                SysQueueThread.Priority = Global.SvcPriority;   // hm
+
+                // xml queue thread
+                XmlQueueThread = new Thread(new ThreadStart(new Action(XmlLoop)));
+                XmlQueueThread.Name = Global.XmlThreadName;
+                XmlQueueThread.IsBackground = true;
+                XmlQueueThread.Priority = Global.SvcPriority;   // hm                        
+
+                // fire up the queues
+                SysQueueThread.Start();
+                XmlQueueThread.Start();
+
+                // fire up the main thread
+                SvcMasterThread.Start();
+
+                // log service start
+                SvcLog.Info("Service Started.");
+            }
+            catch (Exception ex) {
+                SvcLog.ErrorFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+        }
 
         /// <summary>
         /// Setup the integratrex prior to starting the main loop
@@ -98,7 +140,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 while (!SvcShutdownEvent.WaitOne(Global.MainLoopCycleTime)) {                  
                     SvcLog.DebugFormat("MainLoop Iteration:{0}", ++count);
                     // check system queue thread
-                    if (!SysQueueThread.IsAlive) {
+                    if (!SysQueueThread.IsAlive) {                      
                         // TODO: attempt to revive thread
                         SvcShutdownEvent.Set(); 
                     }
@@ -109,7 +151,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     }                                        
                 }
                 // post-loop logic
-                WindDown();                               
+                WindDown();
+                // stop service
+                Stop();
             }
             catch(Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -129,6 +173,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // shut 'em down                
+                InjectHaltMessage();
                 m_Integratrex.StopAllIntegrations();
             }
             catch (Exception ex) {
@@ -139,6 +184,92 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }    
         }
+
+        /// <summary>
+        /// Inject a halt message into the Xml and System queues
+        /// </summary>
+        private void InjectHaltMessage() {
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+
+                MessageQueue SysQ = new MessageQueue(Global.AppSettings.IntegratrexSysQueue);            
+                SysQ.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });
+
+                MessageQueue XmlQ = new MessageQueue(Global.AppSettings.IntegratrexXmlQueue);
+                XmlQ.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });
+
+                if (SysQ.CanWrite) {
+                    SysQ.Send("HALT", "Service");
+                }
+
+                if (XmlQ.CanWrite) {
+                    XmlQ.Send("HALT", "Service");
+                }
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+            }
+        }
+
+
+        /// <summary>
+        /// Monitor the sys queue ... perhaps this should just be the main loop because im not sure what the main loop does ... 
+        /// </summary>
+        private void SysQueueStartListening() {
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                // don't do anything until the main loop starts looping
+                if (!MainLoopStartEvent.WaitOne(Global.MainLoopStartTimeout)) {
+                    SvcLog.FatalFormat("System message thread failed waiting for the main service loop to start");
+                    return;
+                }
+                // aquire the system queue
+                if (!MessageQueue.Exists(Global.AppSettings.IntegratrexSysQueue)) {
+                    SvcLog.FatalFormat("Message Queue \"{0}\" does not exist.", Global.AppSettings.IntegratrexSysQueue);
+                    return;
+                }
+                // got it
+                MessageQueue SysQ = new MessageQueue(Global.AppSettings.IntegratrexSysQueue);
+                SysQ.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });
+                // hook up event
+                SysQ.ReceiveCompleted += SysQ_ReceiveCompleted;
+                SysQ.BeginReceive();                
+                
+                
+
+                // this should occur during a normal service stop
+                SvcLog.Info("System message queue stopped");
+
+            }
+            catch (ThreadAbortException) {
+                SvcLog.Fatal("SYSTEM THREAD ABORTED");
+            }
+            catch (Exception ex) {
+                throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+            }
+        }
+        
+        /// <summary>
+        /// Message Received
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SysQ_ReceiveCompleted(object sender, ReceiveCompletedEventArgs e) {
+            throw new NotImplementedException();
+        }
+
+
+
+
 
         /// <summary>
         /// Monitor the sys queue ... perhaps this should just be the main loop because im not sure what the main loop does ... 
@@ -153,32 +284,51 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     return;
                 }
                 MessageQueue SysQ = new MessageQueue(Global.AppSettings.IntegratrexSysQueue);
+                SysQ.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });
                 TimeSpan TimeOut = new TimeSpan(0, 0, Global.SysQueueTimeout);
                 // don't do anything until the main loop starts looping
-                if (!MainLoopStartEvent.WaitOne(Global.MainLoopStartTimeout))
-                {
+                if (!MainLoopStartEvent.WaitOne(Global.MainLoopStartTimeout)) {
                     SvcLog.FatalFormat("System message thread failed waiting for the main service loop to start");                    
                     return;
                 }
+
                 // looper
-                while (!SvcShutdownEvent.WaitOne(0)) {
-                    Message SysMsg = null;
+                while (!SvcShutdownEvent.WaitOne(0)) {                    
                     try {
-                        SysMsg = SysQ.Receive(TimeOut);
-
-                        
-
+                        // get the message
+                        string message = SysQ.Receive(TimeOut).Body.ToString();                        
+                        // log it
+                        SvcLog.InfoFormat(Global.Messages.SysMessage, message);
+                        // check and action the message                    
+                        if(message.Equals("STOP", StringComparison.OrdinalIgnoreCase)) {
+                            SvcShutdownEvent.Set();
+                        }                                        
+                        if (message.Equals("HALT", StringComparison.OrdinalIgnoreCase)) {
+                            break;
+                        }
                     }
                     catch (MessageQueueException ex) {
+                        if(ex.MessageQueueErrorCode == MessageQueueErrorCode.IOTimeout) {
+                            continue;
+                        }
                         SvcLog.WarnFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);                        
                     }
                     catch (Exception ex) {
                         SvcLog.ErrorFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);                        
                     }
                 }
+                // this should occur during a normal service stop
+                SvcLog.Info("System message queue stopped");
+
+            }
+            catch (ThreadAbortException) {
+                SvcLog.Fatal("SYSTEM THREAD ABORTED");
             }
             catch (Exception ex) {
                 throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -187,13 +337,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         private void XmlLoop() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            try {
+            try {                
+                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // aquire the system queue                
                 if (!MessageQueue.Exists(Global.AppSettings.IntegratrexXmlQueue)) {
                     XmlLog.FatalFormat("Message Queue \"{0}\" does not exist.", Global.AppSettings.IntegratrexXmlQueue);                    
                     return;
                 }
                 MessageQueue XmlQ = new MessageQueue(Global.AppSettings.IntegratrexXmlQueue);
+                XmlQ.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });    // this will probably have to change when actual XML is used
                 TimeSpan TimeOut = new TimeSpan(0, 0, Global.XmlQueueTimeout);               
                 // don't do anything until the main loop starts looping
                 if (!MainLoopStartEvent.WaitOne(Global.MainLoopStartTimeout)) {
@@ -210,9 +362,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                             // message is not normal
                         }
 
-                        string messsage = XmlMsg.Body.ToString();
+                        string message = XmlMsg.Body.ToString();
 
-                        
+                        if (message.Equals("HALT", StringComparison.OrdinalIgnoreCase)) {
+                            break;
+                        }
+
                         // the message is an integation
                         // it can be added to integrations 
                         // or it can be run once and discarded
@@ -221,19 +376,30 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                         // BUT - if it only contains one IMMEDIATE schedule, just run it and discard
 
                         // add a method to Ingratrex that can pull in the xml message and... do what it has to do
-                        
-                        
+
+
                     }
                     catch(MessageQueueException ex) {
+                        if (ex.MessageQueueErrorCode == MessageQueueErrorCode.IOTimeout) {
+                            continue;
+                        }
                         XmlLog.WarnFormat("Message Queue: {0} receive timeout after {1}. Message={2}", XmlQ.QueueName, Global.XmlQueueTimeout.ToString(), ex.Message);
                     }
                     catch(Exception ex) {
                         XmlLog.ErrorFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                     }
                 }
+                // this should occur during a normal service stop
+                SvcLog.Info("XML queue stopped");
+            }
+            catch(ThreadAbortException) {
+                SvcLog.Fatal("XML THREAD ABORTED");
             }
             catch (Exception ex) {
                 throw ex;
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }        
 
@@ -247,65 +413,28 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
 #endif
-
-        /// <summary>
-        /// On Start
-        /// </summary>
-        /// <param name="args">arrrrrgs!</param>
-        protected override void OnStart(string[] args) {
-            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            try {               
-                // service master thread
-                SvcMasterThread = new Thread(new ThreadStart(new Action(MainLoop)));
-                SvcMasterThread.Name = Global.MasterThreadName;
-                SvcMasterThread.IsBackground = true;
-                SvcMasterThread.Priority = Global.SvcPriority;   // hm
-
-                // system queue thread
-                SysQueueThread = new Thread(new ThreadStart(new Action(SysLoop)));
-                SysQueueThread.Name = Global.SysThreadName;
-                SysQueueThread.IsBackground = true;
-                SysQueueThread.Priority = Global.SvcPriority;   // hm
-
-                // xml queue thread
-                XmlQueueThread = new Thread(new ThreadStart(new Action(XmlLoop)));
-                XmlQueueThread.Name = Global.XmlThreadName;
-                XmlQueueThread.IsBackground = true;
-                XmlQueueThread.Priority = Global.SvcPriority;   // hm                        
-
-                // fire up the queues
-                SysQueueThread.Start();
-                XmlQueueThread.Start();
-
-                // fire up the main thread
-                SvcMasterThread.Start();
-
-                // log service start
-                SvcLog.Info("Service Started.");
-            }
-            catch (Exception ex) {
-                SvcLog.ErrorFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-                throw ex;
-            } 
-        }
-
+        
         /// <summary>
         /// On Stop
         /// </summary>
         protected override void OnStop() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                SvcShutdownEvent.Set();
-                if (!SvcMasterThread.Join(Global.ServiceStopWaitTime)) {
-                    SvcMasterThread.Abort();
+                SvcLog.InfoFormat("OnStop thread={0}", Thread.CurrentThread.Name);
+                // log
+                SvcLog.InfoFormat(Global.Messages.ServiceEvent, ThisMethod.Name);
+                // if the shutdown event has not been signaled, signal it!
+                if (!SvcShutdownEvent.WaitOne(1)) {
+                    SvcShutdownEvent.Set();
                 }
-                if (!SysQueueThread.Join(Global.ServiceStopWaitTime)) {
-                    SysQueueThread.Abort();
-                }
+                // stop xml queue
                 if (!XmlQueueThread.Join(Global.ServiceStopWaitTime)) {
                     XmlQueueThread.Abort();
                 }
-
+                // stop system queue
+                if (!SysQueueThread.Join(Global.ServiceStopWaitTime)) {                    
+                    SysQueueThread.Abort();     
+                }                
                 // log service start
                 SvcLog.Info("Service Stopped.");
             }
@@ -313,9 +442,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 SvcLog.ErrorFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
-            finally {
-                // hm
-            }            
+            finally {                
+#if (DEBUG)
+                AppEntry.StopDebugService.Set();
+#endif                
+            }
         }
 
         /// <summary>

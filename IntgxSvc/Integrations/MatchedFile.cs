@@ -10,10 +10,7 @@ using C2InfoSys.FileIntegratrex.Lib;
 using Newtonsoft.Json;
 
 
-namespace C2InfoSys.FileIntegratrex.Svc {
-
-
-    
+namespace C2InfoSys.FileIntegratrex.Svc {   
 
 
     /// <summary>

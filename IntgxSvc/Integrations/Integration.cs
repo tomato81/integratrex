@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,9 +87,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         private void SetAttrsInitialContext() {
             Manager.Attributes.Files = m_MatchedFiles;
-        }
-
-        
+        }        
 
         /// <summary>
         /// A file has been renamed at the integration source
@@ -148,9 +146,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="e">event args</param>
         private void Source_DeletedFiles(object sender, IntegrationFilesEventArgs e) {
             IntInstLog.InfoFormat("all matched files delete from {0}", Manager.Source.Description);
-        }       
-
-        
+        }               
 
         /// <summary>
         /// Integration Value is Required!
@@ -260,10 +256,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             } else {
                 e.MatchedFile.SetWorkingFileName(e.MatchedFile.OriginalName);
             }           
-
-            
-
-
         }        
 
         /// <summary>

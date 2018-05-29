@@ -7,7 +7,7 @@
 
   <Integration Desc="Local-Local" Enable="Y">
     <Schedule>
-      <Continuous Interval="20" />
+      <Continuous Interval="15" />
     </Schedule>
     <Source Desc="FileX Pickup">
       <Local>

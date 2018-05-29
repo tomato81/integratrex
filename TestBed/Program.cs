@@ -15,7 +15,7 @@ using System.Security.Cryptography;
 using C2InfoSys.Schedule;
 using C2InfoSys.FileIntegratrex.Lib;
 using C2InfoSys.FileIntegratrex.Svc;
-
+using System.Diagnostics;
 
 namespace C2InfoSys.FileIntegratrex.TestBed {
     
@@ -46,6 +46,27 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
     public class Program {
 
 
+
+        private static void StopIntegratrex() {
+
+            try {
+                
+
+                MessageQueue SysQ = new MessageQueue(@".\Private$\integratrex_sys");
+                SysQ.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });
+
+                if (SysQ.CanWrite) {
+                    SysQ.Send("STOP", "Integratrex Console");
+                }
+
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+
+        }
+
+
         /// <summary>
         /// App Entry
         /// </summary>
@@ -53,6 +74,7 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
         static void Main(string[] args) {
             try {
 
+                StopIntegratrex();
 
                 /*
                 C.M();
@@ -72,7 +94,7 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
                 //TestBusinessCalendarEdits();
                 //TestOptions();
                 //ParseDynamicText();
-                TestDynamicTextParser();
+                //TestDynamicTextParser();
                 //TestScanner();
                 //TestScheduleTimer();
 
@@ -88,8 +110,7 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
                     Console.WriteLine(ex.Message);
                     ex = ex.InnerException;
                 } while (ex != null);
-            }           
-            Console.ReadKey();        
+            }                       
         }
 
         private static void TestBCReader() {

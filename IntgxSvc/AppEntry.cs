@@ -5,6 +5,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Threading;
 
 namespace C2InfoSys.FileIntegratrex.Svc {
 
@@ -14,7 +15,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     public static class AppEntry {
 
         // event source
-        public const string EventSource = "File Integratrex";  
+        public const string EventSource = "File Integratrex";
+
+#if (DEBUG)
+        public static ManualResetEvent StopDebugService = new ManualResetEvent(false);
+#endif
 
         /// <summary>
         /// The main entry point for the application.
@@ -31,18 +36,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
 #if (DEBUG)
             Service S = new Service();            
-            S.Start();            
-            // break on this
-            //System.Threading.Thread.Sleep(System.Threading.Timeout.Infinite);
-            System.Threading.Thread.Sleep(60000);
-            // stop
-            S.Stop();
+            S.Start();
+            StopDebugService.WaitOne();
 #else
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[] { new Service() };
             ServiceBase.Run(ServicesToRun);                       
-#endif                
-            
+#endif
+
         }
 
     }   // end class Program

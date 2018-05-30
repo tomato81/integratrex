@@ -10,22 +10,7 @@ using C2InfoSys.FileIntegratrex.Lib;
 using Newtonsoft.Json;
 
 
-namespace C2InfoSys.FileIntegratrex.Svc {   
-
-
-    /// <summary>
-    /// Use to compare matched files
-    /// </summary>
-    public class MatchedFileComparer : IEqualityComparer<MatchedFile> {
-
-        public bool Equals(MatchedFile p_Lhs, MatchedFile p_Rhs) {
-            return (p_Lhs.OriginalName.Equals(p_Rhs.OriginalName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public int GetHashCode(MatchedFile p_Mf) {
-            return p_Mf.GetHashCode();
-        }
-    }
+namespace C2InfoSys.FileIntegratrex.Svc {       
 
     /// <summary>
     /// Matched File
@@ -90,6 +75,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 return m_origName;
             }
         }
+
         /// <summary>
         /// Transformed file name at the integration source
         /// </summary>
@@ -98,10 +84,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 return RemoveExtension(m_origName);
             }
         }
+
         /// <summary>
         /// Transformed file name extension at the integration source
-        /// </summary>
-        
+        /// </summary>        
         public string OriginalNameExt {
             get {
                 return GetFileExtension(m_origName);
@@ -120,19 +106,19 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 m_fileName = value;
             }
         }
+
         /// <summary>
-        /// Transformed file name at the integration source without the file extension
-        /// </summary>
-        
+        /// Transformed file name at the integration source - No Extension
+        /// </summary>        
         public string NameNoExt {
             get {
                 return RemoveExtension(m_fileName);
             }
         }
+
         /// <summary>
-        /// Transformed file extension at the integration source
-        /// </summary>
-        
+        /// Transformed File Name at the integration source - Extension Only
+        /// </summary>        
         public string Ext {
             get {
                 return GetFileExtension(m_fileName);
@@ -142,27 +128,26 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private string m_fileName;
 
         /// <summary>
-        /// Working Name
-        /// </summary>
-        
+        /// Working File Name
+        /// </summary>        
         public string WorkingName {
             get {
                 return m_WorkingFi.Name;
             }
         }
+
         /// <summary>
-        /// Working file name
+        /// Working File Name - No Extension
         /// </summary>
-        
         public string WorkingNameNoExt {
             get {
                 return RemoveExtension(m_WorkingFi.Name);
             }
         }
+
         /// <summary>
-        /// Working file extension
-        /// </summary>
-        
+        /// Working File Name - Extension Only
+        /// </summary>        
         public string WorkingNameExt {
             get {
                 return m_WorkingFi.Extension;
@@ -244,10 +229,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Has the file been deleted from the source?
         /// </summary>        
         public bool Deleted { get; set; }
-
         
+        /// <summary>
+        /// Source Location
+        /// </summary>
         public ISourceLocation Source { get => m_Source; set => m_Source = value; }
 
+        // members
         private bool m_supress;
         private DirectoryInfo m_WorkingDi;
         private FileInfo m_WorkingFi;
@@ -278,37 +266,71 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Compile!
         /// </summary>
         protected override void CompileDynamicText() {            
-        }
-
-        /// <summary>
-        /// Equals
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public bool Equals(MatchedFile x, MatchedFile y) {
-            return x.OriginalName.Equals(y.OriginalName, StringComparison.Ordinal);
+            // nothing
         }
 
         /// <summary>
         /// Get Hash Code
         /// </summary>        
-        /// <returns>a hash code</returns>
+        /// <returns>the hash code</returns>
         public new int GetHashCode() {
             return OriginalName.GetHashCode();
-        } 
+        }
 
         /// <summary>
         /// Compare
         /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
-        public bool Equals(MatchedFile other) {
-            return new MatchedFileComparer().Equals(this, other);
+        /// <param name="p_Other"></param>
+        /// <returns>true if Matched Files are the same</returns>
+        public bool Equals(MatchedFile p_Other) {
+            return new MatchedFileComparer().Equals(this, p_Other);
         }
 
     }   // MatchedFile
 
+    /// <summary>
+    /// Use to compare matched files on file name
+    /// </summary>
+    public class MatchedFileComparer : IEqualityComparer<MatchedFile> {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public MatchedFileComparer() :
+            this(StringComparison.OrdinalIgnoreCase) {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="p_stringComparison">String Comparison Type</param>
+        public MatchedFileComparer(StringComparison p_stringComparison) {
+            m_stringComparison = p_stringComparison;
+        }
+
+        // members
+        private StringComparison m_stringComparison;
+
+        /// <summary>
+        /// Equals
+        /// </summary>
+        /// <param name="p_Lhs">left hand side</param>
+        /// <param name="p_Rhs">right hand side</param>
+        /// <returns>true if Matched Files are the same</returns>
+        public bool Equals(MatchedFile p_Lhs, MatchedFile p_Rhs) {
+            return (p_Lhs.OriginalName.Equals(p_Rhs.OriginalName, m_stringComparison));
+        }
+
+        /// <summary>
+        /// Get Hash Code
+        /// </summary>
+        /// <param name="p_Mf">Matched File</param>
+        /// <returns>hash code</returns>
+        public int GetHashCode(MatchedFile p_Mf) {
+            return p_Mf.GetHashCode();
+        }        
+
+    }   // MatchedFileComparer
 
 
 }

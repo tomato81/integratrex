@@ -87,9 +87,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
         /// <summary>
         /// Constructor
-        /// </summary>        
+        /// </summary>
         public IntegrationEventArgs() {
         }
+
 
     }   // IntegrationEventArgs
 

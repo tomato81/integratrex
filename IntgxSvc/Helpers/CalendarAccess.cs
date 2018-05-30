@@ -56,7 +56,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public void LoadCalendars(string p_calendarPath, bool p_recursive, string p_xmlns) {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {                
-                SvcLog.TraceEvent(TraceEventType.Verbose, 0, Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                SvcLog.TraceEvent(TraceEventType.Verbose, 0, Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // method logic
                 BCReader Reader = new BCReader(p_xmlns);
                 m_Calendars = Reader.LoadFromFolder(p_calendarPath, p_recursive);
@@ -67,11 +67,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 }
             }
             catch (Exception ex) {
-                SvcLog.TraceEvent(TraceEventType.Critical, 0, Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.TraceEvent(TraceEventType.Critical, 0, Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                SvcLog.TraceEvent(TraceEventType.Verbose, 0, Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                SvcLog.TraceEvent(TraceEventType.Verbose, 0, Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }  
         }
 

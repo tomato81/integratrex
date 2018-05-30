@@ -56,7 +56,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // method logic
             HashSet<MatchedFile> Matches = new HashSet<MatchedFile>(new MatchedFileComparer());
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
                 // scan logic - first things first - what is the scan location?
                 string folder = Folder();                
                 // local folder
@@ -86,7 +86,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 ErrorEvent(ex);
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -97,7 +97,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public override void Get(List<MatchedFile> p_Mf) {        
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();            
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // getting
                 GetFilesEvent();
                 // go thru matched files
@@ -123,7 +123,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 ErrorEvent(ex);
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -134,7 +134,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public override void Delete(List<MatchedFile> p_Mf) {          
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
                 // deleting
                 DeleteFilesEvent();
                 // go thru matched files
@@ -166,7 +166,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 ErrorEvent(ex);
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -177,7 +177,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public override void Transform(List<MatchedFile> p_Mf) {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
                 // transform event arguments
                 TransformSourceEventArgs Args = new TransformSourceEventArgs(p_Mf);
@@ -222,7 +222,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 ErrorEvent(ex);
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 

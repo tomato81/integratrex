@@ -60,7 +60,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 ErrorEvent(ex);
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 

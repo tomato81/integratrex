@@ -57,7 +57,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public void ReadIntegrationConfig(string p_configPath, string p_xmlns) {            
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // method logic
                 m_Managers.Clear();
                 m_ManagerDict.Clear();
@@ -68,7 +68,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 foreach (XIntegration Integration in m_Integrations.Integration) {                                    
                     // check the integration has a unique name
                     if (m_ManagerDict.ContainsKey(Integration.Desc)) {     
-                        SvcLog.WarnFormat(Global.ErrMessage.ERR1001, Integration.Desc);
+                        SvcLog.WarnFormat(Global.Messages.Error.ERR1001, Integration.Desc);
                         continue;
                     }
                     // get a manager
@@ -81,11 +81,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 }                                                           
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }         
         }        
 
@@ -95,17 +95,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public void StartAllIntegrations() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 foreach (IntegrationManager Mgr in m_Managers) {
                     Mgr.StartSchedule();
                 }
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }         
         }
 
@@ -115,17 +115,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public void StopAllIntegrations() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 foreach (IntegrationManager Mgr in m_Managers) {
                     Mgr.StopSchedule();
                 }
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }  
         }
 

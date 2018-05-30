@@ -95,8 +95,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="sender">object that raised the event</param>
         /// <param name="e">Event Args</param>
-        private void Source_FileRenamed(object sender, FileRenamedEventArgs e) {
-            IntInstLog.InfoFormat("Source file renamed from {0} to {1}", e.RenamedFrom, e.RenamedTo);
+        private void Source_FileRenamed(object sender, FileRenamedEventArgs e) {           
+            IntInstLog.InfoFormat(Global.Messages.Integration.SourceFileRenamed, e.RenamedFrom, e.RenamedTo);
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="sender">object that raised the event</param>
         /// <param name="e">event args</param>
         private void Source_DeleteFiles(object sender, IntegrationEventArgs e) {
-            IntInstLog.InfoFormat("{0}: begin deleting files", Manager.Source.Description);
+            IntInstLog.InfoFormat(Global.Messages.Integration.SourceDeleteFiles, Manager.Source.Description);
         }
 
         /// <summary>
@@ -318,16 +318,16 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // dont do anything else at this point
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
                 // scan the source location for files patching the passed patterns
                 Manager.Source.Scan(Manager.Patterns);              
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -338,7 +338,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // copy files from the source to the working directory
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 
 
                 // were files matched?
@@ -364,11 +364,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -379,7 +379,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // make any necessary alterations to files in the working directory
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
                 // are we supressing?
                 if(!Manager.MatchHistory.SupressDuplciates) {
@@ -395,11 +395,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 }
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -410,15 +410,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // make any necessary alterations to files in the working directory
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -429,7 +429,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // make any necessary alterations the the source (delete, rename, etc.)
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 
                 // transform!
                 Manager.Source.Transform(MatchedFiles);              
@@ -439,11 +439,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 }
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -454,18 +454,18 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // run each response in order            
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
                 
 
 
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -476,7 +476,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // run each response in order            
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
                 // add em'
                 foreach(MatchedFile F in MatchedFiles) {
@@ -487,11 +487,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 }
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -734,7 +734,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 IntLog.InfoFormat("File matching patterns intialized:{0}", m_Patterns.Count());
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
         }    
@@ -756,7 +756,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 IntInstLog.InfoFormat("Integration source intialized:{0}", m_Integration.Source.Desc);
             }
             catch(Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
         }
@@ -790,7 +790,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 IntInstLog.InfoFormat("{0} - Schedule Started", m_Integration.Desc);
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }
         }
 
@@ -811,7 +811,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 IntInstLog.InfoFormat("{0} - Schedule Stopped", m_Integration.Desc);
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }            
         }        
 
@@ -894,7 +894,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
                 // log debug
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
 
                 // check if blocking
                 if (!m_IntegrationInterruptEvent.WaitOne(Global.IntegrationInterruptWait)) {
@@ -924,12 +924,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 }
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
                 m_inRunMethod = 0;
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }            
         }               
 

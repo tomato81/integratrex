@@ -32,8 +32,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
         // log
         private ILog SvcLog;
-        private ILog SysLog;
-        private ILog XmlLog;
+        private ILog QueueLog;        
         private ILog DebugLog;        
 
         // threading
@@ -62,8 +61,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // setup trace sources
             DebugLog = LogManager.GetLogger(Global.DebugLogName);
             SvcLog = LogManager.GetLogger(Global.ServiceLogName);
-            SysLog = LogManager.GetLogger(Global.SysLogName);
-            XmlLog = LogManager.GetLogger(Global.XmlLogName);            
+            QueueLog = LogManager.GetLogger(Global.QueueLogName);            
         }
 
         /// <summary>
@@ -72,14 +70,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void MethodTemplate() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
 
             }
             catch (Exception ex) {
-                SvcLog.ErrorFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);                
+                SvcLog.ErrorFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);                
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -90,22 +88,28 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         protected override void OnStart(string[] args) {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
+
+                // log service start
+                SvcLog.InfoFormat(Global.Messages.Service.Starting);
+
                 // service master thread
                 SvcMasterThread = new Thread(new ThreadStart(new Action(MainLoop)));
                 SvcMasterThread.Name = Global.MasterThreadName;
                 SvcMasterThread.IsBackground = true;
                 SvcMasterThread.Priority = Global.SvcPriority;   // hm
 
-
                 // fire up the main thread
                 SvcMasterThread.Start();
 
                 // log service start
-                SvcLog.Info("Service Started.");
+                SvcLog.InfoFormat(Global.Messages.Service.Started);
             }
             catch (Exception ex) {
-                SvcLog.ErrorFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
-                throw ex;
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                try {                                        
+                    Stop();
+                }
+                catch { }                
             }
         }
 
@@ -115,7 +119,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void PreRoll() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                // log 
+                LogServiceConfig();
                 // method logic                
                 CalendarAccess.Instance.LoadCalendars(Global.AppSettings.BusinessCalendarFolder, false, Global.AppSettings.BusinessCalendarNamespace);
                 // create the integratrex...
@@ -128,12 +134,22 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 m_Integratrex.StartAllIntegrations();              
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }            
+        }
+
+        /// <summary>
+        /// Log service attributes
+        /// </summary>
+        private void LogServiceConfig() {
+
+            
+
+            SvcLog.DebugFormat(Global.Messages.Service.ConfigurationItem, "MainLoopCycleTime", Global.MainLoopCycleTime.Value, Global.MainLoopCycleTime.Units);
         }
 
         /// <summary>
@@ -142,17 +158,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void MainLoop() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // pre-loop logic
                 PreRoll();
                 MainLoopStartEvent.Set();   // release threads
                 // looper
                 int count = 0;
-                while (!SvcShutdownEvent.WaitOne(Global.MainLoopCycleTime)) {                  
-                    SvcLog.DebugFormat("MainLoop Iteration:{0}", ++count);
+                while (!SvcShutdownEvent.WaitOne(Global.MainLoopCycleTime.Value)) {                  
+                    SvcLog.DebugFormat(Global.Messages.Service.MainLoopIterate, ++count);
                     // check on queues
                     DoSystemQ();
-                    DoXmlQ();                                        
+                    DoXmlQ();                          
                 }
                 // post-loop logic
                 WindDown();
@@ -160,12 +176,12 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 Stop();
             }
             catch(Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 // shut 'er down?
                 SvcShutdownEvent.Set();
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -175,17 +191,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void DoSystemQ() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-                if (SysQReset.WaitOne(0)) {
-                    SysLog.Info("Waiting for message...");
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                if (SysQReset.WaitOne(0)) {                    
                     SysQ.BeginReceive();
+                    QueueLog.InfoFormat(Global.Messages.Queue.Waiting, SysQ.QueueName);
                 }
             }
             catch (Exception ex) {
-                SvcLog.ErrorFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.ErrorFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }            
         }
 
@@ -195,17 +211,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void DoXmlQ() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-                if (XmlQReset.WaitOne(0)) {
-                    XmlLog.Info("Waiting for message...");
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                if (XmlQReset.WaitOne(0)) {                                       
                     XmlQ.BeginReceive();
+                    QueueLog.InfoFormat(Global.Messages.Queue.Waiting, XmlQ.QueueName);
                 }
             }
             catch (Exception ex) {
-                SvcLog.ErrorFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.ErrorFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }            
         }
 
@@ -215,10 +231,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void InitSysQ() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // aquire the system queue
                 if (!MessageQueue.Exists(Global.AppSettings.IntegratrexSysQueue)) {
-                    SvcLog.FatalFormat("Message Queue \"{0}\" does not exist.", Global.AppSettings.IntegratrexSysQueue);
+                    SvcLog.ErrorFormat(Global.Messages.Queue.DoesNotExist, Global.AppSettings.IntegratrexSysQueue);
                     return;
                 }
                 // got it
@@ -227,13 +243,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // hook up event
                 SysQ.ReceiveCompleted += SysQ_ReceiveCompleted;
                 // log
-                SysLog.Info("System Queue Ready");
+                QueueLog.InfoFormat(Global.Messages.Queue.Opened, SysQ.QueueName);
             }
             catch (Exception ex) {
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
             }
         }
 
@@ -243,10 +259,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void InitXmlQ() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // aquire the system queue
                 if (!MessageQueue.Exists(Global.AppSettings.IntegratrexXmlQueue)) {
-                    SvcLog.FatalFormat("Message Queue \"{0}\" does not exist.", Global.AppSettings.IntegratrexXmlQueue);
+                    SvcLog.ErrorFormat(Global.Messages.Queue.DoesNotExist, Global.AppSettings.IntegratrexXmlQueue);
                     return;
                 }
                 // got it
@@ -255,13 +271,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // hook up event
                 XmlQ.ReceiveCompleted += XmlQ_ReceiveCompleted;
                 // log
-                XmlLog.Info("XML Queue Ready");
+                QueueLog.InfoFormat(Global.Messages.Queue.Opened, XmlQ.QueueName);                
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
 
@@ -273,20 +289,20 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void SysQ_ReceiveCompleted(object sender, ReceiveCompletedEventArgs e) {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                Thread.CurrentThread.Name = ThisMethod.Name;
+                Thread.CurrentThread.Name = ThisMethod.Name;                
                 // the Q
                 MessageQueue Q = (MessageQueue)sender;
                 // get the message                 
                 string message = Q.EndReceive(e.AsyncResult).Body.ToString();
                 // log it
-                SysLog.InfoFormat(Global.Messages.SysMessage, message);
+                QueueLog.InfoFormat(Global.Messages.Queue.MessageReceived, Q.QueueName, message);
                 // check and action the message                    
-                if (message.Equals("STOP", StringComparison.OrdinalIgnoreCase)) {
+                if (message.Equals(Global.SysQueue.STOP, StringComparison.OrdinalIgnoreCase)) {
                     SvcShutdownEvent.Set();
                 }
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }
             finally {
                 // let 'er rip
@@ -306,18 +322,18 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // the Q
                 MessageQueue Q = (MessageQueue)sender;
                 // get the message
-                string message = e.Message.Body.ToString();
+                string message = Q.EndReceive(e.AsyncResult).Body.ToString();
                 // log it
-                XmlLog.InfoFormat(Global.Messages.XmlMessage, message);
+                QueueLog.InfoFormat(Global.Messages.Queue.MessageReceived, Q.QueueName, message);
                 // do XML things
-                // done
-                Q.EndReceive(e.AsyncResult);
+                
             }
             catch (MessageQueueException ex) {
                 if ((int)ex.MessageQueueErrorCode == -1073741536) {  // queue is closed
+                    QueueLog.ErrorFormat(Global.Messages.Queue.ClosedOnReceive, Global.AppSettings.IntegratrexXmlQueue);
                     return;
                 }
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.ErrorFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
             }
             finally {
                 // let 'er rip
@@ -331,19 +347,21 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void WindDown() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // stop listening to queues
                 SysQ.Close();
+                QueueLog.InfoFormat(Global.Messages.Queue.Closed, SysQ.QueueName);
                 XmlQ.Close();
+                QueueLog.InfoFormat(Global.Messages.Queue.Closed, XmlQ.QueueName);
                 // stop all integrations
                 m_Integratrex.StopAllIntegrations();
             }
             catch (Exception ex) {
-                SvcLog.FatalFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {
-                DebugLog.DebugFormat(Global.Messages.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }    
         }
 
@@ -364,19 +382,18 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         protected override void OnStop() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
-            try {
-                SvcLog.InfoFormat("OnStop thread={0}", Thread.CurrentThread.Name);
+            try {                
                 // log
-                SvcLog.InfoFormat(Global.Messages.ServiceEvent, ThisMethod.Name);
+                SvcLog.InfoFormat(Global.Messages.Service.Stopping);
                 // if the shutdown event has not been signaled, signal it!
                 if (!SvcShutdownEvent.WaitOne(0)) {
                     SvcShutdownEvent.Set();
-                }              
-                // log service start
-                SvcLog.Info("Service Stopped.");
+                }
+                // log
+                SvcLog.InfoFormat(Global.Messages.Service.Stopped);
             }
             catch (Exception ex) {
-                SvcLog.ErrorFormat(Global.Messages.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                SvcLog.ErrorFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
                 throw ex;
             }
             finally {                
@@ -390,20 +407,23 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Pause
         /// </summary>
         protected override void OnPause() {
-            SvcLog.Info("Service Paused.");
+            // log
+            SvcLog.InfoFormat(Global.Messages.Service.Paused);
         }
 
         /// <summary>
         /// Play
         /// </summary>
         protected override void OnContinue() {
-            SvcLog.Info("Service Resume.");
+            // log
+            SvcLog.InfoFormat(Global.Messages.Service.Resume);
         }
 
         /// <summary>
         /// Shut it down
         /// </summary>
         protected override void OnShutdown() {
+            SvcLog.InfoFormat(Global.Messages.Service.Shutdown);
             OnStop();
         }
 

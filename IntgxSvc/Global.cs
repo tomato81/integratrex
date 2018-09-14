@@ -180,6 +180,38 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 /// {0=Integration Source}
                 /// </summary>
                 public static readonly string SourceDeleteFiles = "{0} delete files";
+                
+                /// <summary>
+                /// {0=Location}
+                /// </summary>
+                public static readonly string ResponseLocationCreated = "{0} has been created at the response location";
+
+                /// <summary>
+                /// {0=The file} {1=the target location}
+                /// </summary>
+                public static readonly string FileExistsAtTarget = "The file {0} exists at the target location {1}";
+
+                /// <summary>
+                /// {0=The overrwritten file}
+                /// </summary>
+                public static readonly string OverrwriteFileAtTarget = "The file {0} has been overrwritten at the target location";
+
+                /// <summary>
+                /// {0=Response Description}
+                /// </summary>
+                public static readonly string ResponseActionStarted = "Response [{0}] action started";
+
+                /// <summary>
+                /// {0=Response Description}
+                /// </summary>
+                public static readonly string ResponseActionComplete = "Response [{0}] action has completed";
+
+                /// <summary>
+                /// {0=the file}
+                /// {1=the action}
+                /// {2=the target location}
+                /// </summary>
+                public static readonly string ResponseFileActioned = "{0} {1} {2}";
             }
 
             /// <summary>

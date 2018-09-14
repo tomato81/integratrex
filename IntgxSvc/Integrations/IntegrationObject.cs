@@ -152,7 +152,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         protected IntegrationObject() {
             // log refs 
             DebugLog = LogManager.GetLogger(Global.DebugLogName);
+            // if you ever start thinking CompileDynamicText can go here, it can't! Has to be in the child contructor.
         }
+
+        /// <summary>
+        /// Implement in child objects to compile dynamic text elements
+        /// </summary>
+        protected abstract void CompileDynamicText();
 
         // debug log       
         public ILog DebugLog;
@@ -171,7 +177,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// The Integration Object has performed a loggable action
         /// </summary>
         public event EventHandler<IntegrationLogEventArgs> DoLog;
-
         
         /// <summary>
         /// Raise an Error Event
@@ -219,12 +224,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         protected void LogEvent(string p_message) {
             // raise it 
             DoLog?.Invoke(this, new IntegrationLogEventArgs(p_message));
-        }
-
-        /// <summary>
-        /// Implement in child objects to compile dynamic text elements
-        /// </summary>
-        protected abstract void CompileDynamicText();
+        }        
 
         /// <summary>
         /// Dynamic Text is required

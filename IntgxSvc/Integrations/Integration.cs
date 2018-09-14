@@ -49,20 +49,116 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Attach integration object event sources to the handlers on the tracker
         /// </summary>
         private void AttachEvents() {
-            // source
-            
+            // source            
             Manager.Source.Match += SourceScan_Match;
             Manager.Source.GotFile += Source_GotFile;
-            Manager.Source.DoTransform += Source_DoTransform;
+            Manager.Source.SourceTransform += Source_DoTransform;
             Manager.Source.FileRenamed += Source_FileRenamed;
             Manager.Source.GotFiles += Source_GotFiles;
             Manager.Source.DeleteFiles += Source_DeleteFiles;
             Manager.Source.DeletedFile += Source_DeletedFile;
             Manager.Source.DeletedFiles += Source_DeletedFiles;
+            // responses
+            foreach(IntegrationResponse R in Manager.Responses) {
+                // attach response events
+
+                R.TransformResponse += Response_TransformResponse;
+
+                R.LocationCreated += Response_LocationCreated;
+                R.FileExists += Response_FileExists;
+                R.FileOverrwrite += Response_FileOverrwrite;
+                R.ActionStarted += Response_ActionStarted;
+                R.ActionComplete += Response_ActionComplete;
+                R.FileActioned += Response_FileActioned;
+                R.OnValueRequired += ValueRequired;
+                
+            }            
+
             // hookup dtext events
             Manager.OnContact.OnValueRequired += ValueRequired;
             Manager.Source.OnValueRequired += ValueRequired;
-        }        
+        }
+
+        /// <summary>
+        /// Apply transformations to the response file 
+        /// </summary>
+        /// <remarks>basically rename the file to be actioned at the response location</remarks>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Response_TransformResponse(object sender, TransformResponseEventArgs e) {
+            // get at the response
+            IntegrationResponse Response = (IntegrationResponse)sender;   
+            // do things?
+            if(!Response.IsRename) {                
+                return;
+            }
+            // go thru the files
+            foreach (MatchedFile F in e.MatchedFiles) {
+                // set File context                
+                Manager.SetAttrContext(F, e.MatchedFiles);                
+                // do rename
+                F.ResponseFileName = Response.Transformation.Rename();
+            }
+            // transforms have been performed
+            e.HasTransforms = true;         
+        }
+
+        /// <summary>
+        /// The response has been actioned on a file
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Response_FileActioned(object sender, FileActionedEventArgs e) {
+            IntegrationResponse R = (IntegrationResponse)sender;
+            IntInstLog.InfoFormat(Global.Messages.Integration.ResponseFileActioned, e.MatchedFile.WorkingName, e.Action, R.Description);
+        }
+
+        /// <summary>
+        /// The response action has completed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Response_ActionComplete(object sender, ActionCompleteEventArgs e) {
+            IntegrationResponse R = (IntegrationResponse)sender;            
+            IntInstLog.InfoFormat(Global.Messages.Integration.ResponseActionComplete, R.Description);
+        }
+
+        /// <summary>
+        /// The response action has started
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Response_ActionStarted(object sender, IntegrationEventArgs e) {
+            IntegrationResponse R = (IntegrationResponse)sender;
+            IntInstLog.InfoFormat(Global.Messages.Integration.ResponseActionStarted, R.Description);
+        }
+
+        /// <summary>
+        /// A file at the response location has been overwritten
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Response_FileOverrwrite(object sender, OverrwriteEventArgs e) {
+            IntInstLog.InfoFormat(Global.Messages.Integration.OverrwriteFileAtTarget, e.Path);
+        }
+
+        /// <summary>
+        /// The file already exists at the target location
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Response_FileExists(object sender, FileExistsEventArgs e) {
+            IntInstLog.InfoFormat(Global.Messages.Integration.FileExistsAtTarget, e.MatchedFile.WorkingName);
+        }
+
+        /// <summary>
+        /// A location has been created at the target
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Response_LocationCreated(object sender, LocationCreatedEventArgs e) {
+            IntInstLog.InfoFormat(Global.Messages.Integration.ResponseLocationCreated, e.Location);
+        }
 
         /// <summary>
         /// Detach integration object event sources to the handlers on the tracker
@@ -72,12 +168,24 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             
             Manager.Source.Match -= SourceScan_Match;
             Manager.Source.GotFile -= Source_GotFile;
-            Manager.Source.DoTransform -= Source_DoTransform;
+            Manager.Source.SourceTransform -= Source_DoTransform;
             Manager.Source.FileRenamed -= Source_FileRenamed;
             Manager.Source.GotFiles -= Source_GotFiles;            
             Manager.Source.DeleteFiles -= Source_DeleteFiles;
             Manager.Source.DeletedFile -= Source_DeletedFile;
             Manager.Source.DeletedFiles -= Source_DeletedFiles;
+
+            // responses
+            foreach (IntegrationResponse R in Manager.Responses) {
+                // detach response
+                R.LocationCreated -= Response_LocationCreated;
+                
+
+
+                // detach response dtext event
+                R.OnValueRequired -= ValueRequired;
+            }
+
             // detach dtext events
             Manager.OnContact.OnValueRequired -= ValueRequired;
             Manager.Source.OnValueRequired -= ValueRequired;
@@ -108,11 +216,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // what we do?
             if(Manager.OnContact.RenameOriginal) {
                 // go thru the files
-                foreach (MatchedFile F in e.MatchedFiles) {
-                    // set File context                
-                    Attrs.File = F;
+                foreach (MatchedFile F in e.MatchedFiles) {                           
                     // do rename
-                    F.Name = Manager.OnContact.Rename();
+                    F.Name = Manager.OnContactContext(F, e.MatchedFiles).Rename();
                 }
                 // transforms have been performed
                 e.HasTransforms = true;
@@ -332,14 +438,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
-        /// Retrive files from the integration source 
+        /// Retreive files from the integration source 
         /// </summary>
         public void GetFiles() {
             // copy files from the source to the working directory
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-                
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);              
 
                 // were files matched?
                 if (MatchCount == 0) {
@@ -355,13 +460,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     M.SetWorkingDi(WorkingDi);
                 }
                 // get files into the working directory
-                Manager.Source.Get(MatchedFiles);
-
-                
-
-                // add to match history
-//                Manager.MatchHistory.Add(MatchedFiles);
-
+                Manager.Source.Get(MatchedFiles);              
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -380,12 +479,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
                 DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-
                 // are we supressing?
                 if(!Manager.MatchHistory.SupressDuplciates) {
                     return; // nope
                 }
-
                 // check each file vs. the match history
                 foreach(MatchedFile F in MatchedFiles) {
                     if(Manager.MatchHistory.IsDuplicate(F)) {
@@ -437,6 +534,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 if (Manager.OnContact.DeleteFromSource) {
                     Manager.Source.Delete(MatchedFiles);
                 }
+                //  if the files are deleted from the source what is the point of the transform??
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -446,6 +544,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
+               
 
         /// <summary>
         /// Run integration response actions
@@ -455,10 +554,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
                 DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
-
-                
-
-
+                foreach(IntegrationResponse R in Manager.Responses) {
+                    R.Transform(MatchedFiles);
+                    R.Action(MatchedFiles);                    
+                }
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -528,17 +627,19 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     }   // IntegrationTracker
 
     /// <summary>
-    /// Manages the execution of an Integration - directly corresponds to an <Integration> ... </Integration> in the configuration file
+    /// Manages the execution of an Integration
     /// </summary>
+    /// <remarks>directly corresponds to an <Integration> ... </Integration> in the configuration file</remarks>
     public class IntegrationManager : IDisposable {
 
-        // all active integration manager
+        // all active integration managers
         public static Dictionary<string, IntegrationManager> m_IntegrationManagers = new Dictionary<string, IntegrationManager>();
+
         /// <summary>
         /// Get the integration manager for a named integration
         /// </summary>
         /// <param name="p_integration">integration name</param>
-        /// <returns>integration manager</returns>
+        /// <returns>an integration manager</returns>
         public static IntegrationManager GetIntegrationManager(string p_integration) {
             if (!m_IntegrationManagers.ContainsKey(p_integration)) {
                 throw new KeyNotFoundException();
@@ -571,6 +672,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             InitializeLog();
             InitializePatterns();
             InitializeSource();
+            InitializeResponses();
             // setup timer            
             m_RunAction = new Action(Run);
             m_Timer = new ScheduleTimer();            
@@ -607,7 +709,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private readonly XIntegration m_Integration;
         private readonly ScheduleTimer m_Timer;        
         private readonly IPattern[] m_Patterns;
-        private readonly DirectoryInfo m_IntegrationDi;  // this folder stores any support files necessrary for this integration to run (e.g. psftp scripts)
+        private readonly DirectoryInfo m_IntegrationDi;  // this folder stores any support files necessary for this integration to run (e.g. psftp scripts)
         private readonly DirectoryInfo m_WorkingDi;  // root folder for this integration's timestamped integration instance folders        
         private readonly MatchHistory m_MatchHistory;        
         private readonly Action m_RunAction;
@@ -615,10 +717,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
         // other members
         private IntegrationSource m_Source;
+        private List<IntegrationResponse> m_Responses = new List<IntegrationResponse>();
 
         // logs
         private ILog SvcLog;    // service log
-        private ILog IntLog;    // log of ALL integrations          
+        private ILog IntLog;    // log of ALL integrations
         private ILog DebugLog;  // debug log
         private ILog IntInstLog;    // log of THIS integration
 
@@ -626,11 +729,26 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// On Contact
         /// </summary>
         public OnContact OnContact { get => m_OnContact; }
+        /// <summary>
+        /// Get the OnContact object and provide the necessary context for dynamic text functions 
+        /// </summary>
+        /// <param name="p_File">the matched file</param>
+        /// <param name="p_Files">the set of matched files</param>
+        /// <returns></returns>
+        public OnContact OnContactContext(MatchedFile p_File, List<MatchedFile> p_Files) {
+            SetAttrContext(p_File, p_Files);
+            return m_OnContact;
+        }
 
         /// <summary>
         /// Integration Source
         /// </summary>
         public IntegrationSource Source { get => m_Source; }
+
+        /// <summary>
+        /// Integration Responses
+        /// </summary>
+        public List<IntegrationResponse> Responses { get => m_Responses; }
 
         /// <summary>
         /// XIntegration Object
@@ -670,7 +788,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                     return SourceLevels.All;
                 }
             }
-        }        
+        }    
+        
+        /// <summary>
+        /// Set dynamic text replacement context
+        /// </summary>
+        /// <param name="p_File">the current working file</param>
+        /// <param name="p_Files">the current working set of files</param>
+        public void SetAttrContext(MatchedFile p_File, List<MatchedFile> p_Files) {
+            Attributes.File = p_File;
+            Attributes.Files = p_Files;
+        }
 
         /// <summary>
         /// Get a new Integration Tracker
@@ -745,15 +873,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         private void InitializeSource() {
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                // source!
+                // source factory
                 IntegrationSourceFactory F = new IntegrationSourceFactory();
                 m_Source = F.Create(m_Integration.Source);
                 // events!
                 m_Source.ScanSource += Source_ScanSource;
                 m_Source.OnError += Source_OnError;
-
                 // log
-                IntInstLog.InfoFormat("Integration source intialized:{0}", m_Integration.Source.Desc);
+                IntInstLog.InfoFormat("Integration source intialized:{0}", m_Source.Description);
             }
             catch(Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
@@ -762,12 +889,60 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
+        /// Setup the Response List
+        /// </summary>
+        private void InitializeResponses() {
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            try {
+                // response factory
+                IntegrationResponseFactory F = new IntegrationResponseFactory();
+                // create all the resposnse
+                foreach(XResponse R in m_Integration.Responses) {
+                    IntegrationResponse Response = F.Create(R);
+                    // attach events
+                    Response.OnError += Response_OnError;                  
+                    // add it to this list
+                    Responses.Add(Response);
+                    // log
+                    IntInstLog.InfoFormat("Integration response intialized:{0}", Response.Description);
+                }
+                // log
+                IntInstLog.InfoFormat("All integration responses intialized. Response Count=[{0}]", m_Responses.Count);
+            }
+            catch (Exception ex) {
+                SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);
+                throw ex;
+            }
+        }
+
+        /// <summary>
         /// Log Dat
         /// </summary>
-        /// <param name="sender">the object that raised the event</param>
+        /// <param name="sender">an IntegrationResponse</param>
+        /// <param name="e">event args</param>
+        private void Response_OnError(object sender, IntegrationErrorEventArgs e) {
+            try {
+                IntegrationResponse Obj = (IntegrationResponse)sender;              
+                IntInstLog.ErrorFormat("{0} [{1}]", Obj.Description, e.Message);
+            }
+            catch(InvalidCastException ex) {
+                DebugLog.DebugFormat("Response_OnError expected IntegrationResponse as sender. Message: {0}", ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Log Dat
+        /// </summary>
+        /// <param name="sender">an IntegrationSource</param>
         /// <param name="e">event args</param>
         private void Source_OnError(object sender, IntegrationErrorEventArgs e) {
-            IntInstLog.ErrorFormat("{0} [{1}]", m_Source.Description, e.Message);     
+            try {
+                IntegrationSource Obj = (IntegrationSource)sender;
+                IntInstLog.ErrorFormat("{0} [{1}]", Obj.Description, e.Message);
+            }
+            catch (InvalidCastException ex) {
+                DebugLog.DebugFormat("Source_OnError expected IntegrationSource as sender. Message: {0}", ex.Message);
+            }               
         }
 
         /// <summary>
@@ -1170,7 +1345,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
 
     }   // MatchHistory
-
 
     /// <summary>
     /// Manage the attributes associated with each integration and provide a way to access them

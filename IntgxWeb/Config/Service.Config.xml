@@ -7,11 +7,11 @@
 
   <Integration Desc="Local-Local" Enable="Y">
     <Schedule>
-      <Continuous Interval="10" />
+      <Continuous Interval="30" />
     </Schedule>
     <Source Desc="FileX Pickup">
       <Local>
-        <Path>C:\\Sandbox\\Integratrex\\Source\\?(Date -f 'yyyyMMdd')</Path>
+        <Path>C:\\Sandbox\\Integratrex\\Source\\Files</Path>
       </Local>
     </Source>
     <Patterns>
@@ -21,16 +21,16 @@
       <Pattern Desc="file n pattern" Type="Simple">file*</Pattern>
     </Patterns>
     <OnContact MoveToWorkingArea="Y" DeleteFromSource="N" StoreFileInfo="Y" CalculateMD5="Y" CalculateSHA1="Y">
-      <SupressDuplicates Enable="Y">
+      <SupressDuplicates Enable="N">
         <MatchBy FileName="Y" FileSize="Y" LastModifiedDate="Y" MD5="Y" SHA1="Y" />
       </SupressDuplicates>
       <Rename Original="N" WorkingCopy="Y">?{File.NameNoExt}_?(Date -f 'yyyyMMddhhmmss')?{File.Ext}</Rename>
     </OnContact>
     <Responses>
       <Response Desc="Target Folder" Enable="Y">
-        <Rename>?{File.WorkingName}_?(Date -f 'yyyyMMddhhmmss')</Rename>
+        <Rename Enable="Y">?{File.NameNoExt}_?(Date -f 'yyyyMMddhhmmss')?{File.Ext}</Rename>
         <Target>
-          <Local Action="Copy" Overwrite="Y">
+          <Local Action="Copy" Overwrite="Y" CreateDirectory="Y">
             <Path>C:\\Sandbox\\Integratrex\\Target\\?(Date -f 'yyyyMMdd')</Path>
           </Local>
         </Target>

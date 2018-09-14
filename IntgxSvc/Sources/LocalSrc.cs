@@ -62,7 +62,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 // local folder
                 DirectoryInfo Di = new DirectoryInfo(folder);
                 // scanning
-                OnScanEvent(Di.FullName);
+                ScanEvent(Di.FullName);
                 FileInfo[] Files = Di.GetFiles();
                 // go thru each pattern
                 foreach (IPattern P in p_Pattern) {
@@ -76,7 +76,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                                 MatchEvent(Match, folder); 
                             }
                             else {
-                                ErrorEvent("Unexpected File Match. A subsequent pattern {0} has matched on: {1}", P.ToString(), Fi.Name);
+                                // not really an error ... maybe a warn or an information
+                                ErrorEvent("Unexpected File Match. A subsequent pattern {0} has matched on: {1}", P.ToString(), Fi.Name);                                
                             }
                         }
                     }
@@ -183,7 +184,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 TransformSourceEventArgs Args = new TransformSourceEventArgs(p_Mf);
 
                 // perform transforms on the model
-                DoTransformEvent(Args);
+                SourceTransformEvent(Args);
                 // were any transforms performed?
                 if(!Args.HasTransforms) {
                     return;

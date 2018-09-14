@@ -1018,6 +1018,8 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         
         private XSFTPTgtOverwrite overwriteField;
         
+        private XSFTPTgtCreateDirectory createDirectoryField;
+        
         /// <remarks/>
         public XURI URI {
             get {
@@ -1057,6 +1059,17 @@ namespace C2InfoSys.FileIntegratrex.Lib {
             }
             set {
                 this.overwriteField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public XSFTPTgtCreateDirectory CreateDirectory {
+            get {
+                return this.createDirectoryField;
+            }
+            set {
+                this.createDirectoryField = value;
             }
         }
     }
@@ -1125,6 +1138,19 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
     [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
+    public enum XSFTPTgtCreateDirectory {
+        
+        /// <remarks/>
+        Y,
+        
+        /// <remarks/>
+        N,
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
@@ -1137,6 +1163,8 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         private XFTPTgtAction actionField;
         
         private XFTPTgtOverwrite overwriteField;
+        
+        private XFTPTgtCreateDirectory createDirectoryField;
         
         /// <remarks/>
         public XURI URI {
@@ -1179,6 +1207,17 @@ namespace C2InfoSys.FileIntegratrex.Lib {
                 this.overwriteField = value;
             }
         }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public XFTPTgtCreateDirectory CreateDirectory {
+            get {
+                return this.createDirectoryField;
+            }
+            set {
+                this.createDirectoryField = value;
+            }
+        }
     }
     
     /// <remarks/>
@@ -1199,6 +1238,19 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.SerializableAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public enum XFTPTgtOverwrite {
+        
+        /// <remarks/>
+        Y,
+        
+        /// <remarks/>
+        N,
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
+    public enum XFTPTgtCreateDirectory {
         
         /// <remarks/>
         Y,
@@ -1254,6 +1306,8 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         
         private XNetworkTgtOverwrite overwriteField;
         
+        private XNetworkTgtCreateDirectory createDirectoryField;
+        
         /// <remarks/>
         public XPath Path {
             get {
@@ -1283,6 +1337,17 @@ namespace C2InfoSys.FileIntegratrex.Lib {
             }
             set {
                 this.overwriteField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public XNetworkTgtCreateDirectory CreateDirectory {
+            get {
+                return this.createDirectoryField;
+            }
+            set {
+                this.createDirectoryField = value;
             }
         }
     }
@@ -1338,6 +1403,19 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
     [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
+    public enum XNetworkTgtCreateDirectory {
+        
+        /// <remarks/>
+        Y,
+        
+        /// <remarks/>
+        N,
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
@@ -1348,6 +1426,8 @@ namespace C2InfoSys.FileIntegratrex.Lib {
         private XLocalTgtAction actionField;
         
         private XLocalTgtOverwrite overwriteField;
+        
+        private XLocalTgtCreateDirectory createDirectoryField;
         
         /// <remarks/>
         public XPath Path {
@@ -1380,6 +1460,17 @@ namespace C2InfoSys.FileIntegratrex.Lib {
                 this.overwriteField = value;
             }
         }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public XLocalTgtCreateDirectory CreateDirectory {
+            get {
+                return this.createDirectoryField;
+            }
+            set {
+                this.createDirectoryField = value;
+            }
+        }
     }
     
     /// <remarks/>
@@ -1400,6 +1491,19 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.SerializableAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public enum XLocalTgtOverwrite {
+        
+        /// <remarks/>
+        Y,
+        
+        /// <remarks/>
+        N,
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
+    public enum XLocalTgtCreateDirectory {
         
         /// <remarks/>
         Y,
@@ -1815,7 +1919,20 @@ namespace C2InfoSys.FileIntegratrex.Lib {
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
     public partial class XRenameResponse {
         
+        private XRenameResponseEnable enableField;
+        
         private string valueField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public XRenameResponseEnable Enable {
+            get {
+                return this.enableField;
+            }
+            set {
+                this.enableField = value;
+            }
+        }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlTextAttribute()]
@@ -1827,6 +1944,19 @@ namespace C2InfoSys.FileIntegratrex.Lib {
                 this.valueField = value;
             }
         }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.6.1055.0")]
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="c2infosys.com/Integratrex/Service.Config.xsd")]
+    public enum XRenameResponseEnable {
+        
+        /// <remarks/>
+        Y,
+        
+        /// <remarks/>
+        N,
     }
     
     /// <remarks/>

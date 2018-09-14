@@ -1,4 +1,14 @@
-﻿run integration
+﻿trying to figure out why the response rename dytext isnt picling up the file attributes
+
+
+"Supress" actually has 2 p's so it should be "Suppress" - this is misspelled all over the place
+
+
+
+Once the response framework has been established the whole dynamic text variable replacement context needs to be examined and possibly reworked a bit
+
+
+run integration
 
 -connect to source
 -get file listing

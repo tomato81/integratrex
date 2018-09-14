@@ -26,8 +26,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public NetworkSrc(XSource p_XSource, XNetworkSrc p_XNetworkSrc) :
             base(p_XSource) {
-            m_XNetworkSrc = p_XNetworkSrc;
-            
+            m_XNetworkSrc = p_XNetworkSrc;            
             CompileDynamicText();
         }        
 

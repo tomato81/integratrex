@@ -210,9 +210,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public bool HasTransforms = false;
 
-    }   // TransformSourceEventArgs
-
-    
+    }   // TransformSourceEventArgs    
 
     /// <summary>
     /// Integration Source Base
@@ -244,21 +242,20 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         public event EventHandler<GotFilesEventArgs> GotFiles;
 
-        public event EventHandler<TransformSourceEventArgs> DoTransform;
+        public event EventHandler<TransformSourceEventArgs> SourceTransform;
 
         public event EventHandler<FileRenamedEventArgs> FileRenamed;
 
         // integration events
         public event EventHandler<ScanSourceEventArgs> ScanSource;
-        public event EventHandler<IntegrationEventArgs> GetFiles;
-        
+        public event EventHandler<IntegrationEventArgs> GetFiles;     
 
         public event EventHandler<IntegrationEventArgs> DeleteFiles;
         public event EventHandler<IntegrationFileEventArgs> DeletedFile;
         public event EventHandler<IntegrationFilesEventArgs> DeletedFiles;
 
-        public event EventHandler<IntegrationEventArgs> DoDeleteFolder;
-        public event EventHandler<IntegrationEventArgs> DoPing;
+        public event EventHandler<IntegrationEventArgs> DeletedFolder;
+        public event EventHandler<IntegrationEventArgs> PingSource;
 
         
 
@@ -291,8 +288,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Transform Source Event
         /// </summary>
         /// <param name="p_Args">Event Args</param>
-        protected void DoTransformEvent(TransformSourceEventArgs p_Args) {
-            DoTransform?.Invoke(this, p_Args);
+        protected void SourceTransformEvent(TransformSourceEventArgs p_Args) {
+            SourceTransform?.Invoke(this, p_Args);
         }
 
         /// <summary>
@@ -308,7 +305,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Scanning!
         /// </summary>
         /// <param name="p_location">scan location as string</param>
-        protected void OnScanEvent(string p_location) {
+        protected void ScanEvent(string p_location) {
             ScanSource?.Invoke(this, new ScanSourceEventArgs(p_location));
         }
 
@@ -329,11 +326,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         protected void DeleteFolderEvent() {
-            DoDeleteFolder?.Invoke(this, IntegrationEventArgs.Empty);
+            DeletedFolder?.Invoke(this, IntegrationEventArgs.Empty);
         }
 
         protected void PingEvent() {
-            DoPing?.Invoke(this, IntegrationEventArgs.Empty);
+            PingSource?.Invoke(this, IntegrationEventArgs.Empty);
         }
 
         // integration source activities to be implemented in derived class

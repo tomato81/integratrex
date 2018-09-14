@@ -155,6 +155,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
+        /// Name of file at response location
+        /// </summary>
+        /// <remarks>this can change as the integration processes the list of responses</remarks>
+        public string ResponseFileName {
+            get; set;
+        }
+
+        /// <summary>
         /// Source Folder or Remote Folder
         /// </summary>
         public string Folder {
@@ -229,6 +237,16 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Has the file been deleted from the source?
         /// </summary>        
         public bool Deleted { get; set; }
+
+        /// <summary>
+        /// All responses completed on this file
+        /// </summary>
+        public List<IntegrationResponse> CompleteResponses = new List<IntegrationResponse>();
+
+        /// <summary>
+        /// Count of responses completed on this file
+        /// </summary>
+        public int ResponseCount { get => CompleteResponses.Count; }
         
         /// <summary>
         /// Source Location

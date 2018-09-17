@@ -28,7 +28,7 @@
     </OnContact>
     <Responses>
       <Response Desc="Target Folder" Enable="Y">
-        <Rename Enable="Y">?{File.NameNoExt}_?(Date -f 'yyyyMMddhhmmss')?{File.Ext}</Rename>
+        <Rename Enable="N" />
         <Target>
           <Local Action="Copy" Overwrite="Y" CreateDirectory="Y">
             <Path>C:\\Sandbox\\Integratrex\\Target\\?(Date -f 'yyyyMMdd')</Path>

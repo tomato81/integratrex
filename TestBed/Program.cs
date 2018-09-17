@@ -76,6 +76,9 @@ namespace C2InfoSys.FileIntegratrex.TestBed {
 
 
 
+                //Console.WriteLine(string.Format("{0}", Guid.NewGuid()));
+                //Console.ReadKey();
+
 
                 StopIntegratrex();
 

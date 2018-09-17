@@ -50,7 +50,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_Mf">Matched Files</param>
         public override void Action(List<MatchedFile> p_Mf) {
-            ActionStartedEvent();                      
+            ActionStartedEvent(p_Mf);                      
             switch (m_LocalTgt.Action) {
                 case XLocalTgtAction.None:
                     break;
@@ -92,7 +92,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                         continue;
                     }                    
 
-                    string copyToPath = Path.Combine(folder, Mf.WorkingName);                    
+                    string copyToPath = Path.Combine(folder, Mf.ResponseFileName);                    
                     if(File.Exists(copyToPath)) {
                         FileExistsEvent(Mf, folder);
                         if (overwrite) {
@@ -118,8 +118,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
             }
         }
-
-
 
     }   // LocalResponse
 }

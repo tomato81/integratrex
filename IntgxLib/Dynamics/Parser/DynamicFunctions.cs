@@ -96,6 +96,67 @@ namespace C2InfoSys.FileIntegratrex.Lib {
 
 
     /// <summary>
+    /// GUID Function
+    /// </summary>
+    public class GuidFn : DyFn {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public GuidFn() : base("GUID") {
+            m_format = "{0}";
+        }
+
+        private bool m_evalStr = true;
+
+        /// <summary>
+        /// Add a parameter to the function
+        /// </summary>
+        /// <param name="p_name">parameter name</param>
+        /// <param name="p_val">parameter value</param>
+        public override void AddParam(string p_name, object p_val) {
+            switch (p_name) {
+                case "f": {
+                    m_evalStr = true;
+                    m_format = "{0:" + p_val.ToString() + "}";
+                    break;
+                }
+                default: {
+                    throw new Exception(string.Format("{0} is not a valid parameter for {1}", p_name, Name));
+                }
+            }
+        }
+
+        public override Type EvalToType() {
+            if (m_evalStr) {
+                return typeof(string);
+            }
+            return typeof(Guid);
+        }
+
+        /// <summary>
+        /// Evaluate
+        /// </summary>
+        /// <returns></returns>
+        public override object EvalObj() {
+            return Guid.NewGuid();
+        }
+
+        /// <summary>
+        /// Evaluate
+        /// </summary>
+        /// <returns></returns>
+        public override string EvalStr() {
+            return string.Format(m_format, EvalObj());
+        }
+
+        // params
+        private string m_format;
+
+    }
+
+
+    /// <summary>
     /// Date Function
     /// </summary>
     public class DateFn : DyFn {

@@ -207,11 +207,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 public static readonly string ResponseActionComplete = "Response [{0}] action has completed";
 
                 /// <summary>
-                /// {0=the file}
-                /// {1=the action}
+                /// {0=the action}
+                /// {1=the file}
                 /// {2=the target location}
                 /// </summary>
-                public static readonly string ResponseFileActioned = "{0} {1} {2}";
+                public static readonly string ResponseFileActioned = "{0} {1} > {2}";
             }
 
             /// <summary>

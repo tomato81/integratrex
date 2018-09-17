@@ -80,13 +80,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             get {
                 return string.IsNullOrWhiteSpace(m_Response.Desc) ? "(none)" : m_Response.Desc;
             }
-        } 
+        }
 
         public bool IsRename {
             get {
                 return m_Response.Rename.Enable == XRenameResponseEnable.Y;
             }
-        }
+        }        
 
         /// <summary>
         /// String representaion of the action to take at the target
@@ -94,7 +94,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public abstract string ActionDesc { get; }
 
         public event EventHandler<LocationCreatedEventArgs> LocationCreated;
-        public event EventHandler<IntegrationEventArgs> ActionStarted;
+        public event EventHandler<ActionStartedEventArgs> ActionStarted;
         public event EventHandler<FileExistsEventArgs> FileExists;
         public event EventHandler<FileActionedEventArgs> FileActioned;
         public event EventHandler<ActionCompleteEventArgs> ActionComplete;
@@ -110,8 +110,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         protected void FileExistsEvent(MatchedFile p_Mf, string p_target) {
             FileExists?.Invoke(this, new FileExistsEventArgs(p_Mf, p_target));
         }
-        protected void ActionStartedEvent() {
-            ActionStarted?.Invoke(this, IntegrationEventArgs.Empty);
+        protected void ActionStartedEvent(List<MatchedFile> p_Mf) {
+            ActionStarted?.Invoke(this, new ActionStartedEventArgs(p_Mf));
         }
         protected void FileActionedEvent(MatchedFile p_Mf, string p_action, string p_target) {
             FileActioned?.Invoke(this, new FileActionedEventArgs(p_Mf, p_action, p_target));
@@ -163,7 +163,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Create and Compile Dynamic Text
         /// </summary>
         protected override void CompileDynamicText() {
-            m_Rename = new DynamicTextParser(X.Value);
+            m_Rename = new DynamicTextParser(X.Value is null ? string.Empty : X.Value);
             m_Rename.OnValueRequired += ValueRequired;
             m_Rename.Compile();
         }
@@ -286,6 +286,24 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public readonly string Target;
 
     }   // FileActionedEventArgs
+
+    /// <summary>
+    /// On Action Started Event Args
+    /// </summary>
+    public class ActionStartedEventArgs : IntegrationEventArgs {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="p_Mf">the file</param>        
+        public ActionStartedEventArgs(List<MatchedFile> p_Mf)
+            : base() {
+            MatchedFiles = p_Mf;
+        }
+        /// <summary>
+        /// The file
+        /// </summary>
+        public readonly List<MatchedFile> MatchedFiles;
+    }   // ActionStartedEventArgs
 
     /// <summary>
     /// On Action Complete Event Args

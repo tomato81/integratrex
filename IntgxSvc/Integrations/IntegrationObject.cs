@@ -52,6 +52,27 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
     }   // IntegrationErrorEventArgs
 
+
+    /// <summary>
+    /// Integration Warning Event Args
+    /// </summary>
+    public class IntegrationWarningEventArgs : EventArgs {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="p_warnMessage">warning message</param>
+        public IntegrationWarningEventArgs(string p_warnMessage) {
+            Message = p_warnMessage;
+        }
+
+        /// <summary>
+        /// Error Message
+        /// </summary>
+        public readonly string Message;
+
+    }   // IntegrationWarningEventArgs
+
     /// <summary>
     /// Integration Log Event Args
     /// </summary>
@@ -93,6 +114,22 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
 
     }   // IntegrationEventArgs
+
+    /// <summary>
+    /// Integration Value Required Event Args
+    /// </summary>
+    public class IntegrationValueRequiredEventArgs : OnValueRequiredEventArgs {
+
+        public IntegrationValueRequiredEventArgs(string p_name, MatchedFile p_MatchedFile, List<MatchedFile> p_MatchedFiles)
+            :base (p_name) {
+            MatchedFile = p_MatchedFile;
+            MatchedFiles = p_MatchedFiles;
+        }
+
+        public readonly MatchedFile MatchedFile;
+        public readonly List<MatchedFile> MatchedFiles;
+
+    }   // IntegrationValueRequiredEventArgs
 
     /// <summary>
     /// Use to Identify Dynamic Text Functions
@@ -174,6 +211,11 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         public event EventHandler<IntegrationErrorEventArgs> OnError;
 
         /// <summary>
+        /// Fires when an integration object issues a warning
+        /// </summary>
+        public event EventHandler<IntegrationWarningEventArgs> OnWarn;
+
+        /// <summary>
         /// The Integration Object has performed a loggable action
         /// </summary>
         public event EventHandler<IntegrationLogEventArgs> DoLog;
@@ -194,6 +236,23 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_args"></param>
         protected void ErrorEvent(string p_errorMessage) {
             OnError?.Invoke(this, new IntegrationErrorEventArgs(p_errorMessage));
+        }
+
+        /// <summary>
+        /// Raise a warning event
+        /// </summary>
+        /// <param name="p_warnMessage">warning message</param>
+        protected void WarningEvent(string p_warnMessage) {
+            OnWarn?.Invoke(this, new IntegrationWarningEventArgs(p_warnMessage));
+        }
+
+        /// <summary>
+        /// Raise a warning event
+        /// </summary>
+        /// <param name="p_warnMessage">warning message format</param>
+        /// <param name="p_params">params to format</param>
+        protected void WarningEvent(string p_warnFormat, params object[] p_params) {
+            OnWarn?.Invoke(this, new IntegrationWarningEventArgs(string.Format(p_warnFormat, p_params)));
         }
 
         /// <summary>
@@ -232,6 +291,9 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="p_EventArgs"></param>
         protected void ValueRequired(object sender, OnValueRequiredEventArgs p_EventArgs) {
             try {
+
+                // promote context               
+
                 if (OnValueRequired != null) {
                     OnValueRequired(sender, p_EventArgs);
                     return;

@@ -42,7 +42,6 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         private XOnContact X { get => m_XOnContact; }
 
-
         // functions
         public readonly Func<MatchedFile, string> GetSHA1;
         public readonly Func<MatchedFile, string> GetMD5;
@@ -129,9 +128,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         protected override void CompileDynamicText() {
             m_Rename = new DynamicTextParser(X.Rename.Value);
-            m_Rename.OnValueRequired += ValueRequired;
+            m_Rename.OnValueRequired += ValueRequired;        
             m_Rename.Compile();           
         }
+
 
         [DynamicText]
         public string Rename() {

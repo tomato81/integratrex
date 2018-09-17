@@ -23,7 +23,7 @@ namespace C2InfoSys.FileIntegratrex.Lib
         /// <summary>
         /// Result
         /// </summary>
-        public object Result { get; set; }
+        public object Result { get; set; }        
 
         /// <summary>
         /// Variable Name
@@ -193,6 +193,9 @@ namespace C2InfoSys.FileIntegratrex.Lib
                 case "Format": {
                     return new FormatFn();                        
                 }
+                case "GUID": {
+                    return new GuidFn();
+                }
                 default: {
                     throw new Exception(string.Format("{0} is not a function", p_FnToken.Cargo));
                 }
@@ -238,9 +241,9 @@ namespace C2InfoSys.FileIntegratrex.Lib
                 if(m_compiled) {
                     throw new InvalidOperationException();
                 }
-                if(m_text.Length == 0) {
-                    throw new InvalidOperationException();  // maybe 0 length is fine
-                }                
+                //if(m_text.Length == 0) {
+                //    throw new InvalidOperationException();  // maybe 0 length is fine
+                //}                
                 // a character scanner
                 Scanner S = new Scanner(m_text);
                 // a tokenizer

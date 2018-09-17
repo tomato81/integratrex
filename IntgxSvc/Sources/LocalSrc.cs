@@ -68,16 +68,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 foreach (IPattern P in p_Pattern) {
                     foreach (FileInfo Fi in Files) {
                         if (P.IsMatch(Fi.Name)) {
-                            MatchedFile Match = new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc);
-
-                            
+                            MatchedFile Match = new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc);                            
                             if (Matches.Add(new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc))) {
                                 // pew pew
                                 MatchEvent(Match, folder); 
                             }
                             else {
-                                // not really an error ... maybe a warn or an information
-                                ErrorEvent("Unexpected File Match. A subsequent pattern {0} has matched on: {1}", P.ToString(), Fi.Name);                                
+                                // warn
+                                WarningEvent("Duplicate file match. A subsequent pattern {0} has matched on: {1}", P.ToString(), Fi.Name);                                
                             }
                         }
                     }

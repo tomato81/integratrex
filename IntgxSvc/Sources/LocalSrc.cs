@@ -71,7 +71,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                             MatchedFile Match = new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc);                            
                             if (Matches.Add(new MatchedFile(this, Fi.Name, Fi.DirectoryName, Fi.Length, Fi.LastWriteTimeUtc))) {
                                 // pew pew
-                                MatchEvent(Match, folder); 
+                                MatchEvent(Match, folder, P); 
                             }
                             else {
                                 // warn
@@ -98,7 +98,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             try {
                 DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
                 // getting
-                GetFilesEvent();
+                GetFilesEvent(p_Mf);
                 // go thru matched files
                 foreach(MatchedFile F in p_Mf) {
                     // source file
@@ -183,6 +183,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
                 // perform transforms on the model
                 SourceTransformEvent(Args);
+
                 // were any transforms performed?
                 if(!Args.HasTransforms) {
                     return;

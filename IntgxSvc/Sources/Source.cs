@@ -95,10 +95,16 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Constructor
         /// </summary>
         /// <param name="p_MatchedFile"></param>
-        public OnFileMatchEventArgs(MatchedFile p_MatchedFile, string p_location) {
-            MatchedFile = p_MatchedFile;
+        public OnFileMatchEventArgs(MatchedFile p_MatchedFile, string p_location, IPattern p_Pattern) {
+            MatchedFile = p_MatchedFile;            
             Location = p_location;
+            Pattern = p_Pattern;
         }
+
+        /// <summary>
+        /// The match matter
+        /// </summary>
+        public readonly IPattern Pattern;
 
         /// <summary>
         /// The Matched File
@@ -189,21 +195,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// <summary>
     /// Transform Source Event Args
     /// </summary>
-    public class TransformSourceEventArgs : IntegrationEventArgs {
+    public class TransformSourceEventArgs : IntegrationFilesEventArgs {
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="p_MatchedFile">the matched file</param>
+        /// <param name="p_MatchedFile">the matched files</param>
         public TransformSourceEventArgs(List<MatchedFile> p_MatchedFiles)
-            : base() {
-            MatchedFiles = p_MatchedFiles;
+            : base(p_MatchedFiles) {
         }
-
-        /// <summary>
-        /// The Matched File
-        /// </summary>        
-        public readonly List<MatchedFile> MatchedFiles;
         
         /// <summary>
         /// Flag if any transforms have been applied
@@ -226,6 +226,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             base() {
             m_Source = p_Source;
         }
+        
+        /*
+         * when other sources are implented it may be a good idea to implement this attribute to
+         * control how the manager/tracker calls methods. In some cases it may be best to act on 
+         * one file at a time (for context setting) but for some source locations it may be beneficial
+         * to operate on batches of files all at once (i.e. 
+        public abstract bool SupportsBatchOps { get; }
+        */
 
         /// <summary>
         /// On Matched File Contact
@@ -248,7 +256,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
         // integration events
         public event EventHandler<ScanSourceEventArgs> ScanSource;
-        public event EventHandler<IntegrationEventArgs> GetFiles;     
+        public event EventHandler<IntegrationFilesEventArgs> GetFiles;     
 
         public event EventHandler<IntegrationEventArgs> DeleteFiles;
         public event EventHandler<IntegrationFileEventArgs> DeletedFile;
@@ -264,8 +272,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_M">the matched file</param>
         /// <param name="p_location">the location as a string</param>
-        protected void MatchEvent(MatchedFile p_M, string p_location) {
-            Match?.Invoke(this, new OnFileMatchEventArgs(p_M, p_location));
+        protected void MatchEvent(MatchedFile p_M, string p_location, IPattern p_Pattern) {
+            Match?.Invoke(this, new OnFileMatchEventArgs(p_M, p_location, p_Pattern));
         }
 
         /// <summary>
@@ -309,8 +317,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             ScanSource?.Invoke(this, new ScanSourceEventArgs(p_location));
         }
 
-        protected void GetFilesEvent() {
-            GetFiles?.Invoke(this, IntegrationEventArgs.Empty);
+        protected void GetFilesEvent(List<MatchedFile> p_Files) {
+            GetFiles?.Invoke(this, new IntegrationFilesEventArgs(p_Files));
         }
 
         protected void DeleteFilesEvent() {

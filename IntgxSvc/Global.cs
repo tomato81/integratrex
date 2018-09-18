@@ -167,6 +167,17 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             /// Activity Messages
             /// </summary>
             public static class Activity {
+
+                /// <summary>
+                /// {0=token} {1=replacement value}
+                /// </summary>
+                public static readonly string DynamicContextAccess = "dynamic context accessed token=[{0}] value=[{1}]";
+
+                /// <summary>
+                /// {0=context changed by} {1=Files context} {2=File context}
+                /// </summary>
+                public static readonly string DynamicContextSwitch = "Dynamic context switch [{0}] [Files={1} File={2}]";
+
             }
 
             public static class Integration {
@@ -180,7 +191,19 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 /// {0=Integration Source}
                 /// </summary>
                 public static readonly string SourceDeleteFiles = "{0} delete files";
-                
+
+                /// <summary>
+                /// {0=matched file name}
+                /// {1=source location}
+                /// {2=pattern}
+                /// </summary>
+                public static readonly string SourceFileMatched = "matched {0} at {1} with pattern {2}";
+
+                /// <summary>
+                /// {0=working directory}
+                /// </summary>
+                public static readonly string WorkingDirectoryCreated = "working directory created [{0}]";
+
                 /// <summary>
                 /// {0=Location}
                 /// </summary>

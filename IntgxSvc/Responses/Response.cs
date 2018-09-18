@@ -80,13 +80,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             get {
                 return string.IsNullOrWhiteSpace(m_Response.Desc) ? "(none)" : m_Response.Desc;
             }
-        }
-
-        public bool IsRename {
-            get {
-                return m_Response.Rename.Enable == XRenameResponseEnable.Y;
-            }
-        }        
+        }      
 
         /// <summary>
         /// String representaion of the action to take at the target
@@ -131,7 +125,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
         public abstract void Action(List<MatchedFile> p_Mf);
 
-        public void Transform(List<MatchedFile> p_Mf) {
+        public void Transform(MatchedFile p_Mf) {
             TransformResponse?.Invoke(this, new TransformResponseEventArgs(p_Mf));
         }
 
@@ -151,8 +145,13 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             CompileDynamicText();
         }
 
-        // members
+        // X Object
         private readonly XRenameResponse m_XRenameResponse;
+
+        /// <summary>
+        /// Rename?
+        /// </summary>
+        public bool IsRename => m_XRenameResponse.Enable == XRenameResponseEnable.Y;        
 
         /// <summary>
         /// The X object
@@ -168,6 +167,10 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             m_Rename.Compile();
         }
 
+        /// <summary>
+        /// Get the file name for the response
+        /// </summary>
+        /// <returns></returns>
         [DynamicText]
         public string Rename() {
             return m_Rename.Run();
@@ -185,20 +188,20 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// Constructor
         /// </summary>
         /// <param name="p_MatchedFile">the matched file</param>
-        public TransformResponseEventArgs(List<MatchedFile> p_Mf)
+        public TransformResponseEventArgs(MatchedFile p_MatchedFile)
             : base() {
-            MatchedFiles = p_Mf;
+            MatchedFile = p_MatchedFile;
         }
 
         /// <summary>
         /// The Matched File
         /// </summary>        
-        public readonly List<MatchedFile> MatchedFiles;
+        public readonly MatchedFile MatchedFile;
 
         /// <summary>
         /// Flag if any transforms have been applied
         /// </summary>
-        public bool HasTransforms = false;
+        public bool TransformApplied = false;
 
     }   // TransformSourceEventArgs    
 

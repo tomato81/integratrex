@@ -37,7 +37,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
     /// Integration Response
     /// </summary>
     public interface IResponse {
-        void Transform(List<MatchedFile> p_Mf);
+        void Transform(MatchedFile p_Mf);
         void Action(List<MatchedFile> p_Mf);
     }
 

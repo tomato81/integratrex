@@ -16,9 +16,22 @@ namespace C2InfoSys.FileIntegratrex.Lib
         /// <summary>
         /// Value Requried Event Args
         /// </summary>
-        public OnValueRequiredEventArgs(string p_name) {
-            m_name = p_name;
+        public OnValueRequiredEventArgs(string p_name) :
+            this(p_name, string.Empty) {            
         }
+
+        /// <summary>
+        /// Value Requried Event Args
+        /// </summary>
+        public OnValueRequiredEventArgs(string p_name, string p_tag) {
+            m_name = p_name;
+            Tag = p_tag;
+        }
+
+        /// <summary>
+        /// UDF
+        /// </summary>
+        public readonly string Tag;
 
         /// <summary>
         /// Result

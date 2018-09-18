@@ -64,6 +64,14 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         }
 
         /// <summary>
+        /// Copy Action - Single File
+        /// </summary>
+        /// <param name="p_Mf"></param>
+        private void Copy(MatchedFile p_Mf) {
+
+        }
+
+        /// <summary>
         /// Copy Action
         /// </summary>
         /// <param name="p_Mf">Matched Files</param>

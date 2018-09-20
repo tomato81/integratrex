@@ -68,7 +68,51 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// </summary>
         /// <param name="p_Mf"></param>
         private void Copy(MatchedFile p_Mf) {
+            MethodBase ThisMethod = MethodBase.GetCurrentMethod();
+            // method logic            
+            try {
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+                // what is the target location?
+                string folder = Folder();
+                // verify format of folder name??                             
+                // local folder
+                DirectoryInfo Di = new DirectoryInfo(folder);
+                // maybe create the directory
+                if (!Di.Exists && m_LocalTgt.CreateDirectory == XLocalTgtCreateDirectory.Y) {
+                    Di.Create();
+                    LocationCreatedEvent(Di.FullName);
+                }
+                // maybe overrwrite files
+                bool overwrite = m_LocalTgt.Overwrite == XLocalTgtOverwrite.Y;
+          
+                // supress response on this file?
+                if (p_Mf.Supress) {
+                    ResponseSupressedEvent();
+                    return;
+                }
 
+                // where to copy
+                string copyToPath = Path.Combine(folder, p_Mf.ResponseFileName);
+                if (File.Exists(copyToPath)) {
+                    FileExistsEvent(p_Mf, folder);
+                    if (overwrite) {
+                        FileOverrwriteEvent(copyToPath);
+                    }
+                }
+                try {
+                    p_Mf.WorkingFi.CopyTo(copyToPath, overwrite);
+                    FileActionedEvent(p_Mf, ActionDesc, copyToPath);
+                }
+                catch (IOException ex) {
+                    ErrorEvent(ex);
+                }                                
+            }
+            catch (Exception ex) {
+                ErrorEvent(ex);
+            }
+            finally {
+                DebugLog.DebugFormat(Global.Messages.Debug.ExitMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);
+            }
         }
 
         /// <summary>

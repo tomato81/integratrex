@@ -407,7 +407,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // go thru files
             foreach(MatchedFile M in e.MatchedFiles) {
                 if(!M.WorkingFi.Exists) {
-                    IntInstLog.ErrorFormat("Working file {0} is unexpectedly missing", M.WorkingName);
+                    IntInstLog.ErrorFormat("working file {0} is unexpectedly missing", M.WorkingName);
                     continue;
                 }
                 // examine files
@@ -518,7 +518,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 foreach(MatchedFile F in MatchedFiles) {
                     if(Manager.MatchHistory.IsDuplicate(F)) {
                         F.Supress = true;
-                        IntInstLog.InfoFormat("[{0}] - Supressing File from Previous Run", F.WorkingFi.FullName);
+                        IntInstLog.InfoFormat("[{0}] - supressing file from previous run", F.WorkingFi.FullName);
                     }
                 }
             }
@@ -574,14 +574,15 @@ namespace C2InfoSys.FileIntegratrex.Svc {
             // make any necessary alterations the the source (delete, rename, etc.)
             MethodBase ThisMethod = MethodBase.GetCurrentMethod();
             try {
-                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                
-                // transform!
-                Manager.Source.Transform(MatchedFiles);              
-                // and delete (maybe)
+                DebugLog.DebugFormat(Global.Messages.Debug.EnterMethod, ThisMethod.DeclaringType.Name, ThisMethod.Name);                                
+                // delete?
                 if (Manager.OnContact.DeleteFromSource) {
                     Manager.Source.Delete(MatchedFiles);
                 }
-                //  if the files are deleted from the source what is the point of the transform??
+                else {
+                    // transform!
+                    Manager.Source.Transform(MatchedFiles);
+                }                
             }
             catch (Exception ex) {
                 SvcLog.FatalFormat(Global.Messages.Error.Exception, ex.GetType().ToString(), ThisMethod.DeclaringType.Name, ThisMethod.Name, ex.Message);

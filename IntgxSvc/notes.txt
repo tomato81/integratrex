@@ -1,4 +1,13 @@
-﻿trying to figure out why the response rename dytext isnt picling up the file attributes
+﻿
+Add all messages to Global.Messages
+
+Code the integration level log & email stuff
+<Log Level="Information" Enable="Y">
+      <Email To="brad.edey@gmail.com" Subject="Integratrex - Send Trade Report Log">
+        <To>?{SysAdmin.Email};someone@somewhere.com</To>
+      </Email>
+    </Log>
+
 
 
 "Supress" actually has 2 p's so it should be "Suppress" - this is misspelled all over the place

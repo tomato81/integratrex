@@ -247,8 +247,8 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="sender">object that raised the event</param>
         /// <param name="e">event args</param>
         private void Source_DeletedFile(object sender, IntegrationFileEventArgs e) {
-            e.File.Deleted = true;
-            IntInstLog.InfoFormat("Deleted {0} from {1}", e.File.Name, Manager.Source.Description);
+            e.File.Deleted = true;            
+            IntInstLog.InfoFormat(Global.Messages.Integration.SourceDeletedFile, e.File.Name, Manager.Source.Description);
         }
 
         /// <summary>
@@ -257,7 +257,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="sender">object that raised the event</param>
         /// <param name="e">event args</param>
         private void Source_DeletedFiles(object sender, IntegrationFilesEventArgs e) {
-            IntInstLog.InfoFormat("all matched files delete from {0}", Manager.Source.Description);
+            IntInstLog.InfoFormat(Global.Messages.Integration.SourceDeletedFiles, Manager.Source.Description);
         }               
 
         /// <summary>
@@ -267,7 +267,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="e"></param>
         private void ValueRequired(object sender, OnValueRequiredEventArgs e) {
             e.Result = Manager.Attributes.GetReplacementValue(e.Name);                               
-            IntInstLog.DebugFormat("Dynamic context required [Key={0}] [Substitution={1}]", e.Name, e.Result);
+            IntInstLog.DebugFormat(Global.Messages.Integration.GetDynamicKeyVal, e.Name, e.Result);
         }
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
         /// <param name="e"></param>
         private void Source_GotFile(object sender, GotFileEventArgs e) {            
             // log
-            IntInstLog.InfoFormat("[{0}] > [{1}] - Got File", e.MatchedFile.OriginalName, e.MatchedFile.WorkingFi.FullName);
+            IntInstLog.InfoFormat(Global.Messages.Integration.SourceGotFile, e.MatchedFile.OriginalName, e.MatchedFile.WorkingFi.FullName);
             // set context
             Manager.SetAttrContext(e.MatchedFile);
             // check that the file can be opened for read
@@ -518,7 +518,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
                 foreach(MatchedFile F in MatchedFiles) {
                     if(Manager.MatchHistory.IsDuplicate(F)) {
                         F.Supress = true;
-                        IntInstLog.InfoFormat("[{0}] - supressing file from previous run", F.WorkingFi.FullName);
+                        IntInstLog.InfoFormat(Global.Messages.Integration.SupressDuplicateFile, F.WorkingFi.FullName);
                     }
                 }
             }
@@ -909,7 +909,7 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
             Global.AddAppender(m_Integration.Desc, I);
 
-            IntInstLog.InfoFormat("{0} - Instance log intialized", m_Integration.Desc);
+            IntInstLog.InfoFormat(Global.Messages.Integration.IntegrationInstaceLogInitialized, m_Integration.Desc);
             
                    
             // setup trace sources

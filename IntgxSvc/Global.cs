@@ -182,6 +182,37 @@ namespace C2InfoSys.FileIntegratrex.Svc {
 
             public static class Integration {
 
+
+                /// <summary>
+                /// {0=Integration Name}
+                /// </summary>
+                public static readonly string IntegrationInstaceLogInitialized = "{0} - Instance log intialized";
+
+                /// <summary>
+                /// {0=Supressed File}
+                /// </summary>
+                public static readonly string SupressDuplicateFile = "[{0}] - supressing file from previous run";
+
+                /// <summary>
+                /// {0=Source File Name} {1=Working Path}
+                /// </summary>
+                public static readonly string SourceGotFile = "[{0}] > [{1}] - Got File";
+
+                /// <summary>
+                /// {0=Key} {1=Value}
+                /// </summary>
+                public static readonly string GetDynamicKeyVal = "Dynamic context required[Key ={0}] [Substitution={1}]";
+
+                /// <summary>
+                /// {0=Location}
+                /// </summary>
+                public static readonly string SourceDeletedFiles = "all matched files delete from {0}";
+
+                /// <summary>
+                /// {0=Deleted File} {1=Location}
+                /// </summary>
+                public static readonly string SourceDeletedFile = "Deleted {0} from {1}";
+
                 /// <summary>
                 /// {0=Original Name} {1=Renamed File Name}
                 /// </summary>
